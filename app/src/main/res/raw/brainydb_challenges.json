@@ -1,0 +1,27 @@
+[
+  {
+    "title": "It's My Party!",
+    "hmw": "How might we hold our friend’s birthday party safely such that they feel celebrated?",
+    "hmwDesc": "Sed egestas bibendum nisi. Morbi eleifend enim in tristique aliquet. Ut tincidunt dui in orci vehicula, ac imperdiet nunc lacinia",
+    "imgFn": "challenge_birthday.png",
+    "guid": "challenge-my-party",
+    "id": 0
+  },
+  {
+    "title": "Too Swole",
+    "hmw": "How might kids exercise and stay active safely during shelter-in-place?",
+    "hmwDesc": "Sed egestas bibendum nisi. Morbi eleifend enim in tristique aliquet. Ut tincidunt dui in orci vehicula, ac imperdiet nunc lacinia",
+    "imgFn": "challenge_swole.png",
+    "guid": "challenge-twoo-swole",
+    "id": 0
+
+  },
+  {
+    "title": "Family Cookout",
+    "hmw": "How might the whole family participate in planning and cooking Sunday dinner?",
+    "hmwDesc": "Sed egestas bibendum nisi. Morbi eleifend enim in tristique aliquet. Ut tincidunt dui in orci vehicula, ac imperdiet nunc lacinia",
+    "imgFn": "challenge_swole.png",
+    "guid": "challenge-family-cookout",
+    "id": 0
+  }
+]

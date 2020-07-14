@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "87520270716",
+    "firebase_url": "https://daily-brainy.firebaseio.com",
+    "project_id": "daily-brainy",
+    "storage_bucket": "daily-brainy.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:87520270716:android:ef543e3732b788d1abacf9",
+        "android_client_info": {
+          "package_name": "org.chenhome.dailybrainy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "87520270716-7vmtbv06bvm23u37l2npgn0m4bin48o4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBa78hyK-3hDhnpOmLmPJOzX6w9Adpl4Xw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "87520270716-7vmtbv06bvm23u37l2npgn0m4bin48o4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
