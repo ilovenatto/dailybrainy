@@ -6,7 +6,8 @@ import org.chenhome.dailybrainy.repo.local.ChallengeDb
 import org.chenhome.dailybrainy.repo.local.GameDb
 
 /**
- * Maps between Database objects and Domain objects
+ * Maps between Database objects and Domain objects. Use the BrainyRepo to get {@link GameDb} instances,
+ * representing entities in the database.
  */
 class DomainObjectMapper (
     val db: BrainyDb,

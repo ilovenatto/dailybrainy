@@ -98,6 +98,9 @@ class BrainyRepo (
     }
 
     /**
+     * Instantiate Game, representing a newly inserted GameDb entity associated with an existing
+     * challenge.
+     *
      * @param challengeId existing challenge in db
      * @return Game instance representing newly inserted game in db. Null if insertion failed
      */
@@ -156,6 +159,8 @@ class BrainyRepo (
     }
 
     /**
+     * Comprehensive data object describing the game state.
+     *
      * @return Game constituted from database. Null if can't be found
      */
     fun getGame(gameId: Long) : Game? {
