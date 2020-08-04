@@ -22,9 +22,23 @@ class LocalDbTest {
     lateinit var appContext : Context
     lateinit var db : BrainyDb
     val egChall1 = ChallengeDb(0, "chall1", "Getting down and up","HMW do this","HMW do this and that", "asdfadsf")
-    val egChall2 = ChallengeDb(0, "chall2", "Getting down and up2","HMW2 do this","HMW2 do this and that", "adsasdf")
-    val egGame = GameDb(0,0,"1234", System.currentTimeMillis())
-    val egPlayer = PlayerDb( id = 0,gameId = 0,name="p1",points = 100,imgFn = "file://foobar",guid = "sadfadf")
+    val egChall2 = ChallengeDb(
+        0,
+        "chall2",
+        "Getting down and up2",
+        "HMW2 do this",
+        "HMW2 do this and that",
+        "adsasdf"
+    )
+    val egGame = GameDb(0, genGuid(), 0, "1234", System.currentTimeMillis())
+    val egPlayer = PlayerDb(
+        id = 0,
+        gameId = 0,
+        name = "p1",
+        points = 100,
+        imgFn = "file://foobar",
+        guid = "sadfadf"
+    )
     val egStory =StoryboardDb(0,0,"3 little pigs", "an awseoms tory", "asdfasf", "asdfadsf","asdfadsf")
     val egIdea = IdeaDb(0,"asdfadsf","asdfasdf",0,0, ChallengeDb.Phase.BRAINSTORM)
 
@@ -98,7 +112,7 @@ class LocalDbTest {
     fun testPlayerDAO() {
         // add parent
         val gId = insertGameHelper().id
-        val guid = PlayerDb.genUniqueKey()
+        val guid = genGuid()
         val p1 = egPlayer.copy(gameId = gId, guid = guid)
 
         // insert
@@ -145,7 +159,7 @@ class LocalDbTest {
         // insert and get
         val id = db.gameDAO.insert(game)
         val g = db.gameDAO.get(id)
-        assertEquals(game.copy(id = id),g)
+        assertEquals("Got $g", game.copy(id = id), g)
 
         // check challenge the same
         assertEquals(egChall1.copy(id=cId), db.challengeDAO.get(g!!.challengeId))
@@ -230,15 +244,19 @@ class LocalDbTest {
         val g2 = db.gameDAO.get(insertGameHelper().id)
         val g3 = db.gameDAO.get(insertGameHelper().id)
 
-        val guidA = PlayerDb.genUniqueKey()
-        val pA1 = db.playerDAO.get(db.playerDAO
-            .insert(egPlayer.copy(guid = guidA, gameId = g1!!.id)))
+        val guidA = genGuid()
+        val pA1 = db.playerDAO.get(
+            db.playerDAO
+                .insert(egPlayer.copy(guid = guidA, gameId = g1!!.id))
+        )
         val pA2 = db.playerDAO.get(db.playerDAO
             .insert(egPlayer.copy(guid = guidA, gameId = g2!!.id)))
         val pA3 = db.playerDAO.get(db.playerDAO
             .insert(egPlayer.copy(guid = guidA, gameId = g3!!.id)))
-        val pB1 = db.playerDAO.get(db.playerDAO
-            .insert(egPlayer.copy(guid = PlayerDb.genUniqueKey(), gameId = g1!!.id)))
+        val pB1 = db.playerDAO.get(
+            db.playerDAO
+                .insert(egPlayer.copy(guid = genGuid(), gameId = g1!!.id))
+        )
         assertTrue(pA1 !=  null && pA2 != null && pA3 != null && pB1 != null)
 
         val res = db.gameDAO.getByPlayer(guidA).blockingObserve()
@@ -255,7 +273,7 @@ class LocalDbTest {
 
     @Test
     fun testLessonDb() {
-        val egLesson = LessonDb(0, "asdf","asdf","asdfasdf","asdfasdf")
+        val egLesson = LessonDb(0, genGuid(), "asdf", "asdf", "asdfasdf", "asdfasdf")
         val lId = db.lessonDAO.insert(egLesson)
         assertTrue(lId>0)
         val l = db.lessonDAO.get(lId)

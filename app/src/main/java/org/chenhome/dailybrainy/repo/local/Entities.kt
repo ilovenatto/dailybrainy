@@ -8,8 +8,15 @@ import com.squareup.moshi.JsonClass
 import java.util.concurrent.TimeUnit
 
 interface CanValidate {
-    fun canInsert() : Boolean
-    fun canUpdate() : Boolean
+    fun canInsert(): Boolean
+    fun canUpdate(): Boolean
+}
+
+/**
+ * Globally unique id that won't collide w/ other ids. Used in remote database as identifier
+ */
+fun genGuid(): String {
+    return java.util.UUID.randomUUID().toString()
 }
 
 @Entity
@@ -31,6 +38,8 @@ data class ChallengeDb(
     val hmw: String,
     val hmwDesc: String
 ) {
+    // No-arg constructur so that Firebase can create this POJO
+    constructor() : this(0, "", null, "", "", "")
 
     /**
      * The phases in each challenge, in ordinal order
@@ -40,6 +49,7 @@ data class ChallengeDb(
         SKETCH,
         SHARE
     }
+
     enum class CountType {
         NUM_VOTES,
         NUM_IDEAS,
@@ -126,6 +136,9 @@ data class GameDb(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
 
+    // use {@link EntitHelper.genGuid()}
+    val guid: String,
+
     // Foreign key to parent Challenge
     val challengeId: Long,
 
@@ -134,13 +147,16 @@ data class GameDb(
 
     // Session start time in Millis since epoch.
     // can be update
-    var sessionStartMillisEpoch: Long=0,
+    var sessionStartMillisEpoch: Long = 0,
 
     var currentStep: ChallengeDb.Step = ChallengeDb.Step.GEN_IDEA
 
 ) : CanValidate {
     override fun canInsert(): kotlin.Boolean = challengeId > 0L
-    override fun canUpdate(): Boolean = id >0L && challengeId > 0L
+    override fun canUpdate(): Boolean = id > 0L && challengeId > 0L
+
+    // No-arg constructur so that Firebase can create this POJO
+    constructor() : this(0, "", 0, "", 0, ChallengeDb.Step.GEN_IDEA)
 }
 
 /**
@@ -168,11 +184,8 @@ data class PlayerDb(
     val points: Int,
     val imgFn: String?
 ) {
-    companion object {
-        fun genUniqueKey(): String {
-            return java.util.UUID.randomUUID().toString()
-        }
-    }
+    // No-arg constructur so that Firebase can create this POJO
+    constructor() : this(0, "", 0, "", 0, "")
 }
 
 
@@ -205,7 +218,10 @@ data class StoryboardDb(
     val imgSettingFn: String?,
     val imgSolutionFn: String?,
     val imgResolutionFn: String?
-)
+) {
+    // No-arg constructur so that Firebase can create this POJO
+    constructor() : this(0, 0, null, "", "", "", "")
+}
 
 @Entity(
     foreignKeys = [ForeignKey(
@@ -233,10 +249,14 @@ data class IdeaDb(
 ) : CanValidate {
     override fun canInsert(): Boolean = gameId > 0L
             && (title.isNotEmpty() || imgFn.isNotEmpty())
+
     override fun canUpdate(): Boolean = canInsert()
     fun vote() {
         votes += 1
     }
+
+    // No-arg constructur so that Firebase can create this POJO
+    constructor() : this(0, "", "", 0, 0, ChallengeDb.Phase.BRAINSTORM)
 }
 
 @Entity
@@ -244,8 +264,12 @@ data class LessonDb(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
 
+    val guid: String,
     val title: String,
     val descrip: String,
     val youtubeUrl: String,
     val imgFn: String
-)
+) {
+    // No-arg constructur so that Firebase can create this POJO
+    constructor() : this(0, "", "", "", "", "")
+}

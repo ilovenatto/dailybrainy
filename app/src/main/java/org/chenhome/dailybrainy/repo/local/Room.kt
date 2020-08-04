@@ -3,17 +3,12 @@ package org.chenhome.dailybrainy.repo.local
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.chenhome.dailybrainy.R
-import org.chenhome.dailybrainy.repo.Game
-
 import timber.log.Timber
-import java.util.*
 
 
 /**
@@ -139,9 +134,12 @@ interface ChallengeDAO {
     @Delete
     fun delete(challegeDb: ChallengeDb): Int
 
+    @Query("DELETE FROM challengedb WHERE guid = :guid")
+    fun deleteByGuid(guid: String): Int
+
     @Update
     fun update(challegeDb: ChallengeDb): Int
-    
+
     @Query("select * from challengedb")
     fun getAll(): LiveData<List<ChallengeDb>>
 
@@ -149,7 +147,10 @@ interface ChallengeDAO {
     fun getAllBlocking(): List<ChallengeDb>
 
     @Query("select * from challengedb where id=:challengeId")
-    fun get(challengeId: Long): ChallengeDb
+    fun get(challengeId: Long): ChallengeDb?
+
+    @Query("select * from challengedb where guid=:guid")
+    fun getByGuid(guid: String): ChallengeDb?
 }
 
 @Dao
@@ -160,11 +161,18 @@ abstract class GameDAO {
     @Delete
     abstract fun delete(game: GameDb): Int
 
+    @Query("DELETE FROM gamedb WHERE guid = :guid")
+    abstract fun deleteByGuid(guid: String): Int
+
     @Update
     abstract fun update(game: GameDb): Int
 
     @Query("select * from gamedb where id=:gameId")
-    abstract fun get(gameId: Long): GameDb
+    abstract fun get(gameId: Long): GameDb?
+
+    @Query("select * from gamedb where guid=:guid")
+    abstract fun getByGuid(guid: String): GameDb?
+
 
     /**
      * All games are universally known by all players. Filter down
@@ -173,7 +181,7 @@ abstract class GameDAO {
      * @return Games that player has participated in
      */
     @Query("SELECT * FROM playerdb INNER JOIN gamedb ON gamedb.id = playerdb.gameId WHERE playerdb.guid = :playerGuid")
-    abstract fun getByPlayer(playerGuid: String) : LiveData<List<GameDb>>
+    abstract fun getByPlayer(playerGuid: String): LiveData<List<GameDb>>
 }
 
 @Dao
@@ -184,17 +192,21 @@ interface PlayerDAO {
     @Delete
     fun delete(player: PlayerDb): Int
 
+    @Query("DELETE FROM playerdb WHERE guid = :guid")
+    fun deleteByGuid(guid: String): Int
+
+
     @Update()
     fun update(player: PlayerDb): Int
 
     @Query("select * from playerdb where id=:playerId")
-    fun get(playerId: Long): PlayerDb
+    fun get(playerId: Long): PlayerDb?
 
     @Query("select * from playerdb where gameId=:gameId")
     fun getByGame(gameId: Long): LiveData<List<PlayerDb>>
 
     @Query("select * from playerdb where guid=:guid")
-    fun getByGuid(guid: String) : PlayerDb
+    fun getByGuid(guid: String): PlayerDb?
 
 
 }
@@ -231,7 +243,7 @@ interface IdeaDAO {
     fun update(idea: IdeaDb): Int
 
     @Query("select * from ideadb where id=:ideaId")
-    fun get(ideaId: Long): IdeaDb
+    fun get(ideaId: Long): IdeaDb?
 
     @Query("select * from ideadb where phase=:phase and gameId=:gameId")
     fun getByPhase(gameId: Long, phase: ChallengeDb.Phase) : LiveData<List<IdeaDb>>
@@ -248,12 +260,19 @@ interface LessonDAO {
     @Delete
     fun delete(lesson: LessonDb): Int
 
+    @Query("DELETE FROM lessondb WHERE guid = :guid")
+    fun deleteByGuid(guid: String): Int
+
     @Update()
     fun update(lesson: LessonDb): Int
 
     @Query("select * from lessondb where id=:lessonId")
-    fun get(lessonId: Long): LessonDb
+    fun get(lessonId: Long): LessonDb?
 
     @Query("select * from lessondb")
     fun getAll(): LiveData<List<LessonDb>>
+
+    @Query("select * from lessondb where guid=:guid")
+    fun getByGuid(guid: String): LessonDb?
+
 }

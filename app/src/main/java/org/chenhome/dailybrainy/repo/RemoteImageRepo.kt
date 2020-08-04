@@ -18,11 +18,8 @@ import kotlin.coroutines.suspendCoroutine
  * Folder names under the root Firebase Storage root for
  * this app's account
  */
-enum class RemoteFolder {
+enum class RemoteImageFolder {
     CHALLENGES,
-    LESSONS,
-    PLAYERS,
-    GAMES,
     IDEAS,
 }
 
@@ -45,7 +42,7 @@ class RemoteImageRepo(
      * Use {@link LocalImageRepo.makeFileUri()}
      * @return StorageReference to newly uploaded file. Returns null if upload fails
      */
-    suspend fun upload(folder: RemoteFolder, fileUri: Uri): StorageReference? {
+    suspend fun upload(folder: RemoteImageFolder, fileUri: Uri): StorageReference? {
         return withContext(scope.coroutineContext) {
             suspendCoroutine<StorageReference?> { continuation ->
                 val ref = fstorage

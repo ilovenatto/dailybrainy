@@ -10,6 +10,7 @@ import org.chenhome.dailybrainy.repo.local.ChallengeDb
 data class Game
     (
     val gameId: Long = 0, // database ID if this game already exists in DB
+    val guid: String,
     val pin: String,
 
     // Mutable in app level

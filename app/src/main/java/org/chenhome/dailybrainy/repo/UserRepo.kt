@@ -2,6 +2,7 @@ package org.chenhome.dailybrainy.repo
 
 import android.content.Context
 import org.chenhome.dailybrainy.repo.local.PlayerDb
+import org.chenhome.dailybrainy.repo.local.genGuid
 import timber.log.Timber
 
 /**
@@ -33,7 +34,7 @@ class UserRepo(val context: Context) {
         get() {
             if (field.isEmpty()) {
                 // get from pref
-                val newGuid = PlayerDb.genUniqueKey()
+                val newGuid = genGuid()
                 if (pref.contains(KEY_PLAYER_GUID)) {
                     field = pref.getString(KEY_PLAYER_GUID, newGuid) ?: newGuid
                 } else {

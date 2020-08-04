@@ -8,7 +8,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import junit.framework.Assert.*
 import kotlinx.coroutines.runBlocking
 import org.chenhome.dailybrainy.repo.LocalImageRepo
-import org.chenhome.dailybrainy.repo.RemoteFolder
+import org.chenhome.dailybrainy.repo.RemoteImageFolder
 import org.chenhome.dailybrainy.repo.RemoteImageRepo
 import org.junit.*
 import org.junit.runner.RunWith
@@ -79,7 +79,7 @@ class ImageRepoTest {
     @Test
     fun testUploadRemote() {
         runBlocking {
-            val r = remoteRepo.upload(RemoteFolder.CHALLENGES, tempFileUri)
+            val r = remoteRepo.upload(RemoteImageFolder.CHALLENGES, tempFileUri)
             assertNotNull(r)
             Timber.d("Storage ref from upload ${r!!.path}")
 
@@ -89,6 +89,16 @@ class ImageRepoTest {
 
             // delete it
             assertTrue(remoteRepo.deleteRemote(r))
+        }
+    }
+
+    @Test
+    fun testGetStaticRemoteImages() {
+        runBlocking {
+            val p = "challenges/challenge_swole.png"
+            val ref = remoteRepo.getValidStorageRef(p)
+            assertNotNull("ref $ref", ref)
+            Timber.d("Got remote ref $ref, ${ref!!.path}")
         }
     }
 }

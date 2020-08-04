@@ -20,6 +20,7 @@ class DomainObjectMapper (
     fun toGame(game: GameDb, challenge:ChallengeDb) : Game {
         var to = Game(
             gameId = game.id,
+            guid = game.guid,
             pin = game.pin,
             sessionStartMillisEpoch = game.sessionStartMillisEpoch,
             currentStep = game.currentStep,
@@ -57,6 +58,7 @@ class DomainObjectMapper (
     fun toGameDb(from: Game) : GameDb =
         GameDb(
             id = from.gameId, // could be 0 in case of new Game instance
+            guid = from.guid,
             challengeId = from.challId, // must be set, even for new Game instance
             pin = from.pin,
             sessionStartMillisEpoch = from.sessionStartMillisEpoch,
