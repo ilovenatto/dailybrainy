@@ -1,7 +1,7 @@
 package org.chenhome.dailybrainy.repo
 
 import android.content.Context
-import org.chenhome.dailybrainy.repo.local.PlayerDb
+import org.chenhome.dailybrainy.repo.local.PlayerSession
 import org.chenhome.dailybrainy.repo.local.genGuid
 import timber.log.Timber
 
@@ -11,7 +11,7 @@ import timber.log.Timber
 class UserRepo(val context: Context) {
 
     private val KEY_CURRENT_GAMEID = "CURRENT_GAMEID"
-    private val KEY_PLAYER_GUID = PlayerDb::guid.name
+    private val KEY_PLAYER_GUID = PlayerSession::guid.name
     private val PREF_NAME = UserRepo::class.qualifiedName
     private val pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 

@@ -9,6 +9,7 @@ import org.chenhome.dailybrainy.repo.local.*
 import org.junit.*
 import org.junit.Assert.*
 import org.junit.runner.RunWith
+import timber.log.Timber
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -17,37 +18,16 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class LocalDbTest {
-    @get:Rule val instantTaskExecutorRule = InstantTaskExecutorRule()
+    @get:Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    lateinit var appContext : Context
-    lateinit var db : BrainyDb
-    val egChall1 = ChallengeDb(0, "chall1", "Getting down and up","HMW do this","HMW do this and that", "asdfadsf")
-    val egChall2 = ChallengeDb(
-        0,
-        "chall2",
-        "Getting down and up2",
-        "HMW2 do this",
-        "HMW2 do this and that",
-        "adsasdf"
-    )
-    val egGame = GameDb(0, genGuid(), 0, "1234", System.currentTimeMillis())
-    val egPlayer = PlayerDb(
-        id = 0,
-        gameId = 0,
-        name = "p1",
-        points = 100,
-        imgFn = "file://foobar",
-        guid = "sadfadf"
-    )
-    val egStory =StoryboardDb(0,0,"3 little pigs", "an awseoms tory", "asdfasf", "asdfadsf","asdfadsf")
-    val egIdea = IdeaDb(0,"asdfadsf","asdfasdf",0,0, ChallengeDb.Phase.BRAINSTORM)
+    lateinit var appContext: Context
+    lateinit var db: BrainyDb
 
-
-    fun insertGameHelper(): GameDb {
-        val cId = db.challengeDAO.insert(egChall1)
-        val game = egGame.copy(challengeId = cId)
-        val gid = db.gameDAO.insert(game)
-        return game.copy(id=gid)
+    fun insertUniqueGame(): Game {
+        val game = egGame.copy(guid = genGuid())
+        assertTrue(db.gameDAO.insert(game) > 0)
+        return game
     }
 
 
@@ -57,7 +37,8 @@ class LocalDbTest {
 
         // In memory fixture
         db = Room.inMemoryDatabaseBuilder(
-            appContext, BrainyDb::class.java).build()
+            appContext, BrainyDb::class.java
+        ).build()
 
     }
 
@@ -69,227 +50,167 @@ class LocalDbTest {
     @Test
     fun testChallengeDb() {
         // Insert challenge
-        val c1Id = db.challengeDAO.insert(egChall1)
-        assertTrue(c1Id > 0)
-        val c2Id = db.challengeDAO.insert(egChall2)
-        assertTrue(c2Id > 0)
+        assertTrue(db.challengeDAO.insert(egChall1) > 0)
+        assertTrue(db.challengeDAO.insert(egChall2) > 0)
 
         // Get one
-        val c1 = db.challengeDAO.get(c1Id)
-        assertEquals(egChall1.copy(id = c1Id), c1)
+        val c1 = db.challengeDAO.get(egChall1.guid)
+        assertEquals(egChall1, c1)
 
         // update
-        val modified = c1?.copy(title= "412312asdfadsf322")
-        assertEquals(1,db.challengeDAO.update(modified!!))
-        assertEquals(modified,
-            db.challengeDAO.get(c1Id))
+        val modified = c1?.copy(title = "412312asdfadsf322")
+        assertEquals(1, db.challengeDAO.update(modified!!))
+        assertEquals(
+            modified,
+            db.challengeDAO.get(modified.guid)
+        )
 
         // Get all
-        val challenges = db.challengeDAO.getAll().blockingObserve()
-        val challengesDead = db.challengeDAO.getAllBlocking()
+        val challenges = db.challengeDAO.getAll()
         assertEquals(2, challenges?.size)
-        assertEquals(2, challengesDead?.size)
         challenges?.forEach {
-            when (it.id) {
-                c1Id -> assertEquals(modified, it)
-                c2Id -> assertEquals(egChall2.copy(id = c2Id), it)
+            when (it.guid) {
+                modified.guid -> assertEquals(modified, it)
+                egChall2.guid -> assertEquals(egChall2, it)
             }
         }
-        challengesDead?.forEach {
-            when (it.id) {
-                c1Id -> assertEquals(modified, it)
-                c2Id -> assertEquals(egChall2.copy(id = c2Id), it)
-            }
-        }
-
 
         // delete
-        assertEquals(1,db.challengeDAO.delete(egChall1.copy(id = c1Id)))
-        assertEquals(1,db.challengeDAO.delete(egChall2.copy(id = c2Id)))
+        assertEquals(1, db.challengeDAO.delete(egChall1.guid))
+        assertEquals(1, db.challengeDAO.delete(egChall2.guid))
     }
 
     @Test
     fun testPlayerDAO() {
         // add parent
-        val gId = insertGameHelper().id
-        val guid = genGuid()
-        val p1 = egPlayer.copy(gameId = gId, guid = guid)
+        val gId = insertUniqueGame().guid
+        val p1 = egPlayer.copy(gameGuid = gId)
 
+        Timber.d("got guid ${gId} ${p1.guid}");
         // insert
-        val id = db.playerDAO.insert(p1)
-        val insertedP1 = db.playerDAO.get(id)
-        assertEquals(p1.copy(id = id), insertedP1)
+        assertTrue(db.playerSessionDAO.insert(p1) > 0)
+        val insertedP1 = db.playerSessionDAO.get(p1.guid)
+        assertEquals(p1, insertedP1)
 
-        // get by guid
-        assertEquals(p1.copy(id =id), db.playerDAO.getByGuid(guid))
+        // getByPlayer
+        assertEquals(p1, db.playerSessionDAO.getByPlayer(p1.playerGuid))
 
         // update
-        val modifiedP = insertedP1?.copy(points=200)
-        assertEquals(1,db.playerDAO.update(modifiedP!!))
-        assertEquals(modifiedP,
-            db.playerDAO.get(id))
+        val modifiedP = insertedP1?.copy(name = "foobar")
+        assertEquals(1, db.playerSessionDAO.update(modifiedP!!))
+        assertEquals(
+            modifiedP,
+            db.playerSessionDAO.get(insertedP1.guid)
+        )
 
         // insert antoher
-        val toInsert = insertedP1.copy(name="asdfasdf", id=0)
-        val id2 = db.playerDAO.insert(toInsert)
-        assertTrue(id2 > 0)
-        val insertedP2 = db.playerDAO.get(id2)
-        assertEquals(toInsert.copy(id=id2), insertedP2)
+        val toInsert = insertedP1.copy(name = "asdfasdf", guid = genGuid())
+        assertTrue(db.playerSessionDAO.insert(toInsert) > 0)
+        assertEquals(toInsert, db.playerSessionDAO.get(toInsert.guid))
 
         // get by game
-        val playersByGame = db.playerDAO.getByGame(gId).blockingObserve()
-        assertTrue(playersByGame!= null)
+        val playersByGame = db.playerSessionDAO.getByGameLive(gId).blockingObserve()
+        assertTrue(playersByGame != null)
         assertEquals(2, playersByGame?.size)
         playersByGame?.forEach {
-            when (it.id) {
-                id->assertEquals(modifiedP, it)
-                id2-> assertEquals(insertedP2, it)
+            when (it.guid) {
+                p1.guid -> assertEquals(modifiedP, it)
+                toInsert.guid -> assertEquals(toInsert, it)
             }
         }
 
         // delete
-        assertEquals(1,db.playerDAO.delete(modifiedP))
+        assertEquals(1, db.playerSessionDAO.delete(p1.guid))
     }
 
     @Test
     fun testGameDAO() {
-        val cId = db.challengeDAO.insert(egChall1)
-        val game = egGame.copy(challengeId = cId)
-
         // insert and get
-        val id = db.gameDAO.insert(game)
-        val g = db.gameDAO.get(id)
-        assertEquals("Got $g", game.copy(id = id), g)
-
-        // check challenge the same
-        assertEquals(egChall1.copy(id=cId), db.challengeDAO.get(g!!.challengeId))
+        assertTrue(db.gameDAO.insert(egGame) > 0)
+        assertEquals(egGame, db.gameDAO.get(egGame.guid))
 
         // update
-        val modified = g?.copy(pin="4322", currentStep = ChallengeDb.Step.GEN_SKETCH)
-        assertEquals(1,db.gameDAO.update(modified!!))
-        assertEquals(modified,
-            db.gameDAO.get(id))
+        val modified = egGame.copy(pin = "4322", currentStep = Challenge.Step.GEN_SKETCH)
+        assertEquals(1, db.gameDAO.update(modified!!))
+        assertEquals(
+            modified,
+            db.gameDAO.get(egGame.guid)
+        )
 
         // delete
-        assertEquals(1,db.gameDAO.delete(modified))
-    }
+        assertEquals(1, db.gameDAO.delete(modified.guid))
 
-    @Test
-    fun testStoryboardDAO() {
-        // add game
-        val gId = insertGameHelper().id
 
-        // insert and get
-        val s = egStory.copy(gameId = gId)
-        val id = db.storyboardDAO.insert(s)
-        val insertedS = db.storyboardDAO.get(id).blockingObserve()
-        val insertedS2 = db.storyboardDAO.getByGame(gId).blockingObserve()
-        assertEquals(s.copy(id = id),insertedS)
-        assertEquals(s.copy(id = id),insertedS2)
-
-        // update
-        val modified = insertedS?.copy(title = "fdsafadsfadf")
-        assertEquals(1,db.storyboardDAO.update(modified!!))
-        assertEquals(modified,
-            db.storyboardDAO.get(id).blockingObserve())
-
-        // delete
-        assertEquals(1,db.storyboardDAO.delete(modified))
-    }
-
-    @Test
-    fun testPreloadJson() {
-        val result = BrainyDb.BrainyDbHelper.getChallengesFromJson(appContext)
-        assertTrue(result != null && result.size == 3)
     }
 
     @Test
     fun testIdea() {
-        // insert game and storyboard
-        val gId = insertGameHelper().id
-        assertTrue(gId> 0)
+        val game1 = insertUniqueGame()
 
         // Does TypeConverter work?
         // insert
-        val iid = db.ideaDAO.insert(egIdea.copy(gameId = gId))
-        assertTrue(iid >0)
-        val inserted1 = db.ideaDAO.get(iid)
-        assertEquals(egIdea.copy(id=iid, gameId=gId), inserted1)
+        val idea1 = egIdea.copy(gameGuid = game1.playerGuid)
+        assertTrue(db.ideaDAO.insert(idea1) > 0)
 
-        val changed = egIdea.copy(id=iid, gameId=gId, phase = ChallengeDb.Phase.SKETCH)
-        assertEquals(1,db.ideaDAO.update(changed))
-        val finalIdea1 = db.ideaDAO.get(iid)
+        val inserted1 = db.ideaDAO.get(idea1.guid)
+        assertEquals(idea1, inserted1)
+
+        val changed = idea1.copy(origin = Idea.Origin.STORY_RESOLUTION)
+        assertEquals(1, db.ideaDAO.update(changed))
+        val finalIdea1 = db.ideaDAO.get(changed.guid)
         assertEquals(changed, finalIdea1)
 
-        // insert another
-        val idea2 = egIdea.copy(gameId = gId, phase = ChallengeDb.Phase.SKETCH, title = "ffdaas")
-        val iid2 = db.ideaDAO.insert(idea2)
-        assertTrue(iid2 > 0)
+        // insert 2 of same origin
+        val idea2 = egIdea.copy(
+            guid = genGuid(),
+            gameGuid = game1.guid,
+            origin = Idea.Origin.STORY_SETTING,
+            title = "ffdaas"
+        )
+        val idea3 = egIdea.copy(
+            guid = genGuid(),
+            gameGuid = game1.guid,
+            origin = Idea.Origin.STORY_SETTING,
+            title = "f234fdaas"
+        )
+        assertTrue(db.ideaDAO.insert(idea2) > 0)
+        assertTrue(db.ideaDAO.insert(idea3) > 0)
 
-        // get all
-        assertEquals(2,db.ideaDAO.getAll(gId).size)
-
-        // test getIDea by Step. should be 2 of create_storyboard
-        val ideasByStep = db.ideaDAO.getByPhase(gId,
-            ChallengeDb.Phase.SKETCH).blockingObserve()
-        assertTrue(ideasByStep != null && ideasByStep?.size==2)
-        ideasByStep?.forEach {
-            assertTrue(it.phase== ChallengeDb.Phase.SKETCH)
+        // get by origin
+        val ideasByOrigin = db.ideaDAO.getByOriginLive(game1.guid, Idea.Origin.STORY_SETTING)
+            .blockingObserve()
+        assertTrue(ideasByOrigin != null)
+        assertEquals("Got ideas $ideasByOrigin", 2, ideasByOrigin?.size)
+        ideasByOrigin?.forEach {
+            assertTrue(it.origin == Idea.Origin.STORY_SETTING)
         }
     }
 
     @Test
     fun testGetGamesForPlayer() {
-        val g1 = db.gameDAO.get(insertGameHelper().id)
-        val g2 = db.gameDAO.get(insertGameHelper().id)
-        val g3 = db.gameDAO.get(insertGameHelper().id)
+        val g1 = db.gameDAO.get(insertUniqueGame().guid)
+        val g2 = db.gameDAO.get(insertUniqueGame().guid)
+        val g3 = db.gameDAO.get(insertUniqueGame().guid)
 
-        val guidA = genGuid()
-        val pA1 = db.playerDAO.get(
-            db.playerDAO
-                .insert(egPlayer.copy(guid = guidA, gameId = g1!!.id))
-        )
-        val pA2 = db.playerDAO.get(db.playerDAO
-            .insert(egPlayer.copy(guid = guidA, gameId = g2!!.id)))
-        val pA3 = db.playerDAO.get(db.playerDAO
-            .insert(egPlayer.copy(guid = guidA, gameId = g3!!.id)))
-        val pB1 = db.playerDAO.get(
-            db.playerDAO
-                .insert(egPlayer.copy(guid = genGuid(), gameId = g1!!.id))
-        )
-        assertTrue(pA1 !=  null && pA2 != null && pA3 != null && pB1 != null)
+        db.playerSessionDAO
+            .insert(egPlayer.copy(guid = genGuid(), gameGuid = g1!!.guid))
+        db.playerSessionDAO
+            .insert(egPlayer.copy(guid = genGuid(), gameGuid = g2!!.guid))
+        db.playerSessionDAO
+            .insert(egPlayer.copy(guid = genGuid(), gameGuid = g3!!.guid))
+        db.playerSessionDAO
+            .insert(egPlayer.copy(guid = genGuid(), playerGuid = genGuid(), gameGuid = g1!!.guid))
 
-        val res = db.gameDAO.getByPlayer(guidA).blockingObserve()
+        val res = db.gameDAO.getByPlayerLive(egPlayerGuid).blockingObserve()
         assertTrue(res != null)
         assertEquals(3, res?.size)
         res?.forEach {
-            when(it.id) {
-                g1?.id -> assertEquals(g1, it)
-                g2?.id -> assertEquals(g2, it)
-                g3?.id -> assertEquals(g3, it)
+            when (it.guid) {
+                g1?.guid -> assertEquals(g1, it)
+                g2?.guid -> assertEquals(g2, it)
+                g3?.guid -> assertEquals(g3, it)
             }
         }
-    }
-
-    @Test
-    fun testLessonDb() {
-        val egLesson = LessonDb(0, genGuid(), "asdf", "asdf", "asdfasdf", "asdfasdf")
-        val lId = db.lessonDAO.insert(egLesson)
-        assertTrue(lId>0)
-        val l = db.lessonDAO.get(lId)
-        assertEquals(egLesson.copy(id=lId), l)
-        val egLesson2 = egLesson.copy(id=0,title="dfasdfadsfads")
-        val l2Id = db.lessonDAO.insert(egLesson2)
-        val l2 = db.lessonDAO.get(l2Id)
-        val ls = db.lessonDAO.getAll().blockingObserve()
-        assertTrue(ls != null && ls.size == 2)
-        ls?.forEach {
-            when(it.id) {
-                lId -> assertEquals(egLesson.copy(id=lId), l)
-                l2Id -> assertEquals(egLesson2.copy(id=l2Id), l2)
-            }
-        }
-
     }
 }
 

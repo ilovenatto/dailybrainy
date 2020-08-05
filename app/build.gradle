@@ -40,12 +40,6 @@ dependencies {
     // Firebase Storage (for images)
     implementation 'com.google.firebase:firebase-storage-ktx:19.1.1'
 
-    // Moshi
-    def moshi_version="1.9.3"
-    implementation "com.squareup.moshi:moshi:$moshi_version"
-    implementation "com.squareup.moshi:moshi-kotlin:$moshi_version"
-    kapt "com.squareup.moshi:moshi-kotlin-codegen:$moshi_version"
-
     //
     // Room
     //

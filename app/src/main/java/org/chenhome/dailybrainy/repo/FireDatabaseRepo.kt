@@ -10,9 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.chenhome.dailybrainy.repo.local.BrainyDb
-import org.chenhome.dailybrainy.repo.local.ChallengeDb
-import org.chenhome.dailybrainy.repo.local.LessonDb
-import org.chenhome.dailybrainy.repo.local.StoryboardDb
+import org.chenhome.dailybrainy.repo.local.Challenge
 import timber.log.Timber
 
 
@@ -45,10 +43,7 @@ class FireDatabaseRepo(
             return false
         }
 
-        entityHandlers.let {
-            it.plus(ChallengeHandler().register())
-            it.plus(LessonHandler().register())
-        }
+        entityHandlers.plus(ChallengeHandler().register())
         return true
     }
 
@@ -58,99 +53,51 @@ class FireDatabaseRepo(
         }
     }
 
-    // TODO: 8/3/20 write handler for Idea, Player, Game, Storyboard
+    // TODO: 8/3/20 write handler for Idea, Player, Game
     inner class ChallengeHandler : EntityHandler() {
         override fun getPath() = "challenges"
         override fun isExistInDb(guid: String): Boolean =
-            localDb.challengeDAO.getByGuid(guid) == null
+            localDb.challengeDAO.get(guid) == null
 
         override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
             scope.launch {
-                snapshot.getValue<ChallengeDb>()?.let { handleChanged(it) }
+                snapshot.getValue<Challenge>()?.let { handleChanged(it) }
             }
         }
 
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
             scope.launch {
-                snapshot.getValue<ChallengeDb>()?.let { handleAdd(it) }
+                snapshot.getValue<Challenge>()?.let { handleAdd(it) }
             }
         }
 
         override fun onChildRemoved(snapshot: DataSnapshot) {
             scope.launch {
-                snapshot.getValue<ChallengeDb>()?.let { handleRemove(it) }
+                snapshot.getValue<Challenge>()?.let { handleRemove(it) }
             }
         }
 
-        private suspend fun handleRemove(entity: ChallengeDb) {
+        private suspend fun handleRemove(entity: Challenge) {
             withContext(scope.coroutineContext) {
-                if (localDb.challengeDAO.deleteByGuid(entity.guid) != 1) {
+                if (localDb.challengeDAO.delete(entity.guid) != 1) {
                     Timber.w("Unable to delete $entity")
                 }
             }
         }
 
-        private suspend fun handleAdd(entity: ChallengeDb) {
+        private suspend fun handleAdd(entity: Challenge) {
             withContext(scope.coroutineContext) {
                 if (isExistInDb(entity.guid)) {
-                    localDb.challengeDAO.deleteByGuid(entity.guid)
+                    localDb.challengeDAO.delete(entity.guid)
                 }
                 localDb.challengeDAO.insert(entity)
             }
         }
 
-        private suspend fun handleChanged(entity: ChallengeDb) {
+        private suspend fun handleChanged(entity: Challenge) {
             withContext(scope.coroutineContext) {
                 if (isExistInDb(entity.guid)) {
                     localDb.challengeDAO.update(entity)
-                }
-            }
-        }
-    }
-
-    inner class LessonHandler : EntityHandler() {
-        override fun getPath() = "lessons"
-        override fun isExistInDb(guid: String): Boolean = localDb.lessonDAO.getByGuid(guid) == null
-
-        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-            scope.launch {
-                snapshot.getValue<LessonDb>()?.let { handleChanged(it) }
-            }
-        }
-
-        override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-            scope.launch {
-                snapshot.getValue<LessonDb>()?.let { handleAdd(it) }
-            }
-        }
-
-        override fun onChildRemoved(snapshot: DataSnapshot) {
-            scope.launch {
-                snapshot.getValue<LessonDb>()?.let { handleRemove(it) }
-            }
-        }
-
-        private suspend fun handleRemove(entity: LessonDb) {
-            withContext(scope.coroutineContext) {
-                if (localDb.lessonDAO.deleteByGuid(entity.guid) != 1) {
-                    Timber.w("Unable to delete $entity")
-                }
-            }
-        }
-
-        private suspend fun handleAdd(entity: LessonDb) {
-            withContext(scope.coroutineContext) {
-                if (isExistInDb(entity.guid)) {
-                    localDb.lessonDAO.deleteByGuid(entity.guid)
-                }
-                localDb.lessonDAO.insert(entity)
-            }
-        }
-
-        private suspend fun handleChanged(entity: LessonDb) {
-            withContext(scope.coroutineContext) {
-                if (isExistInDb(entity.guid)) {
-                    localDb.lessonDAO.update(entity)
                 }
             }
         }
@@ -162,7 +109,7 @@ class FireDatabaseRepo(
 
         // @return itself to allow chain calls
         fun register(): EntityHandler {
-            Timber.d("Adding listener $this");
+            Timber.d("Adding listener $this")
             dbRef.addChildEventListener(this)
             return this
         }

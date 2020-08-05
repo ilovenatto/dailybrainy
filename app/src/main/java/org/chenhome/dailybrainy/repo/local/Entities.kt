@@ -1,45 +1,61 @@
 package org.chenhome.dailybrainy.repo.local
 
 import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.ForeignKey.CASCADE
 import androidx.room.PrimaryKey
-import com.squareup.moshi.JsonClass
+import java.security.SecureRandom
+import java.util.*
 import java.util.concurrent.TimeUnit
 
-interface CanValidate {
-    fun canInsert(): Boolean
-    fun canUpdate(): Boolean
-}
 
 /**
  * Globally unique id that won't collide w/ other ids. Used in remote database as identifier
  */
+val secureRandom = SecureRandom()
+val encoder = Base64.getUrlEncoder()
 fun genGuid(): String {
-    return java.util.UUID.randomUUID().toString()
+    val bytes = ByteArray(6)
+    secureRandom.nextBytes(bytes)
+    return encoder.encodeToString(bytes)
 }
 
-@Entity
+/**
+ * Generate numeric pin as secret to get into a game
+ */
+fun genPin(): String {
+    val buf = StringBuilder("")
+    val range = IntRange(0, 9)
+    for (i in 0..3) {
+        buf.append(range.random().toString())
+    }
+    return buf.toString()
+}
+
+
 /**
  * Static set of challenges.
  */
-@JsonClass(generateAdapter = true)
-data class ChallengeDb(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long,
-
+@Entity
+data class Challenge(
     // Globally unique identifier
+    @PrimaryKey
     val guid: String,
 
-    // Not required
-    // absolute local filename for the challenge's image
-    val imgFn: String?,
+    val imgFn: String,
     val title: String,
-    val hmw: String,
-    val hmwDesc: String
+    val desc: String,
+    val category: Category,
+
+    val hmw: String?, // only set for Challenge category
+    val youtubeUrl: String? // only set for Lesson category
+
 ) {
-    // No-arg constructur so that Firebase can create this POJO
-    constructor() : this(0, "", null, "", "", "")
+    // No-arg constructor so that Firebase can create this POJO
+    constructor() : this("", "", "", "", Category.CHALLENGE, null, null)
+
+    enum class Category {
+        LESSON,// lesson, where there's generally an associated youtube video
+        CHALLENGE
+    }
 
     /**
      * The phases in each challenge, in ordinal order
@@ -56,6 +72,7 @@ data class ChallengeDb(
         NUM_POPULAR,
         NONE
     }
+
     /**
      * Steps in each challenge, broken down by Phase
      */
@@ -124,152 +141,84 @@ data class ChallengeDb(
 }
 
 
-@Entity(
-    foreignKeys = [ForeignKey(
-        entity = ChallengeDb::class,
-        parentColumns = ["id"],
-        childColumns = ["challengeId"],
-        onDelete = CASCADE
-    )]
-)
-data class GameDb(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long,
-
-    // use {@link EntitHelper.genGuid()}
+@Entity
+data class Game(
+    @PrimaryKey
     val guid: String,
 
     // Foreign key to parent Challenge
-    val challengeId: Long,
+    val challengeGuid: String,
+
+    // Identifying the player that started this game
+    val playerGuid: String,
 
     // Must be generated and set at insertion time
     val pin: String,
 
     // Session start time in Millis since epoch.
-    // can be update
-    var sessionStartMillisEpoch: Long = 0,
+    // can be updated
+    var sessionStartMillis: Long?,
+    var currentStep: Challenge.Step = Challenge.Step.GEN_IDEA,
 
-    var currentStep: ChallengeDb.Step = ChallengeDb.Step.GEN_IDEA
+    var storyTitle: String?,
+    var storyDesc: String?
 
-) : CanValidate {
-    override fun canInsert(): kotlin.Boolean = challengeId > 0L
-    override fun canUpdate(): Boolean = id > 0L && challengeId > 0L
-
+) {
     // No-arg constructur so that Firebase can create this POJO
-    constructor() : this(0, "", 0, "", 0, ChallengeDb.Step.GEN_IDEA)
+    constructor() : this("", "", "", "", null, Challenge.Step.GEN_IDEA, null, null)
 }
 
 /**
- * @param imgFn full filepath name to PlayerDb's avatar img
+ * @param imgFn full filepath name to PlayerSession's avatar img
  */
-@Entity(
-    foreignKeys = [ForeignKey(
-        entity = GameDb::class,
-        parentColumns = ["id"],
-        childColumns = ["gameId"],
-        onDelete = CASCADE
-    )]
-)
-data class PlayerDb(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long,
+@Entity
+data class PlayerSession(
+    @PrimaryKey
+    val guid: String,
+    val playerGuid: String, // There is one player per device.
+    val gameGuid: String,
+    val name: String,
+    val imgFn: String
+) {
+    // No-arg constructur so that Firebase can create this POJO
+    constructor() : this("", "", "", "", "")
+}
 
-    // Globally Unique key for the player
+@Entity
+data class Idea(
+    @PrimaryKey
     val guid: String,
 
-    // Foreign key to GameDb table
-    val gameId: Long,
+    // Foreign key to its parent, Game
+    val gameGuid: String,
 
-    val name: String,
-    val points: Int,
-    val imgFn: String?
-) {
-    // No-arg constructur so that Firebase can create this POJO
-    constructor() : this(0, "", 0, "", 0, "")
-}
+    // Unique user that originated this idea. Helpful
+    // for counting points per player
+    val playerGuid: String,
 
-
-/**
- * Each Game associated with a final Storyboard
- * shared by the players
- * @param title title of the solution
- * @param descrip Description of the solution
- * @param imgSettingFn full filename path to sketch illustrating the solutions' setting
- * @param imgSolutionFn full filename path to sketch illustrating the solution
- * @param imgResolutionFn full filename path to sketch illustrating the solutions' resolution
- */
-@Entity(
-    foreignKeys = [ForeignKey(
-        parentColumns = ["id"],
-        childColumns = ["gameId"],
-        onDelete = CASCADE,
-        entity = GameDb::class
-    )]
-)
-data class StoryboardDb(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long,
-
-    // Foreign key
-    val gameId: Long,
-
-    val title: String?,
-    val descrip: String?,
-    val imgSettingFn: String?,
-    val imgSolutionFn: String?,
-    val imgResolutionFn: String?
-) {
-    // No-arg constructur so that Firebase can create this POJO
-    constructor() : this(0, 0, null, "", "", "", "")
-}
-
-@Entity(
-    foreignKeys = [ForeignKey(
-        entity = GameDb::class,
-        parentColumns = ["id"],
-        childColumns = ["gameId"],
-        onDelete = CASCADE
-    )]
-)
-data class IdeaDb(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long,
-
-    val title: String,
-    val imgFn: String,
+    // Maps to unique name {@link Challenge.Phase}
+    val origin: Idea.Origin,
 
     // defaults to 0
     var votes: Int = 0,
+    var title: String?,
+    var imgFn: String?
 
-    // Foreign key to its parent, Game
-    val gameId: Long,
 
-    // Maps to unique name {@link ChallengeDb.Phase}
-    val phase: ChallengeDb.Phase
-) : CanValidate {
-    override fun canInsert(): Boolean = gameId > 0L
-            && (title.isNotEmpty() || imgFn.isNotEmpty())
-
-    override fun canUpdate(): Boolean = canInsert()
+) {
     fun vote() {
         votes += 1
     }
 
     // No-arg constructur so that Firebase can create this POJO
-    constructor() : this(0, "", "", 0, 0, ChallengeDb.Phase.BRAINSTORM)
-}
+    constructor() : this("", "", "", Origin.BRAINSTORM, 0, null, null)
 
-@Entity
-data class LessonDb(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long,
-
-    val guid: String,
-    val title: String,
-    val descrip: String,
-    val youtubeUrl: String,
-    val imgFn: String
-) {
-    // No-arg constructur so that Firebase can create this POJO
-    constructor() : this(0, "", "", "", "", "")
+    // Which part of the game that the idea orginated
+    enum class Origin {
+        BRAINSTORM,
+        SKETCH,
+        STORY_SETTING,
+        STORY_SOLUTION,
+        STORY_RESOLUTION
+    }
 }

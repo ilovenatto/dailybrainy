@@ -3,12 +3,6 @@ package org.chenhome.dailybrainy.repo.local
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import org.chenhome.dailybrainy.R
-import timber.log.Timber
 
 
 /**
@@ -20,23 +14,19 @@ import timber.log.Timber
 @Database(
     version = 1,
     entities = [
-        ChallengeDb::class,
-        GameDb::class,
-        PlayerDb::class,
-        StoryboardDb::class,
-        IdeaDb::class,
-        LessonDb::class
+        Challenge::class,
+        Game::class,
+        PlayerSession::class,
+        Idea::class
     ],
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class BrainyDb : RoomDatabase() {
-    abstract val storyboardDAO: StoryboardDAO
-    abstract val playerDAO: PlayerDAO
+    abstract val playerSessionDAO: PlayerSessionDAO
     abstract val gameDAO: GameDAO
     abstract val challengeDAO: ChallengeDAO
     abstract val ideaDAO: IdeaDAO
-    abstract val lessonDAO: LessonDAO
 
     // Singletone instance
     companion object {
@@ -70,209 +60,130 @@ abstract class BrainyDb : RoomDatabase() {
             }
         }
     }
-
-    object BrainyDbHelper {
-        fun getChallengesFromJson(context: Context): List<ChallengeDb>? {
-            // Get json file
-            val challengeStr: String = context
-                .resources
-                .openRawResource(R.raw.brainydb_challenges)
-                .bufferedReader()
-                // closes the inputstream
-                .use {
-                    it.readText()
-                }
-            if (challengeStr.isNullOrEmpty()) {
-                Timber.w("Unable preload Brainy db with challenges")
-                return null
-            }
-            val moshi = Moshi.Builder()
-                .add(KotlinJsonAdapterFactory())
-                .build()
-            val adapter: JsonAdapter<List<ChallengeDb>> = moshi
-                .adapter(Types.newParameterizedType(List::class.java, ChallengeDb::class.java))
-
-            // get result
-            val result = adapter.fromJson(challengeStr)
-            if (result.isNullOrEmpty()) {
-                Timber.w("No challenges in json file. Unable to preload Brainy db")
-                return null
-            }
-            Timber.i("Got Challenges from JSON: ${result.size}")
-            return result
-        }
-    }
 }
 
 
+/**
+ * Converters used by Room database to convert primitives to complex types
+ */
 private class Converters {
     @TypeConverter
-    fun fromStepName(stepName:String) : ChallengeDb.Step {
-        return ChallengeDb.Step.valueOf(stepName)
+    fun fromStepName(stepName: String): Challenge.Step {
+        return Challenge.Step.valueOf(stepName)
     }
 
     @TypeConverter
-    fun fromStep(step: ChallengeDb.Step) : String {
+    fun fromStep(step: Challenge.Step): String {
         return step.name
     }
+
     @TypeConverter
-    fun fromPhaseName(phaseName:String) : ChallengeDb.Phase {
-        return ChallengeDb.Phase.valueOf(phaseName)
+    fun fromPhaseName(phaseName: String): Challenge.Phase {
+        return Challenge.Phase.valueOf(phaseName)
     }
 
     @TypeConverter
-    fun fromPhase(phase: ChallengeDb.Phase) : String {
+    fun fromPhase(phase: Challenge.Phase): String {
         return phase.name
+    }
+
+    @TypeConverter
+    fun fromCategory(category: Challenge.Category): String {
+        return category.name
+    }
+
+    @TypeConverter
+    fun fromCategoryName(categoryName: String): Challenge.Category {
+        return Challenge.Category.valueOf(categoryName)
+    }
+
+    @TypeConverter
+    fun fromOrigin(origin: Idea.Origin): String {
+        return origin.name
+    }
+
+    @TypeConverter
+    fun fromOriginName(originName: String): Idea.Origin {
+        return Idea.Origin.valueOf(originName)
     }
 }
 
 @Dao
 interface ChallengeDAO {
     @Insert
-    fun insert(challengeDb: ChallengeDb): Long
+    fun insert(challenge: Challenge): Long
 
-    @Delete
-    fun delete(challegeDb: ChallengeDb): Int
-
-    @Query("DELETE FROM challengedb WHERE guid = :guid")
-    fun deleteByGuid(guid: String): Int
+    @Query("DELETE FROM challenge WHERE guid = :guid")
+    fun delete(guid: String): Int
 
     @Update
-    fun update(challegeDb: ChallengeDb): Int
+    fun update(challege: Challenge): Int
 
-    @Query("select * from challengedb")
-    fun getAll(): LiveData<List<ChallengeDb>>
+    @Query("select * from challenge")
+    fun getAll(): List<Challenge>
 
-    @Query("select * from challengedb")
-    fun getAllBlocking(): List<ChallengeDb>
-
-    @Query("select * from challengedb where id=:challengeId")
-    fun get(challengeId: Long): ChallengeDb?
-
-    @Query("select * from challengedb where guid=:guid")
-    fun getByGuid(guid: String): ChallengeDb?
+    @Query("select * from challenge where guid=:guid")
+    fun get(guid: String): Challenge?
 }
 
 @Dao
-abstract class GameDAO {
+interface GameDAO {
     @Insert
-    abstract fun insert(game: GameDb): Long
+    fun insert(game: Game): Long
 
-    @Delete
-    abstract fun delete(game: GameDb): Int
-
-    @Query("DELETE FROM gamedb WHERE guid = :guid")
-    abstract fun deleteByGuid(guid: String): Int
+    @Query("DELETE FROM game WHERE guid = :guid")
+    fun delete(guid: String): Int
 
     @Update
-    abstract fun update(game: GameDb): Int
+    fun update(game: Game): Int
 
-    @Query("select * from gamedb where id=:gameId")
-    abstract fun get(gameId: Long): GameDb?
+    @Query("select * from game where guid=:guid")
+    fun get(guid: String): Game?
 
-    @Query("select * from gamedb where guid=:guid")
-    abstract fun getByGuid(guid: String): GameDb?
+    @Query("select * from game where playerGuid=:playerGuid")
+    fun getByPlayerLive(playerGuid: String): LiveData<List<Game>>
 
+    @Query("select * from game where playerGuid=:playerGuid")
+    fun getByPlayer(playerGuid: String): List<Game>
 
-    /**
-     * All games are universally known by all players. Filter down
-     * to the games where this user is one of the players
-     * @param playerGuid globally unique identifier for the player
-     * @return Games that player has participated in
-     */
-    @Query("SELECT * FROM playerdb INNER JOIN gamedb ON gamedb.id = playerdb.gameId WHERE playerdb.guid = :playerGuid")
-    abstract fun getByPlayer(playerGuid: String): LiveData<List<GameDb>>
 }
 
 @Dao
-interface PlayerDAO {
+interface PlayerSessionDAO {
     @Insert
-    fun insert(player: PlayerDb): Long
+    fun insert(player: PlayerSession): Long
 
-    @Delete
-    fun delete(player: PlayerDb): Int
-
-    @Query("DELETE FROM playerdb WHERE guid = :guid")
-    fun deleteByGuid(guid: String): Int
-
+    @Query("DELETE FROM playersession WHERE guid = :guid")
+    fun delete(guid: String): Int
 
     @Update()
-    fun update(player: PlayerDb): Int
+    fun update(player: PlayerSession): Int
 
-    @Query("select * from playerdb where id=:playerId")
-    fun get(playerId: Long): PlayerDb?
+    @Query("select * from playersession where playerGuid=:playerGuid")
+    fun getByPlayer(playerGuid: String): PlayerSession?
 
-    @Query("select * from playerdb where gameId=:gameId")
-    fun getByGame(gameId: Long): LiveData<List<PlayerDb>>
+    @Query("select * from playersession where guid=:guid")
+    fun get(guid: String): PlayerSession?
 
-    @Query("select * from playerdb where guid=:guid")
-    fun getByGuid(guid: String): PlayerDb?
-
-
+    @Query("select * from playersession where gameGuid=:gameGuid")
+    fun getByGameLive(gameGuid: String): LiveData<List<PlayerSession>>
 }
 
-
-@Dao
-interface StoryboardDAO {
-    @Insert
-    fun insert(story: StoryboardDb): Long
-
-    @Delete
-    fun delete(story: StoryboardDb): Int
-
-    @Update()
-    fun update(story: StoryboardDb): Int
-
-    @Query("select * from storyboarddb where id=:storyboardId")
-    fun get(storyboardId: Long): LiveData<StoryboardDb>
-
-    @Query("select * from storyboarddb where gameId=:gameId")
-    fun getByGame(gameId: Long): LiveData<StoryboardDb>
-
-}
 
 @Dao
 interface IdeaDAO {
     @Insert
-    fun insert(idea: IdeaDb): Long
+    fun insert(idea: Idea): Long
 
-    @Delete
-    fun delete(idea: IdeaDb): Int
-
-    @Update()
-    fun update(idea: IdeaDb): Int
-
-    @Query("select * from ideadb where id=:ideaId")
-    fun get(ideaId: Long): IdeaDb?
-
-    @Query("select * from ideadb where phase=:phase and gameId=:gameId")
-    fun getByPhase(gameId: Long, phase: ChallengeDb.Phase) : LiveData<List<IdeaDb>>
-
-    @Query("select * from ideadb where gameId=:gameId")
-    fun getAll(gameId: Long): List<IdeaDb>
-}
-
-@Dao
-interface LessonDAO {
-    @Insert
-    fun insert(lesson: LessonDb): Long
-
-    @Delete
-    fun delete(lesson: LessonDb): Int
-
-    @Query("DELETE FROM lessondb WHERE guid = :guid")
-    fun deleteByGuid(guid: String): Int
+    @Query("delete from idea where guid=:guid")
+    fun delete(guid: String): Int
 
     @Update()
-    fun update(lesson: LessonDb): Int
+    fun update(idea: Idea): Int
 
-    @Query("select * from lessondb where id=:lessonId")
-    fun get(lessonId: Long): LessonDb?
+    @Query("select * from idea where guid=:guid")
+    fun get(guid: String): Idea?
 
-    @Query("select * from lessondb")
-    fun getAll(): LiveData<List<LessonDb>>
-
-    @Query("select * from lessondb where guid=:guid")
-    fun getByGuid(guid: String): LessonDb?
-
+    @Query("select * from idea where origin=:origin and gameGuid=:gameGuid")
+    fun getByOriginLive(gameGuid: String, origin: Idea.Origin): LiveData<List<Idea>>
 }
