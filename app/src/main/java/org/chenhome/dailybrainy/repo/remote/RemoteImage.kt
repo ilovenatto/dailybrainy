@@ -1,4 +1,4 @@
-package org.chenhome.dailybrainy.repo
+package org.chenhome.dailybrainy.repo.remote
 
 import android.content.Context
 import android.net.Uri
@@ -31,7 +31,7 @@ enum class RemoteImageFolder {
  * App layer should use Glide to retrieve remote images. App layer
  * references images by
  */
-class RemoteImageRepo(
+class RemoteImage(
     val context: Context
 ) {
     val fstorage: FirebaseStorage = Firebase.storage
@@ -52,7 +52,7 @@ class RemoteImageRepo(
                                 + fileUri.lastPathSegment
                     )
 
-                Timber.d("Uploading file $fileUri to $ref");
+                Timber.d("Uploading file $fileUri to $ref")
                 val upload = ref.putFile(fileUri)
                 upload.addOnSuccessListener {
                     Timber.d("Put file to $it.storage")
@@ -74,7 +74,7 @@ class RemoteImageRepo(
      * @return non-null StorageReference if {@param fullRemotePath} is a valid path. else null.
      *
      * @param fullRemotePath corresponds to the value from this
-     * method {@link https://developers.google.com/android/reference/com/google/firebase/storage/StorageReference#getPath()}
+     * method [getPath()](https://developers.google.com/android/reference/com/google/firebase/storage/StorageReference#getPath())
      */
     suspend fun getValidStorageRef(fullRemotePath: String): StorageReference? {
         // TODO: 7/14/20 does this need to be wrapped in IO thread?
@@ -95,15 +95,15 @@ class RemoteImageRepo(
     }
 
     /**
-     * @param fullRemotePath corresponds to the value from this
-     * method {@link https://developers.google.com/android/reference/com/google/firebase/storage/StorageReference#getPath()}
+     * @param target Firebase remote asset that will be deleted
+     * @return whether delete succeeded
      */
     suspend fun deleteRemote(target: StorageReference): Boolean {
         return withContext(scope.coroutineContext) {
             suspendCoroutine<Boolean> { cont ->
                 target.delete()
                     .addOnSuccessListener {
-                        Timber.d("Deleted remote file $target");
+                        Timber.d("Deleted remote file $target")
                         cont.resume(true)
                     }
                     .addOnFailureListener {

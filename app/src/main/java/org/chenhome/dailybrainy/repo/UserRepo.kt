@@ -23,11 +23,11 @@ class UserRepo(val context: Context) {
         get() {
             return pref.getLong(KEY_CURRENT_GAMEID, 0)
         }
-        set(gameId: Long) {
+        set(gameId) {
             pref
                 .edit()
                 .putLong(KEY_CURRENT_GAMEID, gameId)
-                .commit()
+                .apply()
         }
 
     var currentPlayerGuid: String = ""
@@ -43,7 +43,7 @@ class UserRepo(val context: Context) {
                         Timber.w("Unable to commit player GUID $newGuid")
                     }
                 }
-                Timber.d("Initialized currentPlayerGuid to $field");
+                Timber.d("Initialized currentPlayerGuid to $field")
             }
             return field
         }

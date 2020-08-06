@@ -1,7 +1,6 @@
 package org.chenhome.dailybrainy.repo
 
 import android.content.Context
-import androidx.lifecycle.LiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,7 +11,7 @@ import timber.log.Timber
  * Repository facade over local database and local image filestore. Local database
  * is backed by network store.
  *
- * Offers references to data. The data must be refreshed by calling {@link BrainyRepo.refresh()},
+ * Offers references to data. The data must be refreshed by calling [refresh]
  * which will run off the main thread.
  */
 class BrainyRepo (
@@ -29,13 +28,6 @@ class BrainyRepo (
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     /**
-     * Initialize on first reference to value.
-     * Database READ calls can be made on UI thread
-     */
-    val myGames: LiveData<List<Game>> =
-        db.gameDAO.getByPlayerLive(user.currentPlayerGuid) // current Guid lazily initialized also
-
-    /**
      * @return challenge that this player hasn't encountered before. Null if one can't be found
      */
     suspend fun getNeverPlayed(category: Challenge.Category): Challenge? {
@@ -45,7 +37,7 @@ class BrainyRepo (
                 encountered.add(it.challengeGuid)
             }
             try {
-                return@withContext db.challengeDAO.getAll().first() {
+                return@withContext db.challengeDAO.getAll().first {
                     !encountered.contains(it.guid)
                             && it.category == category
                 }
@@ -61,8 +53,9 @@ class BrainyRepo (
      *
      * @return number of entities that were updated or inserted.
      */
-    // TODO: 8/3/20 utlize FireDatabaseRepo to intialize local db
-/*    suspend fun refresh() : Int {
+    // TODO: 8/3/20 utlize `RemoteDb {` to intialize local db
+    /*
+    suspend fun refresh() : Int {
         return withContext(scope.coroutineContext) {
             // register remote data listeners if not yet registered
             if ()
@@ -110,7 +103,7 @@ class BrainyRepo (
      * Instantiate Game, representing a newly inserted Game entity associated with an existing
      * challenge.
      *
-     * @param challengeId existing challenge in db
+     * @param challengeGuid existing challenge in db
      * @return Game instance representing newly inserted game in db. Null if insertion failed
      */
     suspend fun insertNewGame(challengeGuid: String): Game? {
@@ -130,7 +123,6 @@ class BrainyRepo (
                 null,
                 null
             )
-            1
             db.gameDAO.insert(game).run {
                 if (this == 0L) {
                     Timber.w("Unable to insert game $game with challengeId: $challenge")

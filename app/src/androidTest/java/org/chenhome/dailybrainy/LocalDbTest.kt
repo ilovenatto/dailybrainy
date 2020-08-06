@@ -6,8 +6,12 @@ import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.chenhome.dailybrainy.repo.local.*
-import org.junit.*
-import org.junit.Assert.*
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
 import timber.log.Timber
 
@@ -67,8 +71,8 @@ class LocalDbTest {
 
         // Get all
         val challenges = db.challengeDAO.getAll()
-        assertEquals(2, challenges?.size)
-        challenges?.forEach {
+        assertEquals(2, challenges.size)
+        challenges.forEach {
             when (it.guid) {
                 modified.guid -> assertEquals(modified, it)
                 egChall2.guid -> assertEquals(egChall2, it)
@@ -86,7 +90,7 @@ class LocalDbTest {
         val gId = insertUniqueGame().guid
         val p1 = egPlayer.copy(gameGuid = gId)
 
-        Timber.d("got guid ${gId} ${p1.guid}");
+        Timber.d("got guid ${gId} ${p1.guid}")
         // insert
         assertTrue(db.playerSessionDAO.insert(p1) > 0)
         val insertedP1 = db.playerSessionDAO.get(p1.guid)
@@ -131,7 +135,7 @@ class LocalDbTest {
 
         // update
         val modified = egGame.copy(pin = "4322", currentStep = Challenge.Step.GEN_SKETCH)
-        assertEquals(1, db.gameDAO.update(modified!!))
+        assertEquals(1, db.gameDAO.update(modified))
         assertEquals(
             modified,
             db.gameDAO.get(egGame.guid)
@@ -199,16 +203,16 @@ class LocalDbTest {
         db.playerSessionDAO
             .insert(egPlayer.copy(guid = genGuid(), gameGuid = g3!!.guid))
         db.playerSessionDAO
-            .insert(egPlayer.copy(guid = genGuid(), playerGuid = genGuid(), gameGuid = g1!!.guid))
+            .insert(egPlayer.copy(guid = genGuid(), playerGuid = genGuid(), gameGuid = g1.guid))
 
         val res = db.gameDAO.getByPlayerLive(egPlayerGuid).blockingObserve()
         assertTrue(res != null)
         assertEquals(3, res?.size)
         res?.forEach {
             when (it.guid) {
-                g1?.guid -> assertEquals(g1, it)
-                g2?.guid -> assertEquals(g2, it)
-                g3?.guid -> assertEquals(g3, it)
+                g1.guid -> assertEquals(g1, it)
+                g2.guid -> assertEquals(g2, it)
+                g3.guid -> assertEquals(g3, it)
             }
         }
     }

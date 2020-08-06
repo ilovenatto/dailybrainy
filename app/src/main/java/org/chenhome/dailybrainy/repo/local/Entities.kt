@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
  * Globally unique id that won't collide w/ other ids. Used in remote database as identifier
  */
 val secureRandom = SecureRandom()
-val encoder = Base64.getUrlEncoder()
+val encoder: Base64.Encoder = Base64.getUrlEncoder()
 fun genGuid(): String {
     val bytes = ByteArray(6)
     secureRandom.nextBytes(bytes)
@@ -196,8 +196,8 @@ data class Idea(
     // for counting points per player
     val playerGuid: String,
 
-    // Maps to unique name {@link Challenge.Phase}
-    val origin: Idea.Origin,
+    // Maps to unique name [Challenge.Phase]
+    val origin: Origin,
 
     // defaults to 0
     var votes: Int = 0,

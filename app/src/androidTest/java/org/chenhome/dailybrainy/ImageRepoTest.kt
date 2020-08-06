@@ -5,12 +5,12 @@ import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import junit.framework.Assert.*
 import kotlinx.coroutines.runBlocking
-import org.chenhome.dailybrainy.repo.LocalImageRepo
-import org.chenhome.dailybrainy.repo.RemoteImageFolder
-import org.chenhome.dailybrainy.repo.RemoteImageRepo
+import org.chenhome.dailybrainy.repo.local.LocalImageRepo
+import org.chenhome.dailybrainy.repo.remote.RemoteImage
+import org.chenhome.dailybrainy.repo.remote.RemoteImageFolder
 import org.junit.*
+import org.junit.Assert.*
 import org.junit.runner.RunWith
 import timber.log.Timber
 import java.io.File
@@ -24,7 +24,7 @@ class ImageRepoTest {
 
     lateinit var appContext: Context
     lateinit var localRepo: LocalImageRepo
-    lateinit var remoteRepo: RemoteImageRepo
+    lateinit var remote: RemoteImage
 
     // fixture used in testing
     lateinit var tempFileUri: Uri
@@ -32,8 +32,10 @@ class ImageRepoTest {
     @Before
     fun before() {
         appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        localRepo = LocalImageRepo(appContext)
-        remoteRepo = RemoteImageRepo(appContext)
+        localRepo =
+            LocalImageRepo(appContext)
+        remote =
+            RemoteImage(appContext)
 
         // create a random file
         val tempFile = File.createTempFile("temp", "tmp", null)
@@ -71,7 +73,7 @@ class ImageRepoTest {
 
                 // check it exists
                 assertTrue(localRepo.isExist(dstUri!!))
-                assertTrue(localRepo.deleteLocal(dstUri!!))
+                assertTrue(localRepo.deleteLocal(dstUri))
             }
         }
     }
@@ -79,16 +81,16 @@ class ImageRepoTest {
     @Test
     fun testUploadRemote() {
         runBlocking {
-            val r = remoteRepo.upload(RemoteImageFolder.CHALLENGES, tempFileUri)
+            val r = remote.upload(RemoteImageFolder.CHALLENGES, tempFileUri)
             assertNotNull(r)
             Timber.d("Storage ref from upload ${r!!.path}")
 
-            val r2 = remoteRepo.getValidStorageRef(r.path)
+            val r2 = remote.getValidStorageRef(r.path)
             assertNotNull(r2)
             assertEquals(r, r2)
 
             // delete it
-            assertTrue(remoteRepo.deleteRemote(r))
+            assertTrue(remote.deleteRemote(r))
         }
     }
 
@@ -96,7 +98,7 @@ class ImageRepoTest {
     fun testGetStaticRemoteImages() {
         runBlocking {
             val p = "challenges/challenge_swole.png"
-            val ref = remoteRepo.getValidStorageRef(p)
+            val ref = remote.getValidStorageRef(p)
             assertNotNull("ref $ref", ref)
             Timber.d("Got remote ref $ref, ${ref!!.path}")
         }

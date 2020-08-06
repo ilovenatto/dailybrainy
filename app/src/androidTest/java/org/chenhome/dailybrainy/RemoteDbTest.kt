@@ -7,32 +7,33 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.chenhome.dailybrainy.repo.FireDatabaseRepo
+
 import org.chenhome.dailybrainy.repo.local.BrainyDb
+import org.chenhome.dailybrainy.repo.remote.RemoteDb
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class FireDatabaseRepoTest {
+class RemoteDbTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     lateinit var appContext: Context
-    lateinit var fireDb: FireDatabaseRepo
+    lateinit var fireDb: RemoteDb
     lateinit var localDb: BrainyDb
     lateinit var remoteDb: FirebaseDatabase
 
     @Before
     fun before() {
         appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        fireDb = FireDatabaseRepo(appContext)
-        fireDb.registerHandlers()
+        fireDb = RemoteDb
+        fireDb.registerHandlers(appContext)
         localDb = BrainyDb.getDb(appContext)
         remoteDb = Firebase.database
     }

@@ -1,4 +1,4 @@
-package org.chenhome.dailybrainy.repo
+package org.chenhome.dailybrainy.repo.local
 
 import android.content.Context
 import android.net.Uri
@@ -22,7 +22,6 @@ data class LocalFolder(val context: Context, val location: File?)
  * - Offer local files for Camera app to write images to.
  * - Save and delete local files to app-specific location
  * - File is later retrieved via its URI using a content resolver
- *
  */
 class LocalImageRepo(
     val context: Context
@@ -32,17 +31,23 @@ class LocalImageRepo(
     /**
      * Store local files using File references provided by this app's FileProvider.
      * FileProvider's configuration only manages files located in paths described
-     * by {@link xml/paths.xml}.
-     *
+     * by
+     * > xml/paths.xml
      * This FileProvider has made following paths available.
      */
     // Matches path from Context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
     val LOCALFOLDER_PICS =
-        LocalFolder(context, context.getExternalFilesDir(Environment.DIRECTORY_PICTURES))
+        LocalFolder(
+            context,
+            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        )
 
     // Matches path from Context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
     val LOCALFOLDER_DOWNLOADS =
-        LocalFolder(context, context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS))
+        LocalFolder(
+            context,
+            context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+        )
 
 
     /**
@@ -56,7 +61,7 @@ class LocalImageRepo(
             val tmpFile = File.createTempFile(UUID.randomUUID().toString(), null, folder.location)
             val uri =
                 FileProvider.getUriForFile(context, context.applicationContext.packageName, tmpFile)
-            Timber.d("Make temp file uri $uri in packge ${context.applicationContext.packageName}");
+            Timber.d("Make temp file uri $uri in packge ${context.applicationContext.packageName}")
             return uri
         } catch (e: IOException) {
             Timber.w("Unable to create temp file: ${e.message}")
@@ -66,7 +71,7 @@ class LocalImageRepo(
     }
 
     /**
-     * @param uri Uri returned by{@link #makeFileUri}
+     * @param uri Uri returned by [makeFileUri]
      */
     fun deleteLocal(uri: Uri): Boolean =
         context.contentResolver.delete(uri, null, null) > 0
@@ -74,17 +79,17 @@ class LocalImageRepo(
     fun isExist(uri: Uri): Boolean {
         try {
             val sizeBytes = context.contentResolver.openFileDescriptor(uri, "r")?.statSize
-            Timber.d("File $uri is of size $sizeBytes");
+            Timber.d("File $uri is of size $sizeBytes")
             return if (sizeBytes == null) false else sizeBytes > 0
         } catch (e: FileNotFoundException) {
-            Timber.w("This file doesn't exist: $uri");
+            Timber.w("This file doesn't exist: $uri")
             return false
         }
     }
 
     /**
      * Called in the IO thread
-     * @param srcUri:Uri produced by {@link #makeTempFileUri}
+     * @param srcUri:Uri produced by [makeFileUri]
      * @return URI of the newly saved file. Else null if unable to save file
      */
     suspend fun saveLocal(srcUri: Uri, folder: LocalFolder): Uri? {

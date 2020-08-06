@@ -5,12 +5,12 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 
 import androidx.test.platform.app.InstrumentationRegistry
-import junit.framework.Assert.*
 import kotlinx.coroutines.runBlocking
 import org.chenhome.dailybrainy.repo.BrainyRepo
 import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.repo.local.*
 import org.junit.After
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -80,10 +80,10 @@ class BrainyRepoTest {
 
     @Test
     fun testRepoGetters() {
-        val myGames = repo.myGames.blockingObserve()
-        assertEquals(2, myGames?.size)
+        val myGames = db.gameDAO.getByPlayer(user.currentPlayerGuid)
+        assertEquals(2, myGames.size)
         listOf(g1.guid, g2.guid).forEach {
-            assertEquals("myGames ${myGames}", 1, myGames?.count { game ->
+            assertEquals("myGames ${myGames}", 1, myGames.count { game ->
                 game.guid == it
             })
         }
@@ -105,7 +105,7 @@ class BrainyRepoTest {
             assertEquals(user.currentPlayerGuid, newGame?.playerGuid)
             assertEquals(Challenge.Step.GEN_IDEA, newGame?.currentStep)
             assertTrue(newGame?.sessionStartMillis!! > 0L)
-            assert(newGame?.pin.isNotEmpty())
+            assert(newGame.pin.isNotEmpty())
         }
     }
 
