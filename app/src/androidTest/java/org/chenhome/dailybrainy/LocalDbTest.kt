@@ -26,7 +26,7 @@ class LocalDbTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     lateinit var appContext: Context
-    lateinit var db: BrainyDb
+    lateinit var db: LocalDb
 
     fun insertUniqueGame(): Game {
         val game = egGame.copy(guid = genGuid())
@@ -41,7 +41,7 @@ class LocalDbTest {
 
         // In memory fixture
         db = Room.inMemoryDatabaseBuilder(
-            appContext, BrainyDb::class.java
+            appContext, LocalDb::class.java
         ).build()
 
     }
@@ -132,6 +132,11 @@ class LocalDbTest {
         // insert and get
         assertTrue(db.gameDAO.insert(egGame) > 0)
         assertEquals(egGame, db.gameDAO.get(egGame.guid))
+
+        // test LiveData
+        val games = db.gameDAO.getLive(egGame.guid).blockingObserve()
+        assert(games != null && games.size == 1)
+        assertEquals(egGame, games?.get(0))
 
         // update
         val modified = egGame.copy(pin = "4322", currentStep = Challenge.Step.GEN_SKETCH)

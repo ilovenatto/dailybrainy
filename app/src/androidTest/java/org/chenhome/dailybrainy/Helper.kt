@@ -44,8 +44,18 @@ val egChall2 = Challenge(
     "asdf"
 )
 val egGame =
-    Game(genGuid(), egChall1.guid, egPlayerGuid, "234", 0, Challenge.Step.GEN_IDEA, null, null)
+    Game(
+        genGuid(),
+        null,
+        egChall1.guid,
+        egPlayerGuid,
+        "234",
+        0,
+        Challenge.Step.GEN_IDEA,
+        null,
+        null
+    )
 
-val egPlayer = PlayerSession(genGuid(), egPlayerGuid, egGame.guid, "Sammy", "foobar")
+val egPlayer = PlayerSession(genGuid(), null, egPlayerGuid, egGame.guid, "Sammy", "foobar")
 val egIdea =
-    Idea(genGuid(), egGame.guid, egPlayerGuid, Idea.Origin.BRAINSTORM, 0, "foobar", "asdfadf")
+    Idea(genGuid(), null, egGame.guid, egPlayerGuid, Idea.Origin.BRAINSTORM, 0, "foobar", "asdfadf")

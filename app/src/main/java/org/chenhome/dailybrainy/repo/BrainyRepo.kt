@@ -1,31 +1,97 @@
 package org.chenhome.dailybrainy.repo
 
 import android.content.Context
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ProcessLifecycleOwner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.chenhome.dailybrainy.repo.local.*
+import org.chenhome.dailybrainy.repo.remote.RemoteDb
 import timber.log.Timber
 
 /**
  * Repository facade over local database and local image filestore. Local database
  * is backed by network store.
  *
- * Offers references to data. The data must be refreshed by calling [refresh]
- * which will run off the main thread.
+ * As soon as the singleton is instantiated, data will begin to be synced to the local db.
+ * On instantiation, remote and local db listeners will be registered and cause data to be synced
+ * between these sources.
  */
-class BrainyRepo (
-    val context:Context
+class BrainyRepo
+private constructor(
+    val context: Context
 ) {
     /**
      * Private
      */
-    private val db: BrainyDb = BrainyDb.getDb(context)
+    private val db: LocalDb = LocalDb.singleton(context)
     private val user: UserRepo = UserRepo(context)
+    private val remoteDb: RemoteDb = RemoteDb // singleton
 
     // necessary for INSERT, UPDATE, DELETE.
     // GET queries are done on background thread if they return LiveData
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+
+
+    /**
+     * On instantiation of the singleton, register remote db listners.
+     * This will cause the data to be downloaded from remote db and written to local db
+     */
+    init {
+        // Registration can be done on UI thread.
+        Timber.d("Listening for remote db changes")
+        remoteDb.registerRemoteObservers(context, ProcessLifecycleOwner.get())
+    }
+
+
+    /**
+     * Access singleton with
+     * `BrainyRepo.singleton(context)`
+     */
+    companion object : SingletonHolder<BrainyRepo, Context>({
+        BrainyRepo(it)
+    })
+
+    /**
+     * Registers listeners of the local database for the target game.
+     * When the local data changes, update the remote database.
+     *
+     * Also register listeners of the remote game for changes and update the local db.
+     *
+     * Observers are registered lifecycle owner starts and deregistered when lifecycle is destroyed.
+     *
+     * @param gameGuid Game to look for in local database and observe for changes
+     * @param gameLifecycle the currently running game's lifecycle
+     */
+    fun registerGameObservers(gameGuid: String, gameLifecycle: LifecycleOwner) {
+        Timber.d("Registering observers for local game state changes for game $gameGuid")
+        // Listen to current game
+        db.gameDAO.getLive(gameGuid)
+            .observe(gameLifecycle,
+                Observer { games ->
+                    if (games == null || games.size != 1) {
+                        Timber.w("Unexpected games returned. There should be 1 game matching $gameGuid")
+                        return@Observer
+                    }
+                    // write to remote. Can be done on UI thread
+                    val game = games.get(0)
+                    Timber.d("Current game has changed, $game. Updating remote db.")
+                    remoteDb.updateRemote(game)
+                })
+
+        // Listen to ideas
+        db.ideaDAO.getNewIdeasByGameLive(gameGuid)
+            .observe(gameLifecycle,
+                Observer { ideas ->
+                    remoteDb.addRemote(ideas)
+                })
+
+
+        // listen to remote game state, such as the game and ideas generated within that game
+        remoteDb.registerRemoteGameObservers(context, gameGuid, gameLifecycle)
+    }
 
     /**
      * @return challenge that this player hasn't encountered before. Null if one can't be found
@@ -47,27 +113,6 @@ class BrainyRepo (
         }
     }
 
-
-    /**
-     * Refreshes local entities data from Firebase database. Does not refresh images, which live in Firebase Firestore
-     *
-     * @return number of entities that were updated or inserted.
-     */
-    // TODO: 8/3/20 utlize `RemoteDb {` to intialize local db
-    /*
-    suspend fun refresh() : Int {
-        return withContext(scope.coroutineContext) {
-            // register remote data listeners if not yet registered
-            if ()
-
-            // refresh data
-            var numUpdated = 0
-
-
-        }
-    }*/
-
-
     /**
      * @return whether repo deleted local database, and user preferences
      */
@@ -83,7 +128,7 @@ class BrainyRepo (
      * @return newly inserted Idea with its properties in the correct state. Else null
      * if insertion failed
      */
-    suspend fun insertIdea(gameGuid: String, idea: Idea): Idea? {
+    suspend fun insertLocalIdea(gameGuid: String, idea: Idea): Idea? {
         return withContext(scope.coroutineContext) {
             val corrected = idea.copy(
                 gameGuid = gameGuid,
@@ -106,7 +151,7 @@ class BrainyRepo (
      * @param challengeGuid existing challenge in db
      * @return Game instance representing newly inserted game in db. Null if insertion failed
      */
-    suspend fun insertNewGame(challengeGuid: String): Game? {
+    suspend fun insertLocalGame(challengeGuid: String): Game? {
         return withContext(scope.coroutineContext) {
             val challenge = db.challengeDAO.get(challengeGuid)
             if (challenge == null) {
@@ -114,14 +159,15 @@ class BrainyRepo (
                 return@withContext null
             }
             val game = Game(
-                genGuid(),
-                challengeGuid,
-                user.currentPlayerGuid,
-                genPin(),
-                System.currentTimeMillis(),
-                Challenge.Step.GEN_IDEA,
-                null,
-                null
+                guid = genGuid(),
+                fireGuid = null,
+                challengeGuid = challengeGuid,
+                playerGuid = user.currentPlayerGuid,
+                pin = genPin(),
+                sessionStartMillis = System.currentTimeMillis(),
+                currentStep = Challenge.Step.GEN_IDEA,
+                storyTitle = null,
+                storyDesc = null
             )
             db.gameDAO.insert(game).run {
                 if (this == 0L) {
@@ -132,5 +178,13 @@ class BrainyRepo (
             return@withContext game
         }
     }
+
+    /**
+     * @param game Game with new state
+     * @return whether local update succeeded
+     */
+    suspend fun updateLocalGame(game: Game): Boolean =
+        db.gameDAO.update(game) == 1
+
 
 }

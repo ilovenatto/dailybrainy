@@ -3,13 +3,14 @@ package org.chenhome.dailybrainy.repo.local
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import org.chenhome.dailybrainy.repo.SingletonHolder
 
 
 /**
  * Local DB for all DailyBrainy database objects
  *
  * Local DB acts as the cache for data that is either prepopulated from app resources
- * or from the network. The respository will consider BrainyDb the source of truth.
+ * or from the network. The respository will consider LocalDb the source of truth.
  */
 @Database(
     version = 1,
@@ -22,44 +23,19 @@ import androidx.room.*
     exportSchema = false
 )
 @TypeConverters(Converters::class)
-abstract class BrainyDb : RoomDatabase() {
+abstract class LocalDb : RoomDatabase() {
     abstract val playerSessionDAO: PlayerSessionDAO
     abstract val gameDAO: GameDAO
     abstract val challengeDAO: ChallengeDAO
     abstract val ideaDAO: IdeaDAO
 
-    // Singletone instance
-    companion object {
-        @Volatile
-        var INSTANCE: BrainyDb? = null
-
-        /**
-         * Singleton getter
-         */
-        fun getDb(
-            context: Context
-        ): BrainyDb {
-            val tmpInst = INSTANCE
-            // use smart cast to check it's null and of the type, BrainyDb
-            if (tmpInst != null) {
-                return tmpInst
-            }
-
-
-            // Synchronize on static companion object (there's only one)
-            synchronized(this) {
-                val inst = Room.databaseBuilder(
-                    context.applicationContext,
-                    BrainyDb::class.java,
-                    "dailybrainy_db"
-                )
-                  //  .addCallback(BrainyDbCallback(context))
-                    .build()
-                INSTANCE = inst
-                return inst
-            }
-        }
-    }
+    companion object : SingletonHolder<LocalDb, Context>({
+        Room.databaseBuilder(
+            it.applicationContext,
+            LocalDb::class.java,
+            "dailybrainy_db"
+        ).build()
+    })
 }
 
 
@@ -140,6 +116,9 @@ interface GameDAO {
     @Query("select * from game where guid=:guid")
     fun get(guid: String): Game?
 
+    @Query("select * from game where guid=:guid")
+    fun getLive(guid: String): LiveData<List<Game>>
+
     @Query("select * from game where playerGuid=:playerGuid")
     fun getByPlayerLive(playerGuid: String): LiveData<List<Game>>
 
@@ -186,4 +165,12 @@ interface IdeaDAO {
 
     @Query("select * from idea where origin=:origin and gameGuid=:gameGuid")
     fun getByOriginLive(gameGuid: String, origin: Idea.Origin): LiveData<List<Idea>>
+
+    @Query("select count(guid) from idea where fireGuid=:fireGuid")
+    fun countByFireGuid(fireGuid: String): Int
+
+    // An idea that is only in local db is one where the remote guid, fireGuid, is null.
+    @Query("select * from idea where gameGuid=:gameGuid and fireGuid is null")
+    fun getNewIdeasByGameLive(gameGuid: String): LiveData<List<Idea>>
+
 }

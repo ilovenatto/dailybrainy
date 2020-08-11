@@ -146,6 +146,10 @@ data class Game(
     @PrimaryKey
     val guid: String,
 
+    // Firebase Guid. If set, it means that this entity exists in the remote db.
+    // Used to identify entities that have not yet been inserted in the remote db
+    val fireGuid: String?,
+
     // Foreign key to parent Challenge
     val challengeGuid: String,
 
@@ -165,7 +169,7 @@ data class Game(
 
 ) {
     // No-arg constructur so that Firebase can create this POJO
-    constructor() : this("", "", "", "", null, Challenge.Step.GEN_IDEA, null, null)
+    constructor() : this("", null, "", "", "", null, Challenge.Step.GEN_IDEA, null, null)
 }
 
 /**
@@ -175,19 +179,28 @@ data class Game(
 data class PlayerSession(
     @PrimaryKey
     val guid: String,
+
+    // Firebase Guid. If set, it means that this entity exists in the remote db.
+    // Used to identify entities that have not yet been inserted in the remote db
+    val fireGuid: String?,
+
     val playerGuid: String, // There is one player per device.
     val gameGuid: String,
     val name: String,
     val imgFn: String
 ) {
     // No-arg constructur so that Firebase can create this POJO
-    constructor() : this("", "", "", "", "")
+    constructor() : this("", null, "", "", "", "")
 }
 
 @Entity
 data class Idea(
     @PrimaryKey
     val guid: String,
+
+    // Firebase Guid. If set, it means that this entity exists in the remote db.
+    // Used to identify entities that have not yet been inserted in the remote db
+    var fireGuid: String?,
 
     // Foreign key to its parent, Game
     val gameGuid: String,
@@ -211,7 +224,7 @@ data class Idea(
     }
 
     // No-arg constructur so that Firebase can create this POJO
-    constructor() : this("", "", "", Origin.BRAINSTORM, 0, null, null)
+    constructor() : this("", null, "", "", Origin.BRAINSTORM, 0, null, null)
 
     // Which part of the game that the idea orginated
     enum class Origin {

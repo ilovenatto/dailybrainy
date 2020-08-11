@@ -1,6 +1,10 @@
 package org.chenhome.dailybrainy.repo.remote
 
 import android.content.Context
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.OnLifecycleEvent
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
@@ -9,8 +13,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.chenhome.dailybrainy.repo.local.BrainyDb
 import org.chenhome.dailybrainy.repo.local.Challenge
+import org.chenhome.dailybrainy.repo.local.Game
+import org.chenhome.dailybrainy.repo.local.Idea
+import org.chenhome.dailybrainy.repo.local.LocalDb
 import timber.log.Timber
 
 
@@ -21,9 +27,14 @@ import timber.log.Timber
  * Used to read/write entities to remote backend
  */
 object RemoteDb {
+    private val fireDb: FirebaseDatabase =
+        Firebase.database // default database for this FirebaseApp
 
-    // Entity handlers
-    private val entityHandlers: List<EntityHandler> = mutableListOf()
+    private var challengeObserver: RemoteChallengeObserver? = null
+//    lateinit private var gameObserver: RemoteGameObserver
+
+    // Can be reinitialized for every new game that comes along
+    private var ideaObserver: RemoteIdeaObserver? = null
 
     /**
      * Register handlers if they are not yet registered. Can be called multiple times.
@@ -35,87 +46,215 @@ object RemoteDb {
      * @return whether registration was executed and successful. Else if registration failed or
      * not executed.
      */
-    fun registerHandlers(context: Context): Boolean {
-        if (entityHandlers.isNotEmpty()) {
-            Timber.w("Entity handlers already registered. Ignoring this call")
-            return false
-        }
-        entityHandlers.plus(
-            ChallengeHandler(context).register()
-        )
-        return true
+    fun registerRemoteObservers(context: Context, lifecycleOwner: LifecycleOwner) {
+        lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
+            @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+            fun register() {
+                if (challengeObserver == null) {
+                    challengeObserver = RemoteChallengeObserver(context).register()
+                }
+//                gameObserver = gameObserver ?: RemoteGameObserver(context).register()
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+            fun deregister() {
+                challengeObserver?.deregister()
+//                gameObserver?.deregister()
+            }
+        })
     }
 
-    fun deregisterHandlers() {
-        entityHandlers.forEach {
-            it.deregister()
+
+    /**
+     * Registers observers for the current game. Observers lives tied to Game's lifecycle.
+     *
+     * @param context
+     * @param gameGuid
+     * @param gameLifecycleOwner
+     */
+    fun registerRemoteGameObservers(
+        context: Context,
+        gameGuid: String,
+        gameLifecycleOwner: LifecycleOwner
+    ) {
+        gameLifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
+            @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+            fun register() {
+                ideaObserver =
+                    RemoteIdeaObserver(context, gameGuid).register() as RemoteIdeaObserver
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+            fun deregister() {
+                ideaObserver?.let {
+                    it.deregister()
+                }
+            }
+        })
+    }
+
+    internal interface Registrable {
+        fun register(): Registrable
+        fun deregister()
+    }
+
+
+    /**
+     * Updates remote database with new state
+     * @param game
+     */
+    fun updateRemote(game: Game?) {
+        Timber.d("Local game has changed. Updating remote game to $game")
+        fireDb.getReference(DbFolder.GAMES.path)
+            .setValue(game, DatabaseReference.CompletionListener { error, ref ->
+                error?.let {
+                    Timber.w("Unable to update $game to location $ref. Got $error")
+                }
+            })
+    }
+
+    /**
+     * Add ideas to remote db. Mark each idea with its remote guid before pushing to the remote db.
+     * Each idea will live in a folder, where the folder name is the game's guid
+     *
+     * `<firebasedb-root>/ideas/<game guid>/<idea guid>/..idea..`
+     *
+     * Set the [Idea.fireGuid] field to be the value
+     * of the newly pushed remote entity's key, [DatabaseReference.getKey]
+     *
+     * @param ideas
+     */
+    fun addRemote(ideas: List<Idea>?) {
+        ideas?.forEach { local ->
+            val childRef = fireDb.getReference(DbFolder.IDEAS.path)
+                .child(local.gameGuid)
+                .push()
+            local.fireGuid = childRef.key
+            Timber.d("Pushing local idea to remote game folder ${local.gameGuid} : $local")
+            childRef.setValue(local, DatabaseReference.CompletionListener { error, ref ->
+                error?.let {
+                    Timber.w("Unable to add local idea $local, got error $error")
+                }
+            })
         }
     }
 }
 
 
+enum class DbFolder(val path: String) {
+    GAMES("games"),
+    CHALLENGES("challenges"),
+    PLAYERS("players"),
+    IDEAS("ideas")
+}
+
 // TODO: 8/3/20 write handler for Idea, Player, Game
+
 /**
- * Handler for [Challenge]
+ * Handler for [Idea]
  */
-class ChallengeHandler(context: Context) : EntityHandler(context) {
-    override fun getPath() = "challenges"
-    override fun isExistInDb(guid: String): Boolean =
-        localDb.challengeDAO.get(guid) == null
+class RemoteIdeaObserver(context: Context, val gameGuid: String) : RemoteEntityObserver(context) {
+    override fun getPath() = DbFolder.IDEAS.path + "/$gameGuid"
 
     override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
         scope.launch {
-            snapshot.getValue<Challenge>()?.let { handleChanged(it) }
+            snapshot.getValue<Idea>()?.let { handleChanged(it) }
         }
     }
 
     override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
         scope.launch {
-            snapshot.getValue<Challenge>()?.let { handleAdd(it) }
+            snapshot.getValue<Idea>()?.let { handleAdd(it, snapshot.key) }
         }
     }
 
     override fun onChildRemoved(snapshot: DataSnapshot) {
         scope.launch {
-            snapshot.getValue<Challenge>()?.let { handleRemove(it) }
+            snapshot.getValue<Idea>()?.let { handleRemove(it) }
         }
     }
 
-    private suspend fun handleRemove(entity: Challenge) {
+    private suspend fun handleRemove(entity: Idea) {
         withContext(scope.coroutineContext) {
-            if (localDb.challengeDAO.delete(entity.guid) != 1) {
+            Timber.d("Removing idea $entity")
+            if (localDb.ideaDAO.delete(entity.guid) != 1) {
                 Timber.w("Unable to delete $entity")
             }
         }
     }
 
-    private suspend fun handleAdd(entity: Challenge) {
+    private suspend fun handleAdd(
+        entity: Idea,
+        fireGuid: String?
+    ) {
         withContext(scope.coroutineContext) {
-            if (isExistInDb(entity.guid)) {
-                localDb.challengeDAO.delete(entity.guid)
+            if (fireGuid != null && localDb.ideaDAO.countByFireGuid(fireGuid) == 0) {
+                Timber.d("Inserting new remote Idea to local db, $entity, with fireGuid $fireGuid")
+                localDb.ideaDAO.insert(entity)
+            } else {
+                Timber.d("Encountered idea that's already been inserted $entity with fireGuid $fireGuid")
             }
-            localDb.challengeDAO.insert(entity)
         }
     }
 
-    private suspend fun handleChanged(entity: Challenge) {
+    private suspend fun handleChanged(entity: Idea) {
         withContext(scope.coroutineContext) {
-            if (isExistInDb(entity.guid)) {
-                localDb.challengeDAO.update(entity)
+            val existing = localDb.ideaDAO.get(entity.guid)
+            existing?.let {
+                if (localDb.ideaDAO.update(entity) == 0) {
+                    Timber.d("Change existing $existing to new state $entity")
+                } else {
+                    Timber.w("Unable to update entity to new state $entity")
+                }
             }
         }
     }
 }
 
 /**
- * Base class for ChildEventListeners that handle DailyBrainy entities read and writes
- * to the local db.
+ * Handler for [Challenge]
  */
-abstract class EntityHandler(context: Context) : ChildEventListener {
+class RemoteChallengeObserver(val context: Context) : RemoteDb.Registrable, ValueEventListener {
+    override fun onCancelled(error: DatabaseError) = Timber.d("Ignoring onCancelled $error")
+    override fun onDataChange(snapshot: DataSnapshot) {
+        CoroutineScope(Dispatchers.IO).launch {
+            snapshot.getValue<Map<String, Challenge>>()?.let {
+                Timber.d("Observer instance $this got ${it.size} challenges")
+                val dao = LocalDb.singleton(context).challengeDAO
+                it.forEach { entry ->
+                    if (dao.insert(entry.value) == 0L) {
+                        Timber.w("Unable to insert challenge $entry.value at key ${entry.key} ")
+                    } else {
+                        Timber.d("Observer instance ${this.hashCode()}, Inserting $entry.value")
+                    }
+                }
+            }
+        }
+    }
+
+    override fun register(): RemoteChallengeObserver {
+        Timber.d("Registered ${this.javaClass.name}")
+        Firebase.database.getReference(DbFolder.CHALLENGES.path)
+            .addListenerForSingleValueEvent(this)
+        return this
+    }
+
+    override fun deregister() {
+        Timber.d("Deregistered ${this.javaClass.name}")
+        Firebase.database.getReference(DbFolder.CHALLENGES.path)
+            .removeEventListener(this)
+    }
+}
+
+/**
+ * Base class for ChildEventListeners that handle DailyBrainy entities read and writes
+ * to the local db. Provides convenience member variables and default interface implementations
+ */
+abstract class RemoteEntityObserver(context: Context) : RemoteDb.Registrable, ChildEventListener {
     private val firebaseDb: FirebaseDatabase =
         Firebase.database // default database for this FirebaseApp
     val scope = CoroutineScope(Dispatchers.IO)
-    val localDb = BrainyDb.getDb(context)
+    val localDb = LocalDb.singleton(context)
 
     // DatabaseReference to entity being handled.
     private val dbRef: DatabaseReference by lazy {
@@ -123,16 +262,16 @@ abstract class EntityHandler(context: Context) : ChildEventListener {
     }
 
     // @return itself to allow chain calls
-    fun register(): EntityHandler {
-        Timber.d("Adding listener $this")
+    override fun register(): RemoteEntityObserver {
+        Timber.d("Adding RemoteObserver ${this.javaClass.name}")
         dbRef.addChildEventListener(this)
         return this
     }
 
     // @return itself to allow chain calls
-    fun deregister(): EntityHandler {
+    override fun deregister() {
+        Timber.d("Removing RemoteObserver ${this.javaClass.name}")
         dbRef.removeEventListener(this)
-        return this
     }
 
     /**
@@ -141,16 +280,22 @@ abstract class EntityHandler(context: Context) : ChildEventListener {
     // Firebase database path to this entity
     abstract fun getPath(): String
 
-    // @return whether entity with guid already exists in local db or not
-    abstract fun isExistInDb(guid: String): Boolean
+    // Subclass can override if they want, otherwise they conveninetly can ignore implementing this method
+    override fun onCancelled(error: DatabaseError) =
+        Timber.w("Ignoring onCancelled with error ${error.message}")
 
-    // Ignoring
-    override fun onCancelled(error: DatabaseError) {
-        Timber.w("Handler cancelled with error ${error.message}")
-    }
-
-    override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+    // Subclass can override if they want, otherwise they conveninetly can ignore implementing this method
+    override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) =
         Timber.d("Ignoring on child moved")
-    }
 
+    // Subclass can override if they want, otherwise they conveninetly can ignore implementing this method
+    override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) =
+        Timber.d("Ignoring on child moved")
+
+    // Subclass can override if they want, otherwise they conveninetly can ignore implementing this method
+    override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) =
+        Timber.d("Ignoring on child moved")
+
+    // Subclass can override if they want, otherwise they conveninetly can ignore implementing this method
+    override fun onChildRemoved(snapshot: DataSnapshot) = Timber.d("Ignoring on child moved")
 }

@@ -3,35 +3,40 @@
     "challenge-my-party": {
       "title": "It's My Party!",
       "hmw": "How might we hold our friend’s birthday party safely such that they feel celebrated?",
-      "hmwDesc": "Sed egestas bibendum nisi. Morbi eleifend enim in tristique aliquet. Ut tincidunt dui in orci vehicula, ac imperdiet nunc lacinia",
+      "desc": "Sed egestas bibendum nisi. Morbi eleifend enim in tristique aliquet. Ut tincidunt dui in orci vehicula, ac imperdiet nunc lacinia",
       "imgFn": "challenges/challenge_birthday.png",
-      "guid": "challenge-my-party"
+      "guid": "challenge-my-party",
+      "category": "CHALLENGE"
     },
     "challenge-too-swole": {
       "title": "Too Swole",
       "hmw": "How might kids exercise and stay active safely during shelter-in-place?",
-      "hmwDesc": "Sed egestas bibendum nisi. Morbi eleifend enim in tristique aliquet. Ut tincidunt dui in orci vehicula, ac imperdiet nunc lacinia",
+      "desc": "Sed egestas bibendum nisi. Morbi eleifend enim in tristique aliquet. Ut tincidunt dui in orci vehicula, ac imperdiet nunc lacinia",
       "imgFn": "challenges/challenge_swole.png",
-      "guid": "challenge-twoo-swole"
+      "guid": "challenge-twoo-swole",
+      "category": "CHALLENGE"
     },
     "challenge-family-cookout": {
       "title": "Family Cookout",
       "hmw": "How might the whole family participate in planning and cooking Sunday dinner?",
-      "hmwDesc": "Sed egestas bibendum nisi. Morbi eleifend enim in tristique aliquet. Ut tincidunt dui in orci vehicula, ac imperdiet nunc lacinia",
+      "desc": "Sed egestas bibendum nisi. Morbi eleifend enim in tristique aliquet. Ut tincidunt dui in orci vehicula, ac imperdiet nunc lacinia",
       "imgFn": "challenges/challenge_cookout.png",
-      "guid": "challenge-family-cookout"
-    }
-  },
-  "lessons": {
+      "guid": "challenge-family-cookout",
+      "category": "CHALLENGE"
+    },
     "lesson-brainstorming": {
       "title": "Brainstorming",
-      "descrip": "Learn how you can solve Daily Brainies by brainstorming ideas.",
+      "guid": "lesson-brainstorming",
+      "category": "LESSON",
+      "desc": "Learn how you can solve Daily Brainies by brainstorming ideas.",
       "youtubeUrl": "https://youtu.be/rdWFp7FFkWU",
       "imgFn": "challenges/lesson_brainstorm.png"
     },
     "lesson-affinity-mapping": {
       "title": "Affinity Mapping",
-      "descrip": "Learn how to organize ideas that you've brainstormed and move forward with your designs.",
+      "guid": "lesson-affinity-mapping",
+      "category": "LESSON",
+      "desc": "Learn how to organize ideas that you've brainstormed and move forward with your designs.",
       "youtubeUrl": "https://youtu.be/dnSjwFzlHXU",
       "imgFn": "challenges/lesson_affinitymap.png"
     }

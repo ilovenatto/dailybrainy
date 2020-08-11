@@ -17,21 +17,22 @@ class UserRepo(val context: Context) {
 
 
     /**
-     * @return 0 if no currentGameId is set
+     * @return null if no currentGameId is set
      */
-    var currentGameId: Long
+    var currentGameGuid: String?
         get() {
-            return pref.getLong(KEY_CURRENT_GAMEID, 0)
+            return pref.getString(KEY_CURRENT_GAMEID, "")
         }
-        set(gameId) {
+        set(gameGuid) {
             pref
                 .edit()
-                .putLong(KEY_CURRENT_GAMEID, gameId)
+                .putString(KEY_CURRENT_GAMEID, gameGuid)
                 .apply()
         }
 
     var currentPlayerGuid: String = ""
         get() {
+            // Generate for this user
             if (field.isEmpty()) {
                 // get from pref
                 val newGuid = genGuid()
