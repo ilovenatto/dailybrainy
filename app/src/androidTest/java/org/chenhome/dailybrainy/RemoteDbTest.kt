@@ -2,7 +2,9 @@ package org.chenhome.dailybrainy
 
 import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.firebase.database.FirebaseDatabase
@@ -35,10 +37,17 @@ class RemoteDbTest {
     lateinit var localDb: LocalDb
     lateinit var remoteDb: FirebaseDatabase
     lateinit var brainyRepo: BrainyRepo
+    lateinit var lifecycleOwner: TestLifecycleOwner
+
+    class TestLifecycleOwner : LifecycleOwner {
+        val reg = LifecycleRegistry(this)
+        override fun getLifecycle(): Lifecycle = reg
+    }
 
     @Before
     fun before() {
         appContext = InstrumentationRegistry.getInstrumentation().targetContext
+
         fireDb = RemoteDb
         localDb = LocalDb.singleton(appContext)
         remoteDb = Firebase.database
@@ -46,6 +55,8 @@ class RemoteDbTest {
 
         localDb.clearAllTables()
         localDb.challengeDAO.insert(egChall1)
+        lifecycleOwner = TestLifecycleOwner()
+        lifecycleOwner.reg.currentState = Lifecycle.State.INITIALIZED
     }
 
     @After
@@ -57,8 +68,15 @@ class RemoteDbTest {
     fun testAdd() {
         val c1 = egChall1
         runBlocking {
-            val game = brainyRepo.insertLocalGame(c1.guid)
-            brainyRepo.registerGameObservers(game?.guid!!, ProcessLifecycleOwner.get())
+            //val game = brainyRepo.insertLocalGame(c1.guid)
+            val game = egGame.copy(challengeGuid = c1.guid)
+            localDb.gameDAO.insert(game)
+
+            brainyRepo.registerGameObservers(game.guid, lifecycleOwner)
+            lifecycleOwner.reg.currentState = Lifecycle.State.CREATED
+            delay(500)
+            // fire event
+            lifecycleOwner.reg.currentState = Lifecycle.State.STARTED
 
             delay(3000)
             assertEquals(6, localDb.challengeDAO.getAll().size)
@@ -89,17 +107,15 @@ class RemoteDbTest {
                     .getByOriginLive(game.guid, Idea.Origin.BRAINSTORM).blockingObserve()?.size
             )
 
-            assertEquals(game, localDb.gameDAO.get(game.guid))
-
             // update local game
             game.currentStep = Challenge.Step.VIEW_STORYBOARD
             game.sessionStartMillis = System.currentTimeMillis()
             game.storyDesc = "foasba"
             game.storyTitle = "dfasdf"
-            Timber.d("updating game $game")
             assert(brainyRepo.updateLocalGame(game))
-            delay(5000)
-            Timber.d("finished waiting")
+            delay(3000)
+
+            lifecycleOwner.reg.currentState = Lifecycle.State.DESTROYED
         }
     }
 

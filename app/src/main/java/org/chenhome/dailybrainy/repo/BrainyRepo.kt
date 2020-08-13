@@ -66,28 +66,20 @@ private constructor(
      * @param gameLifecycle the currently running game's lifecycle
      */
     fun registerGameObservers(gameGuid: String, gameLifecycle: LifecycleOwner) {
-        Timber.d("Registering observers for local game state changes for game $gameGuid")
+        Timber.d("Registering observers for local game $gameGuid")
         // Listen to current game
         db.gameDAO.getLive(gameGuid)
-            .observe(gameLifecycle,
-                Observer { games ->
-                    if (games == null || games.size != 1) {
-                        Timber.w("Unexpected games returned. There should be 1 game matching $gameGuid")
-                        return@Observer
-                    }
-                    // write to remote. Can be done on UI thread
-                    val game = games.get(0)
-                    Timber.d("Current game has changed, $game. Updating remote db.")
-                    remoteDb.updateRemote(game)
-                })
+            .observe(gameLifecycle, Observer { game ->
+                Timber.d("Observed local game changed to: $game")
+                remoteDb.updateRemote(game)
+            })
 
         // Listen to ideas
         db.ideaDAO.getNewIdeasByGameLive(gameGuid)
-            .observe(gameLifecycle,
-                Observer { ideas ->
-                    remoteDb.addRemote(ideas)
-                })
-
+            .observe(gameLifecycle, Observer { ideas ->
+                Timber.d("Observed ${ideas.size} new ideas for game $gameGuid")
+                remoteDb.addRemote(ideas)
+            })
 
         // listen to remote game state, such as the game and ideas generated within that game
         remoteDb.registerRemoteGameObservers(context, gameGuid, gameLifecycle)
@@ -184,7 +176,7 @@ private constructor(
      * @return whether local update succeeded
      */
     suspend fun updateLocalGame(game: Game): Boolean =
-        db.gameDAO.update(game) == 1
-
-
+        withContext(scope.coroutineContext) {
+            return@withContext db.gameDAO.update(game) == 1
+        }
 }

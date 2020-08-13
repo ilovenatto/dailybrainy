@@ -135,8 +135,7 @@ class LocalDbTest {
 
         // test LiveData
         val games = db.gameDAO.getLive(egGame.guid).blockingObserve()
-        assert(games != null && games.size == 1)
-        assertEquals(egGame, games?.get(0))
+        assertEquals(egGame, games)
 
         // update
         val modified = egGame.copy(pin = "4322", currentStep = Challenge.Step.GEN_SKETCH)

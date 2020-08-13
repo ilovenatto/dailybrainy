@@ -117,7 +117,7 @@ interface GameDAO {
     fun get(guid: String): Game?
 
     @Query("select * from game where guid=:guid")
-    fun getLive(guid: String): LiveData<List<Game>>
+    fun getLive(guid: String): LiveData<Game>
 
     @Query("select * from game where playerGuid=:playerGuid")
     fun getByPlayerLive(playerGuid: String): LiveData<List<Game>>
@@ -170,7 +170,7 @@ interface IdeaDAO {
     fun countByFireGuid(fireGuid: String): Int
 
     // An idea that is only in local db is one where the remote guid, fireGuid, is null.
-    @Query("select * from idea where gameGuid=:gameGuid and fireGuid is null")
+    @Query("select * from idea where gameGuid=:gameGuid and fireGuid is null or fireGuid=''")
     fun getNewIdeasByGameLive(gameGuid: String): LiveData<List<Idea>>
 
 }
