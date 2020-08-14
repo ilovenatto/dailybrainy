@@ -125,6 +125,9 @@ interface GameDAO {
     @Query("select * from game where playerGuid=:playerGuid")
     fun getByPlayer(playerGuid: String): List<Game>
 
+    @Query("select count(guid) from game where fireGuid=:fireGuid")
+    fun countByFireGuid(fireGuid: String): Int
+
 }
 
 @Dao
@@ -146,6 +149,10 @@ interface PlayerSessionDAO {
 
     @Query("select * from playersession where gameGuid=:gameGuid")
     fun getByGameLive(gameGuid: String): LiveData<List<PlayerSession>>
+
+    @Query("select count(guid) from playersession where fireGuid=:fireGuid")
+    fun countByFireGuid(fireGuid: String): Int
+
 }
 
 

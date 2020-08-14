@@ -3,9 +3,9 @@ package org.chenhome.dailybrainy.repo
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ProcessLifecycleOwner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.chenhome.dailybrainy.repo.local.*
 import org.chenhome.dailybrainy.repo.remote.RemoteDb
@@ -34,18 +34,6 @@ private constructor(
     // GET queries are done on background thread if they return LiveData
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
-
-    /**
-     * On instantiation of the singleton, register remote db listners.
-     * This will cause the data to be downloaded from remote db and written to local db
-     */
-    init {
-        // Registration can be done on UI thread.
-        Timber.d("Listening for remote db changes")
-        remoteDb.registerRemoteObservers(context, ProcessLifecycleOwner.get())
-    }
-
-
     /**
      * Access singleton with
      * `BrainyRepo.singleton(context)`
@@ -67,18 +55,39 @@ private constructor(
      */
     fun registerGameObservers(gameGuid: String, gameLifecycle: LifecycleOwner) {
         Timber.d("Registering observers for local game $gameGuid")
-        // Listen to current game
+        // Listen to current local game's state
         db.gameDAO.getLive(gameGuid)
             .observe(gameLifecycle, Observer { game ->
-                Timber.d("Observed local game changed to: $game")
-                remoteDb.updateRemote(game)
+                if (game == null) {
+                    remoteDb.deleteRemoteGame(gameGuid)
+                    return@Observer
+                }
+                if (game.fireGuid.isNullOrEmpty()
+                    && db.gameDAO.get(game.guid) == null
+                ) {
+                    Timber.d("Observed new local game ${game.guid}")
+                    remoteDb.insertRemote(game)
+                } else {
+                    Timber.d("Observed existing local game that has changed: ${game.guid}")
+                    remoteDb.updateRemote(game)
+                }
             })
 
-        // Listen to ideas
+        // Listen to new local ideas
         db.ideaDAO.getNewIdeasByGameLive(gameGuid)
             .observe(gameLifecycle, Observer { ideas ->
-                Timber.d("Observed ${ideas.size} new ideas for game $gameGuid")
-                remoteDb.addRemote(ideas)
+                scope.launch {
+                    Timber.d("Observed ${ideas.size} new local ideas for game $gameGuid")
+                    remoteDb.addRemote(ideas)
+                    // update the local ideas with new fireGuid.
+                    ideas.forEach { local ->
+                        Timber.d("Updating local idea with fireGuid ${local.fireGuid}")
+                        if (db.ideaDAO.update(local) == 0) {
+                            Timber.w("Unable to update local idea with fireGuid")
+                        }
+                    }
+                }
+
             })
 
         // listen to remote game state, such as the game and ideas generated within that game
@@ -86,22 +95,31 @@ private constructor(
     }
 
     /**
+     * Register observers for remote challenges (all challenges) and games (owned by any player)
+     *
+     * @param lifecycleOwner Observers created (ON_CREATE) and destroyed (ON_DESTROY) based on this lifecycle
+     */
+    fun registerRemoteChallengeAndGameObservers(lifecycleOwner: LifecycleOwner) {
+        Timber.d("Observing remote challenges and games")
+        remoteDb.registerRemoteObservers(context, lifecycleOwner)
+    }
+
+
+    /**
      * @return challenge that this player hasn't encountered before. Null if one can't be found
      */
-    suspend fun getNeverPlayed(category: Challenge.Category): Challenge? {
-        return withContext(scope.coroutineContext) {
-            val encountered = mutableSetOf<String>()
-            db.gameDAO.getByPlayer(user.currentPlayerGuid).forEach {
-                encountered.add(it.challengeGuid)
+    fun getNeverPlayed(category: Challenge.Category): Challenge? {
+        val encountered = mutableSetOf<String>()
+        db.gameDAO.getByPlayer(user.currentPlayerGuid).forEach {
+            encountered.add(it.challengeGuid)
+        }
+        try {
+            return db.challengeDAO.getAll().first {
+                !encountered.contains(it.guid)
+                        && it.category == category
             }
-            try {
-                return@withContext db.challengeDAO.getAll().first {
-                    !encountered.contains(it.guid)
-                            && it.category == category
-                }
-            } catch (e: NoSuchElementException) {
-                return@withContext null
-            }
+        } catch (e: NoSuchElementException) {
+            return null
         }
     }
 
@@ -179,4 +197,5 @@ private constructor(
         withContext(scope.coroutineContext) {
             return@withContext db.gameDAO.update(game) == 1
         }
+
 }
