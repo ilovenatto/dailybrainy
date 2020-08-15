@@ -1,18 +1,18 @@
 package org.chenhome.dailybrainy.repo
 
 import android.content.Context
-import org.chenhome.dailybrainy.repo.local.PlayerSession
-import org.chenhome.dailybrainy.repo.local.genGuid
 import timber.log.Timber
+
+// Constants
+private const val KEY_CURRENT_GAMEID = "CURRENT_GAMEID"
+private val KEY_PLAYER_GUID = PlayerSession::guid.name
+private val PREF_NAME = UserRepo::class.qualifiedName
+
 
 /**
  * Information related to current user. Some info stored in application local preferences
  */
 class UserRepo(val context: Context) {
-
-    private val KEY_CURRENT_GAMEID = "CURRENT_GAMEID"
-    private val KEY_PLAYER_GUID = PlayerSession::guid.name
-    private val PREF_NAME = UserRepo::class.qualifiedName
     private val pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
 

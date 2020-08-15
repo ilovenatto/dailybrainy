@@ -1,4 +1,4 @@
-package org.chenhome.dailybrainy.repo.local
+package org.chenhome.dailybrainy.repo.image
 
 import android.content.Context
 import android.net.Uri

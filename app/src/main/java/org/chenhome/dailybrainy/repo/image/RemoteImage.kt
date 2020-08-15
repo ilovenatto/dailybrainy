@@ -1,4 +1,4 @@
-package org.chenhome.dailybrainy.repo.remote
+package org.chenhome.dailybrainy.repo.image
 
 import android.content.Context
 import android.net.Uri
@@ -77,7 +77,6 @@ class RemoteImage(
      * method [getPath()](https://developers.google.com/android/reference/com/google/firebase/storage/StorageReference#getPath())
      */
     suspend fun getValidStorageRef(fullRemotePath: String): StorageReference? {
-        // TODO: 7/14/20 does this need to be wrapped in IO thread?
         return withContext(scope.coroutineContext) {
             suspendCoroutine<StorageReference?> { cont ->
                 val ref = fstorage.getReference(fullRemotePath)

@@ -1,11 +1,13 @@
-package org.chenhome.dailybrainy.repo.local
+package org.chenhome.dailybrainy.repo
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import java.security.SecureRandom
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+/**
+ * Data objects that align exactly with how the data is
+ * stored in the remote database, Firebase.
+ */
 
 /**
  * Globally unique id that won't collide w/ other ids. Used in remote database as identifier
@@ -34,23 +36,21 @@ fun genPin(): String {
 /**
  * Static set of challenges.
  */
-@Entity
 data class Challenge(
-    // Globally unique identifier
-    @PrimaryKey
     val guid: String,
-
     val imgFn: String,
     val title: String,
     val desc: String,
     val category: Category,
-
     val hmw: String?, // only set for Challenge category
     val youtubeUrl: String? // only set for Lesson category
 
 ) {
     // No-arg constructor so that Firebase can create this POJO
-    constructor() : this("", "", "", "", Category.CHALLENGE, null, null)
+    constructor() : this(
+        "", "", "", "",
+        Category.CHALLENGE, null, null
+    )
 
     enum class Category {
         LESSON,// lesson, where there's generally an associated youtube video
@@ -141,14 +141,10 @@ data class Challenge(
 }
 
 
-@Entity
 data class Game(
-    @PrimaryKey
-    val guid: String,
-
     // Firebase Guid. If set, it means that this entity exists in the remote db.
     // Used to identify entities that have not yet been inserted in the remote db
-    val fireGuid: String?,
+    val guid: String,
 
     // Foreign key to parent Challenge
     val challengeGuid: String,
@@ -169,38 +165,48 @@ data class Game(
 
 ) {
     // No-arg constructur so that Firebase can create this POJO
-    constructor() : this("", null, "", "", "", null, Challenge.Step.GEN_IDEA, null, null)
+    constructor() : this(
+        "", "", "", "", 0L,
+        Challenge.Step.GEN_IDEA, null, null
+    )
+
+    // Convenience constructor for an empty object that has all its required fields set
+    constructor(guid: String, challengeGuid: String, playerGuid: String) : this(
+        guid = guid,
+        challengeGuid = challengeGuid,
+        playerGuid = playerGuid,
+        pin = genPin(),
+        sessionStartMillis = 0L,
+        currentStep = Challenge.Step.GEN_IDEA,
+        storyTitle = null,
+        storyDesc = null
+    )
 }
 
-/**
- * @param imgFn full filepath name to PlayerSession's avatar img
- */
-@Entity
+
 data class PlayerSession(
-    @PrimaryKey
     val guid: String,
-
-    // Firebase Guid. If set, it means that this entity exists in the remote db.
-    // Used to identify entities that have not yet been inserted in the remote db
-    val fireGuid: String?,
-
-    val playerGuid: String, // There is one player per device.
+    val userGuid: String, // There is one application user per device.
     val gameGuid: String,
     val name: String,
-    val imgFn: String
+    var imgFn: String?
 ) {
     // No-arg constructur so that Firebase can create this POJO
-    constructor() : this("", null, "", "", "", "")
+    constructor() : this("", "", "", "", null)
+
+    // Convenience constructor for an empty object that has all its required fields set
+    constructor(guid: String, userGuid: String, gameGuid: String, name: String) : this(
+        guid = guid,
+        userGuid = userGuid,
+        gameGuid = gameGuid,
+        name = name,
+        imgFn = null
+    )
+
 }
 
-@Entity
 data class Idea(
-    @PrimaryKey
     val guid: String,
-
-    // Firebase Guid. If set, it means that this entity exists in the remote db.
-    // Used to identify entities that have not yet been inserted in the remote db
-    var fireGuid: String?,
 
     // Foreign key to its parent, Game
     val gameGuid: String,
@@ -219,12 +225,26 @@ data class Idea(
 
 
 ) {
+    // No-arg constructur so that Firebase can create this POJO
+    constructor() : this(
+        "", "", "",
+        Origin.BRAINSTORM, 0, null, null
+    )
+
+    // Convenience constructor for an empty object that has all its required fields set
+    constructor(guid: String, gameGuid: String, playerGuid: String, origin: Origin) : this(
+        guid = guid,
+        gameGuid = gameGuid,
+        playerGuid = playerGuid,
+        origin = origin,
+        votes = 0,
+        title = null,
+        imgFn = null
+    )
+
     fun vote() {
         votes += 1
     }
-
-    // No-arg constructur so that Firebase can create this POJO
-    constructor() : this("", null, "", "", Origin.BRAINSTORM, 0, null, null)
 
     // Which part of the game that the idea orginated
     enum class Origin {
@@ -234,4 +254,11 @@ data class Idea(
         STORY_SOLUTION,
         STORY_RESOLUTION
     }
+}
+
+enum class DbFolder(val path: String) {
+    GAMES("games"),
+    CHALLENGES("challenges"),
+    PLAYERSESSION("playersessions"),
+    IDEAS("ideas")
 }

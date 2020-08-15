@@ -1,14 +1,15 @@
 package org.chenhome.dailybrainy
 
-import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Observer
 import androidx.test.ext.junit.runners.AndroidJUnit4
-
 import androidx.test.platform.app.InstrumentationRegistry
+import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.chenhome.dailybrainy.repo.BrainyRepo
-import org.chenhome.dailybrainy.repo.UserRepo
-import org.chenhome.dailybrainy.repo.local.*
+import org.chenhome.dailybrainy.repo.*
+import org.chenhome.dailybrainy.repo.helper.nukeRemoteDb
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -16,55 +17,49 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import timber.log.Timber
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 @RunWith(AndroidJUnit4::class)
 class BrainyRepoTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    lateinit var appContext: Context
-    lateinit var repo: BrainyRepo
-    lateinit var user: UserRepo
-    lateinit var db: LocalDb
-
-    val c1: Challenge = egChall1
-    val c2: Challenge = egChall2
-    lateinit var l1: Challenge
-
-    lateinit var g1: Game
-    lateinit var g2: Game
+    private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+    private val repo = BrainyRepo.singleton(appContext)
+    private val user = UserRepo(appContext)
+    private val owner = TestLifecycleOwner()
+    private val fireDb = FirebaseDatabase.getInstance()
 
     @Before
     fun before() {
-        appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        repo = BrainyRepo.singleton(appContext)
-        user = UserRepo(appContext)
-        db = LocalDb.singleton(appContext)
-
-        assertTrue(db.challengeDAO.insert(c1) > 0)
-        assertTrue(db.challengeDAO.insert(c2) > 0)
-        l1 = egChall2.copy(guid = genGuid(), category = Challenge.Category.LESSON)
-        assertTrue(db.challengeDAO.insert(l1) > 0)
-
-        g1 = egGame.copy(playerGuid = user.currentPlayerGuid)
-        g2 = egGame.copy(playerGuid = user.currentPlayerGuid, guid = genGuid())
-        assertTrue(db.gameDAO.insert(g1) > 0)
-        assertTrue(db.gameDAO.insert(g2) > 0)
-
+        owner.reg.currentState = Lifecycle.State.INITIALIZED
     }
 
     @After
     fun after() {
-        db.clearAllTables()
         user.clearUserPrefs()
+        owner.reg.currentState = Lifecycle.State.DESTROYED
+        nukeRemoteDb()
     }
 
     @Test
-    fun testNuke() {
+    fun testChallenges() {
         runBlocking {
-            repo.nukeEverything()
-            assertEquals(0, db.challengeDAO.getAll().size)
+            assertNotNull(repo.challenges)
+            owner.reg.currentState = Lifecycle.State.STARTED
+
+            suspendCoroutine<Unit> { cont ->
+                repo.challenges.observe(owner, Observer<List<Challenge>> {
+                    Timber.d("Found ${it.size} challenges")
+                    assertNotNull(it)
+                    assertEquals(5, it.size)
+                    assert(it[0].hmw?.isNotEmpty()!!)
+                    cont.resume(Unit)
+                })
+            }
         }
+
     }
 
     @Test
@@ -80,62 +75,66 @@ class BrainyRepoTest {
     }
 
     @Test
-    fun testRepoGetters() {
-        val myGames = db.gameDAO.getByPlayer(user.currentPlayerGuid)
-        assertEquals(2, myGames.size)
-        listOf(g1.guid, g2.guid).forEach {
-            assertEquals("myGames ${myGames}", 1, myGames.count { game ->
-                game.guid == it
+    fun testGameStub() {
+        runBlocking {
+
+
+            // add game
+            val gameRef = fireDb.getReference(DbFolder.GAMES.path)
+                .push()
+            val game = Game(gameRef.key!!, "", "")
+            suspendCoroutine<Unit> {
+                gameRef.setValue(game) { e, _ ->
+                    assertNull(e)
+                    it.resume(Unit)
+                }
+            }
+
+            // register observers
+            owner.reg.currentState = Lifecycle.State.STARTED
+
+            // add session
+            val sessionRef = fireDb.getReference(DbFolder.PLAYERSESSION.path)
+                .child(game.guid)
+                .push()
+            val session =
+                PlayerSession(sessionRef.key!!, user.currentPlayerGuid, game.guid, "Samuel")
+            suspendCoroutine<Unit> {
+                sessionRef.setValue(session) { e, _ ->
+                    assertNull(e)
+                    Timber.d("Added session1")
+                    it.resume(Unit)
+                }
+            }
+
+            val sessionRef2 = fireDb.getReference(DbFolder.PLAYERSESSION.path)
+                .child(game.guid)
+                .push()
+            val session2 =
+                PlayerSession(sessionRef2.key!!, user.currentPlayerGuid, game.guid, "Samuel2")
+            suspendCoroutine<Unit> {
+                sessionRef2.setValue(session2) { e, _ ->
+                    assertNull(e)
+                    Timber.d("Added session2")
+                    it.resume(Unit)
+                }
+            }
+            // observe gamestubs and wait for new session
+            repo.gameStubs.observe(owner, Observer<List<GameStub>> {
+                Timber.d("observed list ${it.size}")
+                it.forEach { stub ->
+                    assertEquals(game, stub.game)
+                    if (stub.playerSession.guid == session.guid) assertEquals(
+                        session,
+                        stub.playerSession
+                    )
+                    if (stub.playerSession.guid == session2.guid) assertEquals(
+                        session2,
+                        stub.playerSession
+                    )
+                }
             })
-        }
-        // today's stuff
-        runBlocking {
-            val lesson = repo.getNeverPlayed(Challenge.Category.LESSON)
-            assertNotNull(lesson)
-            assertEquals(l1, lesson)
-            assertNotNull(repo.getNeverPlayed(Challenge.Category.CHALLENGE))
-        }
-    }
-
-    @Test
-    fun testInsertGame() {
-        runBlocking {
-            val newGame = repo.insertLocalGame(c1.guid)
-            assertNotNull(newGame)
-            assertEquals(c1.guid, newGame?.challengeGuid)
-            Timber.d("Got game $newGame")
-            //assertEquals(user.currentPlayerGuid, newGame?.playerGuid)
-            assertEquals(Challenge.Step.GEN_IDEA, newGame?.currentStep)
-            assertTrue(newGame?.sessionStartMillis!! > 0L)
-            assert(newGame.pin.isNotEmpty())
-        }
-    }
-
-    @Test
-    fun testUpdateGameAndAddIdea() {
-        runBlocking {
-            val newGame = repo.insertLocalGame(c1.guid)
-            assertNotNull(newGame)
-
-            // check
-            val game = db.gameDAO.get(newGame!!.guid)
-            assertEquals(newGame, game)
-            assertEquals(Challenge.Step.GEN_IDEA, game?.currentStep)
-
-            // update
-            game?.currentStep = Challenge.Step.VOTE_IDEA
-            assert(db.gameDAO.update(game!!) > 0)
-
-            // add idea
-            val idea =
-                repo.insertLocalIdea(newGame.guid, egIdea.copy(origin = Idea.Origin.BRAINSTORM))
-            assertNotNull(idea)
-
-            // get ideas
-            val res =
-                db.ideaDAO.getByOriginLive(newGame.guid, Idea.Origin.BRAINSTORM).blockingObserve()
-            assertEquals(1, res!!.size)
-            assertEquals(idea, res.get(0))
+            delay(3000)
         }
     }
 }
