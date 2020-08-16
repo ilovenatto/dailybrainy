@@ -51,7 +51,7 @@ class FullGameRepo(
      *
      * @param idea
      */
-    fun insert(idea: Idea) = fullGameObs.IdeaObserver().insert(idea)
+    fun insertRemote(idea: Idea) = fullGameObs.IdeaObserver().insertRemote(idea)
 
     /**
      * Insert into [FullGame] instance managed by [FullGameObserver].
@@ -64,29 +64,39 @@ class FullGameRepo(
      *
      * @param playerSession
      */
-    fun insert(playerSession: PlayerSession) =
-        fullGameObs.PlayerSessionObserver().insert(playerSession)
+    fun insertRemote(playerSession: PlayerSession) =
+        fullGameObs.PlayerSessionObserver().insertRemote(playerSession)
 
-    // TODO: 8/14/20 update
     /**
-     * Updates the mutable parts of the [FullGame], which are
-     * - [FullGame.ideas]
-     * - [FullGame.game]
+     * Remotely updates Game.
      *
-     * The list of actual ideas are updated when user adds one locally or
-     * ideas are added remotely by other players. When added or removed remotely, the [IdeaObserver]
-     * adds/removes them to/from [FullGame].
-     *
-     * Clients use [insert] to add locally to the [FullGame] instance; the method will also add the new idea remotely.
-     *
-     * The [FullGame.players] are updated when players are added locally
-     * and removed remotely (in which case the observer will update the [FullGame.players] state.
-     *
-     * The [FullGame.challenge] is immutable.
-     *
-     * @param fullGame
+     * @param player Game should be from the [FullGame] instance. It should have its [Game.guid] set and
+     * [Game.gameGuid] set to this Game's guid. This method will check for that.
      */
-//    fun update(fullGame: FullGame)
+    fun updateRemote(game: Game) {
+        fullGameObs.GameObserver().updateRemote(game)
+    }
+
+
+    /**
+     * Remotely updates Idea.
+     *
+     * @param player Idea should be from the [FullGame] instance. It should have its [Idea.guid] set and
+     * [Idea.gameGuid] set to this Game's guid. This method will check for that.
+     */
+    fun updateRemote(idea: Idea) {
+        fullGameObs.IdeaObserver().updateRemote(idea)
+    }
+
+    /**
+     * Remotely updates PlayerSession.
+     *
+     * @param player PlayerSession should be from the [FullGame] instance. It should have its [PlayerSession.guid] set and
+     * [PlayerSession.gameGuid] set to this Game's guid. This method will check for that.
+     */
+    fun updateRemote(player: PlayerSession) {
+        fullGameObs.PlayerSessionObserver().updateRemote(player)
+    }
 
 
 }

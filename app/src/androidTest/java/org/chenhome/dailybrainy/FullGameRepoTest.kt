@@ -38,11 +38,13 @@ class FullGameRepoTest {
     lateinit var idea: Idea
     lateinit var session: PlayerSession
     lateinit var challenge: Challenge
+    lateinit var userId: String
 
     @Before
     fun before() {
         Timber.d("@before")
         lifecycleOwner.reg.currentState = Lifecycle.State.INITIALIZED
+        userId = UserRepo(appContext).currentPlayerGuid
 
         runBlocking {
             suspendCoroutine<Unit> {
@@ -60,7 +62,7 @@ class FullGameRepoTest {
             suspendCoroutine<Unit> {
                 // create game with idea, challenge and session
                 val gameRef = fireDb.getReference(DbFolder.GAMES.path).push()
-                game = Game(gameRef.key!!, challenge.guid, UserRepo(appContext).currentPlayerGuid)
+                game = Game(gameRef.key!!, challenge.guid, userId)
                 gameRef.setValue(game) { _, _ ->
                     it.resume(Unit)
                 }
@@ -72,7 +74,7 @@ class FullGameRepoTest {
                     .child(game.guid)
                     .push()
                 idea = Idea(
-                    ideaRef.key!!, game.guid, UserRepo(appContext).currentPlayerGuid,
+                    ideaRef.key!!, game.guid, userId,
                     Idea.Origin.SKETCH
                 )
                 ideaRef.setValue(idea) { _, _ ->
@@ -87,7 +89,7 @@ class FullGameRepoTest {
                     .push()
                 session = PlayerSession(
                     playerRef.key!!,
-                    UserRepo(appContext).currentPlayerGuid,
+                    userId,
                     game.guid,
                     "smauel3"
                 )
@@ -117,7 +119,7 @@ class FullGameRepoTest {
             Timber.d("Started test")
             suspendCoroutine<Unit> { cont ->
                 fullGameRepo.fullGame.observe(lifecycleOwner, Observer { fullGame ->
-                    Timber.d("Observed fullgame $fullGame")
+                    Timber.d("Observed ${fullGame.ideas.size} ideas and ${fullGame.players.size} sessions")
                     assertNotNull(fullGame)
                     assertEquals(game, fullGame.game)
                     assertEquals(challenge, fullGame.challenge)
@@ -129,6 +131,121 @@ class FullGameRepoTest {
                 })
             }
             Timber.d("End test")
+        }
+    }
+
+    @Test
+    fun testInsert() {
+        runBlocking {
+            val fullGameRepo = FullGameRepo(appContext, game.guid, lifecycleOwner)
+            lifecycleOwner.reg.currentState = Lifecycle.State.STARTED
+            delay(3000)
+
+            // insert and wait
+            val idea2 = Idea("", game.guid, userId, Idea.Origin.SKETCH)
+            fullGameRepo.insertRemote(idea2)
+            fullGameRepo.insertRemote(idea2)
+
+            // insert and wait
+            val player2 = PlayerSession("", userId, game.guid, "foobar")
+            fullGameRepo.insertRemote(player2)
+            fullGameRepo.insertRemote(player2)
+
+            delay(3000)
+
+            // then observe
+            suspendCoroutine<Unit> { cont ->
+                fullGameRepo.fullGame.observe(lifecycleOwner, Observer { fullGame ->
+                    Timber.d("Observed ${fullGame.ideas.size} ideas and ${fullGame.players.size} sessions")
+                    assertEquals(3, fullGame.ideas.size)
+                    assertEquals(idea, fullGame.ideas[0])
+
+                    assertEquals(3, fullGame.players.size)
+                    assertEquals(session, fullGame.players[0])
+
+                    cont.resume(Unit)
+                })
+            }
+        }
+    }
+
+    @Test
+    fun testUpdatePlayer() {
+        runBlocking {
+            val fullGameRepo = FullGameRepo(appContext, game.guid, lifecycleOwner)
+            lifecycleOwner.reg.currentState = Lifecycle.State.STARTED
+            delay(3000)
+
+            // get session from fullGame
+            val fullGame = fullGameRepo.fullGame.blockingObserve()
+                ?.let {
+                    assertNotNull(it.players[0])
+                    val session1 = it.players[0]
+                    session1.imgFn = "fancy new image"
+                    fullGameRepo.updateRemote(session1)
+                    delay(3000)
+
+                    // check result
+                    fullGameRepo.fullGame.blockingObserve()
+                        ?.let {
+                            assertNotNull(it.players[0])
+                            assertEquals(session1, it.players[0])
+                        }
+                }
+        }
+    }
+
+
+    @Test
+    fun testUpdateIdea() {
+        runBlocking {
+            val fullGameRepo = FullGameRepo(appContext, game.guid, lifecycleOwner)
+            lifecycleOwner.reg.currentState = Lifecycle.State.STARTED
+            delay(3000)
+
+            // get from fullGame
+            val fullGame = fullGameRepo.fullGame.blockingObserve()
+                ?.let {
+                    assertNotNull(it.ideas[0])
+                    val idea1 = it.ideas[0]
+                    idea1.vote()
+                    fullGameRepo.updateRemote(idea1)
+                    delay(3000)
+
+                    // check result
+                    fullGameRepo.fullGame.blockingObserve()
+                        ?.let {
+                            assertNotNull(it.ideas[0])
+                            assertEquals(idea1, it.ideas[0])
+                        }
+                }
+        }
+    }
+
+
+    @Test
+    fun testUpdateGame() {
+        runBlocking {
+            val fullGameRepo = FullGameRepo(appContext, game.guid, lifecycleOwner)
+            lifecycleOwner.reg.currentState = Lifecycle.State.STARTED
+            delay(3000)
+
+            // get from fullGame
+            val fullGame = fullGameRepo.fullGame.blockingObserve()
+                ?.let {
+                    val game1 = it.game
+                    assertNotNull(game1)
+                    it.game.currentStep = Challenge.Step.VOTE_SKETCH
+                    fullGameRepo.updateRemote(game1)
+                    delay(3000)
+
+                    // check result
+                    fullGameRepo.fullGame.blockingObserve()
+                        ?.let {
+                            assertNotNull(it.game)
+                            assertEquals(game1, it.game)
+                        }
+                }
         }
     }
 

@@ -6,7 +6,6 @@ import com.google.firebase.database.*
 import com.google.firebase.database.ktx.getValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.repo.*
 import timber.log.Timber
 
@@ -21,8 +20,7 @@ internal class FullGameObserver(val gameGuid: String, val context: Context) {
     var _fullGame: MutableLiveData<FullGame> =
         MutableLiveData(FullGame())
 
-    // TODO: 8/14/20 inject BrainyRepo, UserRepo
-    private val userRepo = UserRepo(context)
+    // TODO: 8/15/20 inject brainyrepo
     private val brainyRepo = BrainyRepo.singleton(context)
     private val fireDb =
         FirebaseDatabase.getInstance()
@@ -55,7 +53,7 @@ internal class FullGameObserver(val gameGuid: String, val context: Context) {
 
         override fun onDataChange(snapshot: DataSnapshot) {
             snapshot.getValue<Game>()?.let { game ->
-                Timber.d("Game $gameGuid changed to $game. Notifying observers/")
+                Timber.d("Remote game $gameGuid changed to $game.")
                 _fullGame.value?.game = game
 
                 // Set challenge
@@ -70,6 +68,30 @@ internal class FullGameObserver(val gameGuid: String, val context: Context) {
 
         fun register() = fireRef.addValueEventListener(this)
         fun deregister() = fireRef.removeEventListener(this)
+
+
+        fun updateRemote(game: Game) {
+            if (game.guid.isNotEmpty()
+                && game.guid == gameGuid
+            ) {
+                // Update remotely at /game/<gameGuid>
+                val update = fireRef.child(game.guid)
+                // check that it's there
+                update.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onCancelled(error: DatabaseError) = Timber.d("$error")
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        snapshot.getValue<Game>()?.let {
+                            update.setValue(game) { error, ref ->
+                                error?.let {
+                                    Timber.w("Unable to update game at $ref")
+                                } ?: Timber.d("Updated game ${game.guid} at $ref")
+                            }
+                        }
+                            ?: Timber.w("Unable to update a non-existent game, ${game.guid} at $update")
+                    }
+                })
+            }
+        }
     }
 
     /**
@@ -106,7 +128,7 @@ internal class FullGameObserver(val gameGuid: String, val context: Context) {
                 _fullGame.value?.ideas
                     ?.firstOrNull { changed.guid == it.guid }
                     ?.let { match ->
-                        Timber.d("Replacing $match with $changed")
+                        Timber.d("Remote copy changed. Replacing local ${match.guid} with remote ${changed.guid}")
                         _fullGame.value?.ideas?.remove(match)
                         _fullGame.value?.ideas?.add(changed)
                         _fullGame.notifyObserver()
@@ -124,26 +146,43 @@ internal class FullGameObserver(val gameGuid: String, val context: Context) {
             }
         }
 
-        fun insert(idea: Idea) {
-            _fullGame.value?.ideas?.firstOrNull { idea.guid == it.guid } ?: run {
-                _fullGame.value?.ideas?.add(idea)
-                _fullGame.notifyObserver()
+        /**
+         * @param idea The [Idea.guid] will not be set for locally created Ideas. So just blindly add to
+         * remote database.
+         */
+        fun insertRemote(idea: Idea) {
+            // Add remotely to /ideas/<gameGuid>/<new idea>
+            val created = fireRef.push()
+            created.key?.let {
+                val copy = idea.copy(guid = created.key!!)
+                created.setValue(copy) { error, ref ->
+                    error?.let {
+                        Timber.w("Unable to add to $ref, idea $copy, got $error")
+                    } ?: Timber.d("Inserted idea ${copy.guid} at $ref")
+                }
+            } ?: Timber.w("Unable to insert idea to location ${created}")
+        }
 
-                // Check that it doesn't already exist
-                fireRef.child(idea.guid)
-                    .addListenerForSingleValueEvent(object :
-                        ValueEventListener {
-                        override fun onCancelled(error: DatabaseError) =
-                            Timber.d(error.message)
-
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            snapshot.getValue<Idea>() ?: run {
-                                // Add remotely to /ideas/<gameGuid>/<new idea>
-                                Timber.d("Adding idea $idea to remote location ${snapshot.key}")
-                                fireRef.push().setValue(idea)
+        fun updateRemote(idea: Idea) {
+            if (idea.guid.isNotEmpty()
+                && idea.gameGuid == gameGuid
+            ) {
+                // Update remotely at /ideas/<gameGuid>/<idea guid>
+                val update = fireRef.child(idea.guid)
+                // check that it's there
+                update.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onCancelled(error: DatabaseError) = Timber.d("$error")
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        snapshot.getValue<Idea>()?.let {
+                            update.setValue(idea) { error, ref ->
+                                error?.let {
+                                    Timber.w("Unable to update idea at $ref")
+                                } ?: Timber.d("Updated session ${idea.guid} at $ref")
                             }
                         }
-                    })
+                            ?: Timber.w("Unable to update a non-existent idea, ${idea.guid} at $update")
+                    }
+                })
             }
         }
     }
@@ -184,7 +223,7 @@ internal class FullGameObserver(val gameGuid: String, val context: Context) {
                 _fullGame.value?.players
                     ?.firstOrNull { changed.guid == it.guid }
                     ?.let { match ->
-                        Timber.d("Replacing $match with $changed")
+                        Timber.d("Remote session ${changed.guid} changed. Replacing local version")
                         _fullGame.value?.players?.remove(match)
                         _fullGame.value?.players?.add(changed)
                         _fullGame.notifyObserver()
@@ -203,34 +242,49 @@ internal class FullGameObserver(val gameGuid: String, val context: Context) {
         /**
          * Insert session into [FullGame] instance and update remote db.
          *
-         * @param playerSession
+         * @param session local playerSession where [PlayerSession.guid] is not set
          */
-        fun insert(playerSession: PlayerSession) {
-            // Add to fullGame
-            _fullGame.value?.players?.firstOrNull { it.guid == playerSession.guid } ?: run {
-                _fullGame.value?.players?.add(playerSession)
-                _fullGame.notifyObserver()
-            }
-
-            scope.launch {
-                // Add child to /playersessions/<gameGuid>/
-                fireRef.child(playerSession.guid)
-                    // check /playersessions/<gameGuid>/<playerGuid> doesn't already exist
-                    .addListenerForSingleValueEvent(object :
-                        ValueEventListener {
-                        override fun onCancelled(error: DatabaseError) =
-                            Timber.d(error.message)
-
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            snapshot.getValue<PlayerSession>() ?: run {
-                                Timber.d("Inserting player session $playerSession for game $gameGuid")
-                                fireRef.push().setValue(playerSession)
-                            }
-                        }
-                    })
-            }
+        fun insertRemote(session: PlayerSession) {
+            // Add remotely to /playersessions/<gameGuid>/<new session>
+            val created = fireRef.push()
+            created.key?.let {
+                val copy = session.copy(guid = created.key!!)
+                created.setValue(copy) { error, ref ->
+                    error?.let {
+                        Timber.w("Unable to add to $ref, session $copy. Got $error")
+                    } ?: Timber.d("Inserting session at $ref")
+                }
+            } ?: Timber.w("Unable to insert session to location ${created}")
         }
 
-
+        /**
+         * Updates remote copy of this [PlayerSession]
+         *
+         * @param player
+         */
+        fun updateRemote(player: PlayerSession) {
+            if (player.guid.isNotEmpty()
+                && player.gameGuid == gameGuid
+            ) {
+                // Update remotely at /playersessions/<gameGuid>/<session guid>
+                val update = fireRef.child(player.guid)
+                // check that it's there
+                update.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onCancelled(error: DatabaseError) = Timber.d("$error")
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        snapshot.getValue<PlayerSession>()?.let {
+                            update.setValue(player) { error, ref ->
+                                error?.let {
+                                    Timber.w("Unable to update session at $ref")
+                                } ?: Timber.d("Updated session ${player.guid} at $ref")
+                            }
+                        }
+                            ?: Timber.w("Unable to update a non-existent session, ${player.guid} at $update")
+                    }
+                })
+            }
+        }
     }
+
+
 }
