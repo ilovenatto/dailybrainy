@@ -1,8 +1,12 @@
 apply plugin: 'com.android.application'
+
 // For Firebase Storage
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+
+apply plugin: 'kotlin-kapt'
+apply plugin: 'dagger.hilt.android.plugin'
 
 android {
     compileSdkVersion 29
@@ -14,7 +18,9 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "org.chenhome.dailybrainy.CustomTestRunner"
     }
 
     buildTypes {
@@ -23,40 +29,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    // Java 1.8 For hilt
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
 }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    apply plugin: 'kotlin-kapt'
-
-
-    // Glide, remote images
-    implementation 'com.github.bumptech.glide:glide:4.11.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
-
-    // Firebase database
-    implementation 'com.google.firebase:firebase-database-ktx:19.3.1'
-
-    // Firebase Storage (for images)
-    implementation 'com.google.firebase:firebase-storage-ktx:19.1.1'
-
-    //
-    // Room
-    //
-    def room_version = "2.2.5"
-    implementation "androidx.room:room-runtime:$room_version"
-    kapt "androidx.room:room-compiler:$room_version"
-
-    // optional - Kotlin Extensions and Coroutines support for Room
-    implementation "androidx.room:room-ktx:$room_version"
-
-
-    //
-    // CORE
-    // =======================
-    //
-    // Timber
-    implementation "com.jakewharton.timber:timber:4.7.1"
 
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -71,10 +54,37 @@ dependencies {
     // testing
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    // testing  UI testing
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     // testing - For InstantTaskExecutor
     androidTestImplementation 'androidx.arch.core:core-testing:2.0.0'
 
+
+
+    // Glide
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+
+    // Firebase database
+    implementation 'com.google.firebase:firebase-database-ktx:19.3.1'
+
+    // Firebase Storage (for images)
+    implementation 'com.google.firebase:firebase-storage-ktx:19.1.1'
+
+    // Timber
+    implementation "com.jakewharton.timber:timber:4.7.1"
+
+    // Hilt
+    implementation "com.google.dagger:hilt-android:2.28.3-alpha"
+    kapt "com.google.dagger:hilt-android-compiler:2.28.3-alpha"
+    implementation 'androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha02'
+    kapt 'androidx.hilt:hilt-compiler:1.0.0-alpha02'
+
+
+    // For Hilt testing
+    // For instrumented tests.
+    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.28.3-alpha'
+    kaptAndroidTest 'com.google.dagger:hilt-android-compiler:2.28.3-alpha'
 
 }

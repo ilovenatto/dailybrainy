@@ -52,8 +52,9 @@ internal class ChallengeObserver : ValueEventListener {
  *
  * Add these new sessions to [_gameStubs] and expose.
  */
+
 internal class GameStubObserver(val userGuid: String) : ValueEventListener {
-    // TODO: 8/14/20 inject user repo
+
     private val fireDb = FirebaseDatabase.getInstance()
     private val fireRef = fireDb
         .getReference(DbFolder.PLAYERSESSION.path)

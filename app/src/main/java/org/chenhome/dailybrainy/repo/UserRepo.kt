@@ -1,7 +1,9 @@
 package org.chenhome.dailybrainy.repo
 
 import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import timber.log.Timber
+import javax.inject.Inject
 
 // Constants
 private const val KEY_CURRENT_GAMEID = "CURRENT_GAMEID"
@@ -12,9 +14,8 @@ private val PREF_NAME = UserRepo::class.qualifiedName
 /**
  * Information related to current user. Some info stored in application local preferences
  */
-class UserRepo(val context: Context) {
+class UserRepo @Inject constructor(@ApplicationContext val context: Context) {
     private val pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-
 
     /**
      * @return null if no currentGameId is set
