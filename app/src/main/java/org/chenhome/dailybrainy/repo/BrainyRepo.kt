@@ -10,6 +10,9 @@ import timber.log.Timber
 /**
  * Singleton that offers observable domain objects like [Challenge] to clients. These domain objects will
  * notify their observers when their state has changed.
+ *b9
+ * Get singleton by:
+ * `BrainyRepo.singleton(context)`
  *
  * This singleton's setup and teardown lifecycle is dictated by [ProcessLifecycleOwner]. Data is only available
  * after the lifecycle has begun.
@@ -23,7 +26,6 @@ private constructor(
      * Private
      */
     private val lifecycleOwner = ProcessLifecycleOwner.get()
-    private val user: UserRepo = UserRepo(context)
 
     /**
      * Remote data being observed
@@ -31,7 +33,7 @@ private constructor(
     private val challengeObs =
         ChallengeObserver()
     private val gameStubObs =
-        GameStubObserver(user.currentPlayerGuid)
+        GameStubObserver(context)
 
     /**
      * Access singleton with

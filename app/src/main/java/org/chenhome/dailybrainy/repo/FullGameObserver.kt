@@ -1,32 +1,45 @@
-package org.chenhome.dailybrainy.repo.helper
+package org.chenhome.dailybrainy.repo
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.getValue
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import org.chenhome.dailybrainy.repo.*
+import org.chenhome.dailybrainy.repo.FullGameObserver.GameObserver
+import org.chenhome.dailybrainy.repo.helper.notifyObserver
 import timber.log.Timber
 
 /**
- * Observes remote game, ideas and playersessions for changes.
+ * Observes remote game [FullGame], related [Idea] and [PlayerSession] for remote changes.
+ *
+ * Also clients can use this class to update the state of the remote, mutable [FullGame].
+ * Observers of the [FullGameObserver.fullGame] will be notified when its state changes.
+ *
+ * Not injectable b/c it requires [gameGuid] parameter to be set at construction time. Cannot
+ * lazily initialize [gameGuid] b/c that value is required by the [GameObserver] and others.
+ * These observers are created when the [lifecycleOwner]'s lifecycle begins
  */
-internal class FullGameObserver(val gameGuid: String, val context: Context) {
+class FullGameObserver(
+    val gameGuid: String,
+    private val lifecycleOwner: LifecycleOwner,
+    val context: Context
+) : LifecycleObserver {
+    init {
+        lifecycleOwner.lifecycle.addObserver(this)
+    }
+
+    private var _fullGame: MutableLiveData<FullGame> =
+        MutableLiveData(FullGame())
+    private val brainyRepo = BrainyRepo.singleton(context)
+    private val fireDb = FirebaseDatabase.getInstance()
+
 
     /**
      * Expose [FullGame] data to be used by clients
      */
-    var _fullGame: MutableLiveData<FullGame> =
-        MutableLiveData(FullGame())
+    val fullGame: LiveData<FullGame> = _fullGame
 
-    // TODO: 8/15/20 inject brainyrepo
-    private val brainyRepo = BrainyRepo.singleton(context)
-    private val fireDb =
-        FirebaseDatabase.getInstance()
-    private val scope =
-        CoroutineScope(Dispatchers.IO)
 
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun register() {
         Timber.d("Registering FullGameObserver")
         this.GameObserver().register()
@@ -34,12 +47,70 @@ internal class FullGameObserver(val gameGuid: String, val context: Context) {
         this.PlayerSessionObserver().register()
     }
 
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun deregister() {
         Timber.d("Deregistering FullGameObserver")
         this.GameObserver().deregister()
         this.IdeaObserver().deregister()
         this.PlayerSessionObserver().deregister()
     }
+
+    /**
+     * Insert into [FullGame] instance managed by [FullGameObserver] as well
+     * as updating the remote database at the location:
+     * - `/ideas/<gameGuid>/<new idea>`
+     *
+     * On remote database change, [GameObserver] will ignore this
+     * idea since it's already in the [FullGame] instance.
+     *
+     * @param idea
+     */
+    fun insertRemote(idea: Idea) = IdeaObserver().insertRemote(idea)
+
+    /**
+     * Insert into [FullGame] instance managed by [FullGameObserver].
+     *
+     * Method will ensure that no
+     * duplicate player sessions are inserted locally or remotely.
+     *
+     * Also insert into the following remote locations. :
+     * - `/playersessions/<gameGuid>/<new session>`
+     *
+     * @param playerSession
+     */
+    fun insertRemote(playerSession: PlayerSession) =
+        PlayerSessionObserver().insertRemote(playerSession)
+
+    /**
+     * Remotely updates Game.
+     *
+     * @param game Game should be from the [FullGame] instance.
+     * [Game.guid] should be set. This method will check for that.
+     */
+    fun updateRemote(game: Game) {
+        GameObserver().updateRemote(game)
+    }
+
+    /**
+     * Remotely updates Idea.
+     *
+     * @param idea Idea should be from the [FullGame] instance. It should have its [Idea.guid] set and
+     * [Idea.gameGuid] set to this Game's guid. This method will check for that.
+     */
+    fun updateRemote(idea: Idea) {
+        IdeaObserver().updateRemote(idea)
+    }
+
+    /**
+     * Remotely updates PlayerSession.
+     *
+     * @param player PlayerSession should be from the [FullGame] instance. It should have its [PlayerSession.guid] set and
+     * [PlayerSession.gameGuid] set to this Game's guid. This method will check for that.
+     */
+    fun updateRemote(player: PlayerSession) {
+        PlayerSessionObserver().updateRemote(player)
+    }
+
 
     /**
      * Observes /games/<gameGuid> for changes
@@ -160,7 +231,7 @@ internal class FullGameObserver(val gameGuid: String, val context: Context) {
                         Timber.w("Unable to add to $ref, idea $copy, got $error")
                     } ?: Timber.d("Inserted idea ${copy.guid} at $ref")
                 }
-            } ?: Timber.w("Unable to insert idea to location ${created}")
+            } ?: Timber.w("Unable to insert idea to location $created")
         }
 
         fun updateRemote(idea: Idea) {
@@ -254,7 +325,7 @@ internal class FullGameObserver(val gameGuid: String, val context: Context) {
                         Timber.w("Unable to add to $ref, session $copy. Got $error")
                     } ?: Timber.d("Inserting session at $ref")
                 }
-            } ?: Timber.w("Unable to insert session to location ${created}")
+            } ?: Timber.w("Unable to insert session to location $created")
         }
 
         /**

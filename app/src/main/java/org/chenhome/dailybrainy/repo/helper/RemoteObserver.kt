@@ -1,5 +1,6 @@
 package org.chenhome.dailybrainy.repo.helper
 
+import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -53,8 +54,9 @@ internal class ChallengeObserver : ValueEventListener {
  * Add these new sessions to [_gameStubs] and expose.
  */
 
-internal class GameStubObserver(val userGuid: String) : ValueEventListener {
+internal class GameStubObserver(context: Context) : ValueEventListener {
 
+    private val userGuid = UserRepo(context).currentPlayerGuid
     private val fireDb = FirebaseDatabase.getInstance()
     private val fireRef = fireDb
         .getReference(DbFolder.PLAYERSESSION.path)
