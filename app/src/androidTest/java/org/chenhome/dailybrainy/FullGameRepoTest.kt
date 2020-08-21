@@ -39,6 +39,7 @@ class FullGameRepoTest {
     lateinit var session: PlayerSession
     lateinit var challenge: Challenge
     lateinit var userId: String
+    lateinit var fullGameRepo: FullGameObserver
 
     @Before
     fun before() {
@@ -97,12 +98,16 @@ class FullGameRepoTest {
                     it.resume(Unit)
                 }
             }
+
+            fullGameRepo = FullGameObserver(game.guid, lifecycleOwner, appContext)
+            lifecycleOwner.reg.currentState = Lifecycle.State.CREATED
+            lifecycleOwner.reg.currentState = Lifecycle.State.STARTED
+            delay(1500)
         }
     }
 
     @After
     fun after() {
-
         Timber.d("@after")
         lifecycleOwner.reg.currentState = Lifecycle.State.DESTROYED
         nukeRemoteDb()
@@ -111,11 +116,6 @@ class FullGameRepoTest {
     @Test
     fun testFullGame() {
         runBlocking {
-            val fullGameRepo = FullGameObserver(game.guid, lifecycleOwner, appContext)
-            lifecycleOwner.reg.currentState = Lifecycle.State.CREATED
-            delay(3000)
-
-
             Timber.d("Started test")
             suspendCoroutine<Unit> { cont ->
                 fullGameRepo.fullGame.observe(lifecycleOwner, Observer { fullGame ->
@@ -137,11 +137,6 @@ class FullGameRepoTest {
     @Test
     fun testInsert() {
         runBlocking {
-            val fullGameRepo = FullGameObserver(game.guid, lifecycleOwner, appContext)
-            lifecycleOwner.reg.currentState = Lifecycle.State.CREATED
-            lifecycleOwner.reg.currentState = Lifecycle.State.STARTED
-            delay(1500)
-
             // insert and wait
             val idea2 = Idea("", game.guid, userId, Idea.Origin.SKETCH)
             fullGameRepo.insertRemote(idea2)
@@ -173,10 +168,6 @@ class FullGameRepoTest {
     @Test
     fun testUpdatePlayer() {
         runBlocking {
-            val fullGameRepo = FullGameObserver(game.guid, lifecycleOwner, appContext)
-            lifecycleOwner.reg.currentState = Lifecycle.State.CREATED
-            delay(3000)
-
             // get session from fullGame
             fullGameRepo.fullGame.blockingObserve()
                 ?.let {
@@ -200,10 +191,6 @@ class FullGameRepoTest {
     @Test
     fun testUpdateIdea() {
         runBlocking {
-            val fullGameRepo = FullGameObserver(game.guid, lifecycleOwner, appContext)
-            lifecycleOwner.reg.currentState = Lifecycle.State.CREATED
-            delay(3000)
-
             // get from fullGame
             fullGameRepo.fullGame.blockingObserve()
                 ?.let {
@@ -227,10 +214,6 @@ class FullGameRepoTest {
     @Test
     fun testUpdateGame() {
         runBlocking {
-            val fullGameRepo = FullGameObserver(game.guid, lifecycleOwner, appContext)
-            lifecycleOwner.reg.currentState = Lifecycle.State.CREATED
-            delay(3000)
-
             // get from fullGame
             fullGameRepo.fullGame.blockingObserve()
                 ?.let {
