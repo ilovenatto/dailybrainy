@@ -1,4 +1,4 @@
-package org.chenhome.dailybrainy
+package org.chenhome.dailybrainy.repo
 
 import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -10,7 +10,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.getValue
 import kotlinx.coroutines.runBlocking
-import org.chenhome.dailybrainy.repo.*
 import org.chenhome.dailybrainy.repo.helper.nukeRemoteDb
 import org.junit.After
 import org.junit.Assert.*

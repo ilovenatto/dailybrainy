@@ -1,4 +1,4 @@
-package org.chenhome.dailybrainy
+package org.chenhome.dailybrainy.repo
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
@@ -12,7 +12,8 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.getValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.chenhome.dailybrainy.repo.*
+import org.chenhome.dailybrainy.TestLifecycleOwner
+import org.chenhome.dailybrainy.blockingObserve
 import org.chenhome.dailybrainy.repo.helper.nukeRemoteDb
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -26,7 +27,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 @RunWith(AndroidJUnit4::class)
-class FullGameRepoTest {
+class FullGameObserverTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 

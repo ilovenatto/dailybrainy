@@ -1,4 +1,4 @@
-package org.chenhome.dailybrainy
+package org.chenhome.dailybrainy.repo
 
 import android.content.Context
 import android.net.Uri
@@ -6,6 +6,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
+import org.chenhome.dailybrainy.R
 import org.chenhome.dailybrainy.repo.image.LocalImageRepo
 import org.chenhome.dailybrainy.repo.image.RemoteImage
 import org.chenhome.dailybrainy.repo.image.RemoteImageFolder

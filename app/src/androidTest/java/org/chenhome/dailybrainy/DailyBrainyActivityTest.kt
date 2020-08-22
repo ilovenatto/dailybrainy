@@ -5,6 +5,7 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
+import timber.log.Timber
 
 
 @HiltAndroidTest
@@ -15,9 +16,10 @@ class DailyBrainyActivityTest {
 
     @Test
     fun happyPath() {
+        Timber.d("Starting test")
         ActivityScenario.launch(DailyBrainyActivity::class.java)
 
         // Check Buttons fragment screen is displayed
-        //   onView(withId(R.id.textView)).check(matches(isDisplayed()))
+        //       onView(withId(R.id.textView)).check(matches(isDisplayed()))
     }
 }

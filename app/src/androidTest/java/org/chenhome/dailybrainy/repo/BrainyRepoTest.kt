@@ -1,4 +1,4 @@
-package org.chenhome.dailybrainy
+package org.chenhome.dailybrainy.repo
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
@@ -8,7 +8,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.chenhome.dailybrainy.repo.*
+import org.chenhome.dailybrainy.TestLifecycleOwner
 import org.chenhome.dailybrainy.repo.helper.nukeRemoteDb
 import org.junit.After
 import org.junit.Assert.*
