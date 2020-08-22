@@ -185,10 +185,10 @@ data class Game(
 
 
 data class PlayerSession(
-    val guid: String,
-    val userGuid: String, // There is one application user per device.
-    val gameGuid: String,
-    val name: String,
+    var guid: String,
+    var userGuid: String, // There is one application user per device.
+    var gameGuid: String,
+    var name: String,
     var imgFn: String?
 ) {
     // No-arg constructur so that Firebase can create this POJO

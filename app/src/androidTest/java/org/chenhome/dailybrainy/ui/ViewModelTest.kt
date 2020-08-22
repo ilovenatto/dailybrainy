@@ -2,25 +2,23 @@ package org.chenhome.dailybrainy.ui
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Observer
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.chenhome.dailybrainy.TestLifecycleOwner
 import org.chenhome.dailybrainy.blockingObserve
-import org.chenhome.dailybrainy.repo.DbFolder
-import org.chenhome.dailybrainy.repo.Game
+import org.chenhome.dailybrainy.createFullGame
 import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.repo.helper.nukeRemoteDb
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 
 @RunWith(AndroidJUnit4::class)
@@ -32,25 +30,16 @@ class ViewModelTest {
     private val owner = TestLifecycleOwner()
     private val userRepo = UserRepo(appContext)
     private val viewChallengesVM = ViewChallengesVM(userRepo, appContext)
-    private val fireDb = FirebaseDatabase.getInstance()
+    private val newGameVM = NewGameVM(userRepo, appContext)
 
 
     @Before
     fun before() {
         runBlocking {
             // add game for the current user
-
-            val gameRef = fireDb.getReference(DbFolder.GAMES.path)
-                .push()
-            val game = Game(gameRef.key!!, "", userRepo.currentPlayerGuid)
-            suspendCoroutine<Unit> {
-                gameRef.setValue(game) { e, _ ->
-                    assertNull(e)
-                    it.resume(Unit)
-                }
-            }
-            // Allow BrainyRepo observers time to retreive info from remote firebase db
             owner.reg.currentState = Lifecycle.State.INITIALIZED
+            createFullGame(appContext)
+            owner.reg.currentState = Lifecycle.State.CREATED
             owner.reg.currentState = Lifecycle.State.STARTED
             delay(2000)
         }
@@ -64,7 +53,7 @@ class ViewModelTest {
     }
 
     @Test
-    fun testGetChallenges() {
+    fun viewChallenges_testChallenges() {
         runBlocking {
             val challenges = viewChallengesVM.challenges.blockingObserve()
             assertNotNull(challenges)
@@ -73,11 +62,27 @@ class ViewModelTest {
     }
 
     @Test
-    fun testGetGames() {
+    fun viewChallenges_testGames() {
         runBlocking {
             val games = viewChallengesVM.games.blockingObserve()
             assertNotNull(games)
             assertEquals(1, games?.size)
         }
+    }
+
+    @Test
+    fun viewChallenges_testNavTo() {
+        val challGuid = "1234"
+        viewChallengesVM.navToChallenge.observe(owner, EventObserver<String> {
+            assertEquals(challGuid, it)
+        })
+        viewChallengesVM.navToChallenge(challGuid)
+    }
+
+    @Test
+    fun newGame_testPlayer() {
+        newGameVM.player.observe(owner, Observer {
+            assertNotNull(it)
+        })
     }
 }
