@@ -73,7 +73,7 @@ internal class GameStubObserver(context: Context) : ValueEventListener {
     override fun onCancelled(error: DatabaseError) = Timber.d(error.message)
     override fun onDataChange(snapshot: DataSnapshot) {
         // Newly updated values from remote db
-        var updatedGameStubs: List<GameStub> = listOf()
+        var updatedGameStubs: List<GameStub>
 
         scope.launch {
             var gameMap: Map<String, Game> = mutableMapOf()
