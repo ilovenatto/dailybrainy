@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.observe
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,12 +27,17 @@ class ViewChallengesFrag : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         val view = inflater.inflate(R.layout.view_challenges_frag, container, false)
         // Set the adapter
         if (view is RecyclerView) {
             with(view) {
                 layoutManager = LinearLayoutManager(context)
-                val challAdapter = ChallengeNGameAdapter()
+                val challAdapter = ChallengeNGameAdapter(ChallengeListener { guid, category ->
+                    // for now let ViewModel know to always goto a new game
+                    viewChallengesVM.navToNewGame(guid)
+                    Timber.d("onclick $guid and $category")
+                })
 
                 // Observe ViewModel data and update the adapter
                 viewChallengesVM.challenges.observe(viewLifecycleOwner, Observer {
@@ -47,8 +54,21 @@ class ViewChallengesFrag : Fragment() {
                     }
                 })
                 adapter = challAdapter
+
+
             }
         }
+
+        // observe ViewModel
+        viewChallengesVM.navToNewGame.observe(viewLifecycleOwner, {
+            // navigate
+            it.getContentIfNotHandled()?.let { challengeGuid ->
+                val dir =
+                    ViewChallengesFragDirections.actionViewChallengesFragToNewGameFrag(challengeGuid)
+                this.findNavController().navigate(dir)
+            }
+        })
+
         return view
     }
 }

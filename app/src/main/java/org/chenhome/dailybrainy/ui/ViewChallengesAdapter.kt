@@ -11,7 +11,21 @@ import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.GameStub
 import org.jetbrains.annotations.NotNull
 
-class ChallengeNGameAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+/**
+ * Listener invoked when item managed by [ChallengeNGameAdapter] is clicked.
+ * Typically used within a lambda in the view xml.
+ * `        android:onClick="@{()->clickListener.onClick(challenge)}"`
+ *
+ * @property clickListener
+ */
+class ChallengeListener(val clickListener: (challengeGuid: String, category: Challenge.Category) -> Unit) {
+    fun onClick(challenge: Challenge) = clickListener(challenge.guid, challenge.category)
+}
+
+
+class ChallengeNGameAdapter(val challengeListener: ChallengeListener) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var merged = listOf<Any>()
     private var challenges = listOf<Challenge>()
@@ -53,7 +67,7 @@ class ChallengeNGameAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is ChallViewHolder -> {
-                holder.bind(merged[position] as Challenge)
+                holder.bind(merged[position] as Challenge, challengeListener)
             }
             is GameViewHolder -> {
                 holder.bind(merged[position] as GameStub)
@@ -86,8 +100,9 @@ class ChallengeNGameAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     inner class ChallViewHolder(val binding: @NotNull ViewChallengesItemChallengeBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(challenge: Challenge) {
+        fun bind(challenge: Challenge, challengeListener: ChallengeListener) {
             binding.challenge = challenge
+            binding.clickListener = challengeListener
             binding.executePendingBindings()
         }
     }

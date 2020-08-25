@@ -6,11 +6,16 @@
         <variable
             name="challenge"
             type="org.chenhome.dailybrainy.repo.Challenge" />
+
+        <variable
+            name="clickListener"
+            type="org.chenhome.dailybrainy.ui.ChallengeListener" />
     </data>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:onClick="@{()->clickListener.onClick(challenge)}"
         android:orientation="horizontal">
 
         <TextView
