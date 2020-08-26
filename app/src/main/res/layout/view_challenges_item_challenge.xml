@@ -9,7 +9,7 @@
 
         <variable
             name="clickListener"
-            type="org.chenhome.dailybrainy.ui.ChallengeListener" />
+            type="org.chenhome.dailybrainy.ui.challenges.ChallengeListener" />
     </data>
 
     <LinearLayout

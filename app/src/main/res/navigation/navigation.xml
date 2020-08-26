@@ -7,20 +7,62 @@
 
     <fragment
         android:id="@+id/viewChallengesFrag"
-        android:name="org.chenhome.dailybrainy.ui.ViewChallengesFrag"
+        android:name="org.chenhome.dailybrainy.ui.challenges.ViewChallengesFrag"
         android:label="view_challenges_frag"
         tools:layout="@layout/view_challenges_frag">
         <action
             android:id="@+id/action_viewChallengesFrag_to_newGameFrag"
-            app:destination="@id/newGameFrag" />
+            app:destination="@id/newGameFrag"
+            app:popUpTo="@id/viewChallengesFrag" />
+        <action
+            android:id="@+id/action_viewChallengesFrag_to_lessonFrag"
+            app:destination="@id/lessonFrag"
+            app:popUpTo="@id/viewChallengesFrag" />
+        <action
+            android:id="@+id/action_viewChallengesFrag_to_viewGameFrag"
+            app:destination="@id/viewGameFrag" />
     </fragment>
     <fragment
         android:id="@+id/newGameFrag"
-        android:name="org.chenhome.dailybrainy.ui.NewGameFrag"
+        android:name="org.chenhome.dailybrainy.ui.game.NewGameFrag"
         android:label="new_game_fragment"
-        tools:layout="@layout/new_game_fragment">
+        tools:layout="@layout/new_game_frag">
         <argument
             android:name="challengeGuid"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_newGameFrag_to_viewGameFrag"
+            app:destination="@id/viewGameFrag" />
+    </fragment>
+    <fragment
+        android:id="@+id/lessonFrag"
+        android:name="org.chenhome.dailybrainy.ui.lesson.ViewLessonFrag"
+        android:label="lesson_fragment"
+        tools:layout="@layout/view_lesson_frag">
+        <argument
+            android:name="challengeGuid"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/viewGameFrag"
+        android:name="org.chenhome.dailybrainy.ui.game.ViewGameFrag"
+        android:label="fragment_view_game_steps"
+        tools:layout="@layout/view_game_steps">
+        <argument
+            android:name="gameGuid"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_viewGameFrag_to_genIdeaFrag"
+            app:destination="@id/genIdeaFrag"
+            app:popUpTo="@id/viewGameFrag" />
+    </fragment>
+    <fragment
+        android:id="@+id/genIdeaFrag"
+        android:name="org.chenhome.dailybrainy.ui.idea.GenIdeaFrag"
+        android:label="gen_idea_fragment"
+        tools:layout="@layout/gen_idea_frag">
+        <argument
+            android:name="gameGuid"
             app:argType="string" />
     </fragment>
 </navigation>

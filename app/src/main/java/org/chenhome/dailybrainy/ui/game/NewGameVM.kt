@@ -1,4 +1,4 @@
-package org.chenhome.dailybrainy.ui
+package org.chenhome.dailybrainy.ui.game
 
 import android.content.Context
 import androidx.hilt.lifecycle.ViewModelInject
@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.chenhome.dailybrainy.repo.PlayerSession
 import org.chenhome.dailybrainy.repo.UserRepo
+import org.chenhome.dailybrainy.ui.Event
 
 class NewGameVM @ViewModelInject constructor(
     val userRepo: UserRepo,

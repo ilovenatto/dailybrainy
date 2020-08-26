@@ -15,7 +15,7 @@ open class Event<out T>(private val content: T) {
     /**
      * Returns the content and prevents its use again.
      */
-    fun getContentIfNotHandled(): T? {
+    fun contentIfNotHandled(): T? {
         return if (hasBeenHandled) {
             null
         } else {
@@ -40,7 +40,7 @@ open class Event<out T>(private val content: T) {
  */
 class EventObserver<T>(private val onEventUnhandledContent: (T) -> Unit) : Observer<Event<T>> {
     override fun onChanged(event: Event<T>?) {
-        event?.getContentIfNotHandled()?.let { value ->
+        event?.contentIfNotHandled()?.let { value ->
             onEventUnhandledContent(value)
         }
     }

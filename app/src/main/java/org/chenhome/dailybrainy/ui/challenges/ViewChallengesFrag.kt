@@ -1,4 +1,4 @@
-package org.chenhome.dailybrainy.ui
+package org.chenhome.dailybrainy.ui.challenges
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.R
+import org.chenhome.dailybrainy.repo.Challenge
 import timber.log.Timber
 
 @AndroidEntryPoint // for injecting ViewModel "by viewModels()"
@@ -33,10 +34,11 @@ class ViewChallengesFrag : Fragment() {
         if (view is RecyclerView) {
             with(view) {
                 layoutManager = LinearLayoutManager(context)
-                val challAdapter = ChallengeNGameAdapter(ChallengeListener { guid, category ->
-                    // for now let ViewModel know to always goto a new game
-                    viewChallengesVM.navToNewGame(guid)
-                    Timber.d("onclick $guid and $category")
+                val challAdapter = ViewChallengesAdapter(ChallengeListener { guid, category ->
+                    when (category) {
+                        Challenge.Category.CHALLENGE -> viewChallengesVM.navToNewGame(guid)
+                        Challenge.Category.LESSON -> viewChallengesVM.navToLesson(guid)
+                    }
                 })
 
                 // Observe ViewModel data and update the adapter
@@ -62,12 +64,22 @@ class ViewChallengesFrag : Fragment() {
         // observe ViewModel
         viewChallengesVM.navToNewGame.observe(viewLifecycleOwner, {
             // navigate
-            it.getContentIfNotHandled()?.let { challengeGuid ->
+            it.contentIfNotHandled()?.let { challengeGuid ->
                 val dir =
                     ViewChallengesFragDirections.actionViewChallengesFragToNewGameFrag(challengeGuid)
                 this.findNavController().navigate(dir)
             }
         })
+
+        viewChallengesVM.navToLesson.observe(viewLifecycleOwner, {
+            // navigate
+            it.contentIfNotHandled()?.let { challengeGuid ->
+                val dir =
+                    ViewChallengesFragDirections.actionViewChallengesFragToNewGameFrag(challengeGuid)
+                this.findNavController().navigate(dir)
+            }
+        })
+
 
         return view
     }

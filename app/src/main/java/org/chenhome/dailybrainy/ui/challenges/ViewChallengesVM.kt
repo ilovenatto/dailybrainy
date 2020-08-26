@@ -1,4 +1,4 @@
-package org.chenhome.dailybrainy.ui
+package org.chenhome.dailybrainy.ui.challenges
 
 import android.content.Context
 import androidx.hilt.lifecycle.ViewModelInject
@@ -10,6 +10,7 @@ import org.chenhome.dailybrainy.repo.BrainyRepo
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.GameStub
 import org.chenhome.dailybrainy.repo.UserRepo
+import org.chenhome.dailybrainy.ui.Event
 
 /**
  * ViewModel for [ViewChallengesFrag].
@@ -66,13 +67,13 @@ class ViewChallengesVM @ViewModelInject constructor(
      *
      * @param challengeGuid Guid for existing [Challenge]
      */
-    fun navToChallenge(challengeGuid: String) {
-        _navToChallenge.value = Event(challengeGuid)
+    fun navToLesson(challengeGuid: String) {
+        _navToLesson.value = Event(challengeGuid)
     }
 
-    private val _navToChallenge = MutableLiveData<Event<String>>()
-    val navToChallenge: LiveData<Event<String>>
-        get() = _navToChallenge
+    private val _navToLesson = MutableLiveData<Event<String>>()
+    val navToLesson: LiveData<Event<String>>
+        get() = _navToLesson
 
 
 }

@@ -12,6 +12,8 @@ import org.chenhome.dailybrainy.blockingObserve
 import org.chenhome.dailybrainy.createFullGame
 import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.repo.helper.nukeRemoteDb
+import org.chenhome.dailybrainy.ui.challenges.ViewChallengesVM
+import org.chenhome.dailybrainy.ui.game.NewGameVM
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -68,15 +70,6 @@ class ViewModelTest {
             assertNotNull(games)
             assertEquals(1, games?.size)
         }
-    }
-
-    @Test
-    fun viewChallenges_testNavTo() {
-        val challGuid = "1234"
-        viewChallengesVM.navToChallenge.observe(owner, EventObserver<String> {
-            assertEquals(challGuid, it)
-        })
-        viewChallengesVM.navToChallenge(challGuid)
     }
 
     @Test

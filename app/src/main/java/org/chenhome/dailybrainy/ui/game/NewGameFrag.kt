@@ -1,4 +1,4 @@
-package org.chenhome.dailybrainy.ui
+package org.chenhome.dailybrainy.ui.game
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -24,7 +24,7 @@ class NewGameFrag : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         Timber.d("got args ${args.challengeGuid}")
-        return inflater.inflate(R.layout.new_game_fragment, container, false)
+        return inflater.inflate(R.layout.new_game_frag, container, false)
     }
 
 }

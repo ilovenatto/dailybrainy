@@ -1,4 +1,4 @@
-package org.chenhome.dailybrainy.ui
+package org.chenhome.dailybrainy.ui.challenges
 
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull
 
 
 /**
- * Listener invoked when item managed by [ChallengeNGameAdapter] is clicked.
+ * Listener invoked when item managed by [ViewChallengesAdapter] is clicked.
  * Typically used within a lambda in the view xml.
  * `        android:onClick="@{()->clickListener.onClick(challenge)}"`
  *
@@ -24,7 +24,7 @@ class ChallengeListener(val clickListener: (challengeGuid: String, category: Cha
 }
 
 
-class ChallengeNGameAdapter(val challengeListener: ChallengeListener) :
+class ViewChallengesAdapter(val challengeListener: ChallengeListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var merged = listOf<Any>()
