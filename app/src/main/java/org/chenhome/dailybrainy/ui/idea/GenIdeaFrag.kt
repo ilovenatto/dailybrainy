@@ -10,10 +10,6 @@ import org.chenhome.dailybrainy.R
 
 class GenIdeaFrag : Fragment() {
 
-    companion object {
-        fun newInstance() = GenIdeaFrag()
-    }
-
     private lateinit var viewModel: GenIdeaVM
 
     override fun onCreateView(

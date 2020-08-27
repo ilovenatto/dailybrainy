@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="avatar"
+            type="org.chenhome.dailybrainy.repo.image.AvatarImage" />
+
+        <variable
+            name="listener"
+            type="org.chenhome.dailybrainy.ui.game.AvatarAdapter.AvatarListener" />
+    </data>
+
+    <LinearLayout
+        android:onClick="@{()->listener.onClick(avatar)}"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_margin="8dp">
+
+        <ImageView
+            android:id="@+id/avatarImage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            tools:srcCompat="@tools:sample/avatars"
+            android:contentDescription="@string/avatar" />
+    </LinearLayout>
+</layout>

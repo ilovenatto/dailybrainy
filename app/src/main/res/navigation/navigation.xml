@@ -47,7 +47,7 @@
         android:id="@+id/viewGameFrag"
         android:name="org.chenhome.dailybrainy.ui.game.ViewGameFrag"
         android:label="fragment_view_game_steps"
-        tools:layout="@layout/view_game_steps">
+        tools:layout="@layout/view_game_frag">
         <argument
             android:name="gameGuid"
             app:argType="string" />

@@ -29,7 +29,7 @@ class ViewGameFrag : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.view_game_steps, container, false)
+        val view = inflater.inflate(R.layout.view_game_frag, container, false)
 
         // Set the adapter
         if (view is RecyclerView) {

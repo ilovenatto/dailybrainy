@@ -18,9 +18,6 @@ import timber.log.Timber
 
 @AndroidEntryPoint // for injecting ViewModel "by viewModels()"
 class ViewChallengesFrag : Fragment() {
-    companion object {
-        fun newInstance() = ViewChallengesFrag()
-    }
 
     private val viewChallengesVM: ViewChallengesVM by viewModels()
 
@@ -28,7 +25,6 @@ class ViewChallengesFrag : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         val view = inflater.inflate(R.layout.view_challenges_frag, container, false)
         // Set the adapter
         if (view is RecyclerView) {
@@ -43,7 +39,6 @@ class ViewChallengesFrag : Fragment() {
 
                 // Observe ViewModel data and update the adapter
                 viewChallengesVM.challenges.observe(viewLifecycleOwner, Observer {
-
                     it?.let {
                         Timber.d("Observed challenges changed $it")
                         challAdapter.setChallenges(it)
@@ -75,7 +70,7 @@ class ViewChallengesFrag : Fragment() {
             // navigate
             it.contentIfNotHandled()?.let { challengeGuid ->
                 val dir =
-                    ViewChallengesFragDirections.actionViewChallengesFragToNewGameFrag(challengeGuid)
+                    ViewChallengesFragDirections.actionViewChallengesFragToLessonFrag(challengeGuid)
                 this.findNavController().navigate(dir)
             }
         })

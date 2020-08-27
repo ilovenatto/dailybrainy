@@ -7,20 +7,21 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.chenhome.dailybrainy.repo.PlayerSession
-import org.chenhome.dailybrainy.repo.UserRepo
+import org.chenhome.dailybrainy.repo.image.AvatarImage
 import org.chenhome.dailybrainy.ui.Event
+import timber.log.Timber
 
 class NewGameVM @ViewModelInject constructor(
-    val userRepo: UserRepo,
     @ApplicationContext context: Context
 ) : ViewModel() {
     // Current player
-    // TODO: 8/22/20  Use normal 2-way data binding to get value
-    // val playerName : String
-    // val imgFn : String
     private var _player: MutableLiveData<PlayerSession> = MutableLiveData(PlayerSession())
     val player: LiveData<PlayerSession>
         get() = _player
+
+    init {
+        _player.value?.name = "foobar"
+    }
 
     /**
      * Called by Fragment to persist the new game in remote database
@@ -45,12 +46,18 @@ class NewGameVM @ViewModelInject constructor(
      *
      * @param gameGuid Guid for existing [Game]
      */
-    fun navToExistingGame(gameGuid: String) {
-        _navToExistingGame.value = Event(gameGuid)
+    fun navToGame(gameGuid: String) {
+        _navToGame.value = Event(gameGuid)
     }
 
-    private val _navToExistingGame = MutableLiveData<Event<String>>()
-    val navToExistingGame: LiveData<Event<String>>
-        get() = _navToExistingGame
+    private val _navToGame = MutableLiveData<Event<String>>()
+    val navToGame: LiveData<Event<String>>
+        get() = _navToGame
+
+
+    fun onAvatarSelected(avatarImage: AvatarImage) {
+        Timber.d("Selecting avatar $avatarImage")
+        _player.value?.imgFn = avatarImage.name
+    }
 
 }

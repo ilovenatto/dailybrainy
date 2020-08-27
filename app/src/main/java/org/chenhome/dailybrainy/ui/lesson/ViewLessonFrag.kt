@@ -10,10 +10,6 @@ import org.chenhome.dailybrainy.R
 
 class ViewLessonFrag : Fragment() {
 
-    companion object {
-        fun newInstance() = ViewLessonFrag()
-    }
-
     private lateinit var viewModel: ViewLessonVM
 
     override fun onCreateView(

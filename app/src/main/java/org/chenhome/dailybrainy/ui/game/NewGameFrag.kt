@@ -6,16 +6,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
-import org.chenhome.dailybrainy.R
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import dagger.hilt.android.AndroidEntryPoint
+import org.chenhome.dailybrainy.databinding.NewGameFragBinding
+import org.chenhome.dailybrainy.databinding.NewGameItemAvatarBinding
+import org.chenhome.dailybrainy.repo.image.AvatarImage
+import org.jetbrains.annotations.NotNull
 import timber.log.Timber
 
+@AndroidEntryPoint
 class NewGameFrag : Fragment() {
 
-    companion object {
-        fun newInstance() = NewGameFrag()
-    }
-
+    // data bind the edit text
     private val viewModel: NewGameVM by viewModels()
     private val args: NewGameFragArgs by navArgs()
 
@@ -23,8 +28,54 @@ class NewGameFrag : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Timber.d("got args ${args.challengeGuid}")
-        return inflater.inflate(R.layout.new_game_frag, container, false)
+        val binding = NewGameFragBinding.inflate(inflater, container, false)
+        with(binding.listAvatars) {
+            layoutManager = GridLayoutManager(context, 2)
+            adapter = AvatarAdapter(AvatarAdapter.AvatarListener {
+                viewModel.onAvatarSelected(it)
+            })
+        }
+        binding.vm = viewModel
+        viewModel.player.observe(viewLifecycleOwner, Observer {
+            Timber.d("Got udpated $it and ${it.imgFn}")
+        })
+        // set lifecycle so that 2-way data binding works w/ LiveData
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.executePendingBindings()
+        return binding.root
     }
 
+}
+
+class AvatarAdapter(val listener: AvatarListener) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    val avatars = AvatarImage.values()
+
+    inner class AvatarVH(val binding: @NotNull NewGameItemAvatarBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(avatar: AvatarImage) {
+            binding.avatar = avatar
+            binding.listener = listener
+            binding.avatarImage.setImageResource(avatar.imgResId)
+        }
+    }
+
+    class AvatarListener(val listener: (avatar: AvatarImage) -> Unit) {
+        // Called by item's layout XML onClick attribute
+        fun onClick(avatar: AvatarImage) = listener(avatar)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return AvatarVH(
+            NewGameItemAvatarBinding
+                .inflate(LayoutInflater.from(parent.context), parent, false)
+        )
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        (holder as AvatarVH).bind(avatars[position])
+    }
+
+    override fun getItemCount(): Int = avatars.size
 }

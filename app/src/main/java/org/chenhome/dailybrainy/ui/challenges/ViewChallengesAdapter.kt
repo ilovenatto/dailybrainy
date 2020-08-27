@@ -24,7 +24,7 @@ class ChallengeListener(val clickListener: (challengeGuid: String, category: Cha
 }
 
 
-class ViewChallengesAdapter(val challengeListener: ChallengeListener) :
+class ViewChallengesAdapter(private val challengeListener: ChallengeListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var merged = listOf<Any>()

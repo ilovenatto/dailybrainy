@@ -9,7 +9,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import org.chenhome.dailybrainy.repo.BrainyRepo
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.GameStub
-import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.ui.Event
 
 /**
@@ -20,7 +19,6 @@ import org.chenhome.dailybrainy.ui.Event
  *
  */
 class ViewChallengesVM @ViewModelInject constructor(
-    val userRepo: UserRepo,
     @ApplicationContext context: Context
 ) : ViewModel() {
 
