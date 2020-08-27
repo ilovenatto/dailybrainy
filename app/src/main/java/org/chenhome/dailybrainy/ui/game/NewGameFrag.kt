@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,7 +16,6 @@ import org.chenhome.dailybrainy.databinding.NewGameFragBinding
 import org.chenhome.dailybrainy.databinding.NewGameItemAvatarBinding
 import org.chenhome.dailybrainy.repo.image.AvatarImage
 import org.jetbrains.annotations.NotNull
-import timber.log.Timber
 
 @AndroidEntryPoint
 class NewGameFrag : Fragment() {
@@ -36,12 +36,22 @@ class NewGameFrag : Fragment() {
             })
         }
         binding.vm = viewModel
-        viewModel.player.observe(viewLifecycleOwner, Observer {
-            Timber.d("Got udpated $it and ${it.imgFn}")
-        })
+        binding.challengeGuid = args.challengeGuid
         // set lifecycle so that 2-way data binding works w/ LiveData
         binding.lifecycleOwner = viewLifecycleOwner
         binding.executePendingBindings()
+
+        // init view model
+        viewModel.navToGame.observe(viewLifecycleOwner, Observer {
+            // navigate
+            it.contentIfNotHandled()?.let { gameGuid ->
+                findNavController().navigate(
+                    NewGameFragDirections.actionNewGameFragToViewGameFrag(
+                        gameGuid
+                    )
+                )
+            }
+        })
         return binding.root
     }
 
