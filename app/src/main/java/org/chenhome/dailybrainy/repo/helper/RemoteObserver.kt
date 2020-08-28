@@ -36,11 +36,15 @@ internal class ChallengeObserver : ValueEventListener {
 
     override fun onDataChange(snapshot: DataSnapshot) {
         Timber.d("Challenges data has changed at location ${snapshot.key}")
-        snapshot.getValue<Map<String, Challenge>>()?.let {
-            Timber.d("${snapshot.children} challenges encountered. Replacing all existing challenges.")
-            // calling [MutableLiveData.value] will inform observers of the data change
-            _challenges.value = it.map { entry -> entry.value }
-        } ?: Timber.w("No challenges found in snapshot ${snapshot.key}")
+        try {
+            snapshot.getValue<Map<String, Challenge>>()?.let {
+                Timber.d("${snapshot.children} challenges encountered. Replacing all existing challenges.")
+                // calling [MutableLiveData.value] will inform observers of the data change
+                _challenges.value = it.map { entry -> entry.value }
+            } ?: Timber.w("No challenges found in snapshot ${snapshot.key}")
+        } catch (ex: Exception) {
+            Timber.e("Unable to observe challenges $ex")
+        }
     }
 
     fun register() = fireRef.addValueEventListener(this)
@@ -74,52 +78,57 @@ internal class GameStubObserver(context: Context) : ValueEventListener {
     override fun onDataChange(snapshot: DataSnapshot) {
         // Newly updated values from remote db
         var updatedGameStubs: List<GameStub>
-
         scope.launch {
-            var gameMap: Map<String, Game> = mutableMapOf()
+            try {
+                var gameMap: Map<String, Game> = mutableMapOf()
 
-            // Get all the games and cache in memory. They'll be referred
-            // to later when matching PlayerSessions to their Game
-            suspendCoroutine<Unit> { cont ->
-                fireDb.getReference(DbFolder.GAMES.path)
-                    .addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onCancelled(error: DatabaseError) = Timber.d(error.message)
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            gameMap = snapshot.getValue<Map<String, Game>>() ?: mutableMapOf()
-                            cont.resume(Unit)
-                        }
-                    })
-            }
-            Timber.d("Obtained Game cache with ${gameMap.size} elements")
+                // Get all the games and cache in memory. They'll be referred
+                // to later when matching PlayerSessions to their Game
+                suspendCoroutine<Unit> { cont ->
+                    fireDb.getReference(DbFolder.GAMES.path)
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onCancelled(error: DatabaseError) =
+                                Timber.d(error.message)
 
-            // Returns a map of <gameGuid> -> Map<SessionGuid, Session>
-            //
-            // /playersession/<gameGuid>/<sessionGuid>/session
-            //
-            snapshot.getValue<Map<String, Map<String, PlayerSession>>>()?.let { orig ->
-                // for each game, look at each session and add any session where session.playerGuid == userGuid
-                updatedGameStubs = orig.flatMap { it.value.values }
-                    // Reduce to sessions this user has participated in
-                    .filter {
-                        it.userGuid == userGuid
-                    }
-                    // Transform to a list of GameStubs
-                    .mapNotNull { session ->
-                        gameMap[session.gameGuid]?.let { game ->
-                            GameStub(game, session)
-                        }
-                    }
-
-                // Call on UI thread b/c _gameStubs.setValue can not be called on background thread
-                withContext(Dispatchers.Main) {
-                    // calling [MutableLiveData.value] will notify observers of the LiveData
-                    Timber.d("Found ${updatedGameStubs.size} sessions that user $userGuid participated in")
-                    _gameStubs.value = updatedGameStubs
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                gameMap =
+                                    snapshot.getValue<Map<String, Game>>() ?: mutableMapOf()
+                                cont.resume(Unit)
+                            }
+                        })
                 }
+                Timber.d("Obtained Game cache with ${gameMap.size} elements")
 
-            } ?: Timber.w("No remote player sessions found")
+                // Returns a map of <gameGuid> -> Map<SessionGuid, Session>
+                //
+                // /playersession/<gameGuid>/<sessionGuid>/session
+                //
+                snapshot.getValue<Map<String, Map<String, PlayerSession>>>()?.let { orig ->
+                    // for each game, look at each session and add any session where session.playerGuid == userGuid
+                    updatedGameStubs = orig.flatMap { it.value.values }
+                        // Reduce to sessions this user has participated in
+                        .filter {
+                            it.userGuid == userGuid
+                        }
+                        // Transform to a list of GameStubs
+                        .mapNotNull { session ->
+                            gameMap[session.gameGuid]?.let { game ->
+                                GameStub(game, session)
+                            }
+                        }
+
+                    // Call on UI thread b/c _gameStubs.setValue can not be called on background thread
+                    withContext(Dispatchers.Main) {
+                        // calling [MutableLiveData.value] will notify observers of the LiveData
+                        Timber.d("Found ${updatedGameStubs.size} sessions that user $userGuid participated in")
+                        _gameStubs.value = updatedGameStubs
+                    }
+
+                } ?: Timber.w("No remote player sessions found")
+            } catch (ex: Exception) {
+                Timber.e("Unable to process game stubs $ex")
+            }
         }
-
     }
 }
 

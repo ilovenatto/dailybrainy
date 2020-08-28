@@ -4,12 +4,15 @@ import android.content.Context
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.launch
+import org.chenhome.dailybrainy.R
 import org.chenhome.dailybrainy.repo.BrainyRepo
 import org.chenhome.dailybrainy.repo.PlayerSession
 import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.repo.helper.notifyObserver
 import org.chenhome.dailybrainy.repo.image.AvatarImage
 import org.chenhome.dailybrainy.ui.Event
+import org.chenhome.dailybrainy.ui.UiError
 import timber.log.Timber
 
 class NewGameVM @ViewModelInject constructor(
@@ -20,23 +23,6 @@ class NewGameVM @ViewModelInject constructor(
 
     // Current player, changeable by View, via 2-way data binding
     var player: MutableLiveData<PlayerSession> = MutableLiveData(PlayerSession())
-
-    /**
-     * Called by Fragment to persist the new game in remote database
-     *
-     * @param challengeGuid Challenge that this [Game] is for.
-     * @return gameGuid of the newly created game
-     */
-    private fun persistNewGame(challengeGuid: String): String {
-        // Create game
-        val gameGuid = "foobar" //brainyRepo.insertGame(challengeGuid, userRepo.currentPlayerGuid)
-
-        // Create player
-        player.value?.gameGuid = gameGuid
-        player.value?.userGuid = userRepo.currentPlayerGuid
-        //brainyRepo.insertPlayer(_player.value)
-        return gameGuid
-    }
 
     // Whether all form values are set
     val valid = MediatorLiveData<Boolean>().apply {
@@ -53,16 +39,32 @@ class NewGameVM @ViewModelInject constructor(
      * @param gameGuid Guid for existing [Game]
      */
     fun navToGame(challengeGuid: String) {
-        // persist a new game
-        // TODO: 8/27/20 check insert successful
-        val gameGuid = persistNewGame(challengeGuid)
-        _navToGame.value = Event(gameGuid)
+        player.value?.let { player ->
+            viewModelScope.launch {
+                brainyRepo.insertNewGame(challengeGuid, player, userRepo.currentPlayerGuid)
+                    ?.let { gameGuid ->
+                        _navToGame.value = Event(gameGuid)
+                    } ?: showError(R.string.error_creategame)
+            }
+        } ?: Timber.w("Empty player.Unable to insert new game")
     }
-    private val _navToGame = MutableLiveData<Event<String>>()
 
-    // Fragment listens to this variable and will navigate on state change of this var.
+    private val _navToGame = MutableLiveData<Event<String>>()
     val navToGame: LiveData<Event<String>>
         get() = _navToGame
+
+
+    /**
+     * UI should show the specified error.
+     */
+    fun showError(descResId: Int) {
+        // default to "Cancel" action
+        _showError.value = Event(UiError(descResId, android.R.string.cancel))
+    }
+
+    private var _showError = MutableLiveData<Event<UiError>>()
+    val showError: LiveData<Event<UiError>>
+        get() = _showError
 
 
     fun onAvatarSelected(avatarImage: AvatarImage) {

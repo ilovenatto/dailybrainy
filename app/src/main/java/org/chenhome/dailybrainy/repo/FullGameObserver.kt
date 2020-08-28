@@ -123,17 +123,21 @@ class FullGameObserver(
             Timber.d("$error")
 
         override fun onDataChange(snapshot: DataSnapshot) {
-            snapshot.getValue<Game>()?.let { game ->
-                Timber.d("Remote game $gameGuid changed to $game.")
-                _fullGame.value?.game = game
+            try {
+                snapshot.getValue<Game>()?.let { game ->
+                    Timber.d("Remote game $gameGuid changed to $game.")
+                    _fullGame.value?.game = game
 
-                // Set challenge
-                brainyRepo.challenges.value?.firstOrNull {
-                    it.guid == game.challengeGuid
-                }?.let { challenge ->
-                    _fullGame.value?.challenge = challenge
+                    // Set challenge
+                    brainyRepo.challenges.value?.firstOrNull {
+                        it.guid == game.challengeGuid
+                    }?.let { challenge ->
+                        _fullGame.value?.challenge = challenge
+                    }
+                    _fullGame.notifyObserver()
                 }
-                _fullGame.notifyObserver()
+            } catch (e: Exception) {
+                Timber.e("Unable to observe game $fireRef, $e")
             }
         }
 
@@ -151,14 +155,18 @@ class FullGameObserver(
                 update.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onCancelled(error: DatabaseError) = Timber.d("$error")
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        snapshot.getValue<Game>()?.let {
-                            update.setValue(game) { error, ref ->
-                                error?.let {
-                                    Timber.w("Unable to update game at $ref")
-                                } ?: Timber.d("Updated game ${game.guid} at $ref")
+                        try {
+                            snapshot.getValue<Game>()?.let {
+                                update.setValue(game) { error, ref ->
+                                    error?.let {
+                                        Timber.w("Unable to update game at $ref")
+                                    } ?: Timber.d("Updated game ${game.guid} at $ref")
+                                }
                             }
+                                ?: Timber.w("Unable to update a non-existent game, ${game.guid} at $update")
+                        } catch (e: Exception) {
+                            Timber.e("Unable to update game $game, $e")
                         }
-                            ?: Timber.w("Unable to update a non-existent game, ${game.guid} at $update")
                     }
                 })
             }
@@ -183,37 +191,49 @@ class FullGameObserver(
 
         // Add to [FullGame] instance
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-            snapshot.getValue<Idea>()?.let { added ->
-                // only add item if it's not already in list
-                _fullGame.value?.ideas?.firstOrNull { added.guid == it.guid } ?: run {
-                    Timber.d("Adding idea $added to list of size ${_fullGame.value?.ideas?.size}")
-                    _fullGame.value?.ideas?.add(added)
-                    _fullGame.notifyObserver()
+            try {
+                snapshot.getValue<Idea>()?.let { added ->
+                    // only add item if it's not already in list
+                    _fullGame.value?.ideas?.firstOrNull { added.guid == it.guid } ?: run {
+                        Timber.d("Adding idea $added to list of size ${_fullGame.value?.ideas?.size}")
+                        _fullGame.value?.ideas?.add(added)
+                        _fullGame.notifyObserver()
+                    }
                 }
+            } catch (e: Exception) {
+                Timber.e("Unable to add idea $fireRef, $e")
             }
         }
 
         override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-            snapshot.getValue<Idea>()?.let { changed ->
-                // find existing idea in list
-                _fullGame.value?.ideas
-                    ?.firstOrNull { changed.guid == it.guid }
-                    ?.let { match ->
-                        Timber.d("Remote copy changed. Replacing local ${match.guid} with remote ${changed.guid}")
-                        _fullGame.value?.ideas?.remove(match)
-                        _fullGame.value?.ideas?.add(changed)
-                        _fullGame.notifyObserver()
-                    }
+            try {
+                snapshot.getValue<Idea>()?.let { changed ->
+                    // find existing idea in list
+                    _fullGame.value?.ideas
+                        ?.firstOrNull { changed.guid == it.guid }
+                        ?.let { match ->
+                            Timber.d("Remote copy changed. Replacing local ${match.guid} with remote ${changed.guid}")
+                            _fullGame.value?.ideas?.remove(match)
+                            _fullGame.value?.ideas?.add(changed)
+                            _fullGame.notifyObserver()
+                        }
+                }
+            } catch (e: Exception) {
+                Timber.e("Unable to modify idea $fireRef, $e")
             }
         }
 
         override fun onChildRemoved(snapshot: DataSnapshot) {
             // should never happen b/c app is not designed for any user to remove ideas
             // but including it in case it does (or if testing requires it)
-            snapshot.getValue<Idea>()?.let {
-                Timber.d("Removing idea $it")
-                _fullGame.value?.ideas?.remove(it)
-                _fullGame.notifyObserver()
+            try {
+                snapshot.getValue<Idea>()?.let {
+                    Timber.d("Removing idea $it")
+                    _fullGame.value?.ideas?.remove(it)
+                    _fullGame.notifyObserver()
+                }
+            } catch (e: Exception) {
+                Timber.e("Unable to remove idea $fireRef, $e")
             }
         }
 
@@ -223,15 +243,19 @@ class FullGameObserver(
          */
         fun insertRemote(idea: Idea) {
             // Add remotely to /ideas/<gameGuid>/<new idea>
-            val created = fireRef.push()
-            created.key?.let {
-                val copy = idea.copy(guid = created.key!!)
-                created.setValue(copy) { error, ref ->
-                    error?.let {
-                        Timber.w("Unable to add to $ref, idea $copy, got $error")
-                    } ?: Timber.d("Inserted idea ${copy.guid} at $ref")
-                }
-            } ?: Timber.w("Unable to insert idea to location $created")
+            try {
+                val created = fireRef.push()
+                created.key?.let {
+                    val copy = idea.copy(guid = created.key!!)
+                    created.setValue(copy) { error, ref ->
+                        error?.let {
+                            Timber.w("Unable to add to $ref, idea $copy, got $error")
+                        } ?: Timber.d("Inserted idea ${copy.guid} at $ref")
+                    }
+                } ?: Timber.w("Unable to insert idea to location $created")
+            } catch (e: Exception) {
+                Timber.e("Unable to insert idea $fireRef, $e")
+            }
         }
 
         fun updateRemote(idea: Idea) {
@@ -241,19 +265,23 @@ class FullGameObserver(
                 // Update remotely at /ideas/<gameGuid>/<idea guid>
                 val update = fireRef.child(idea.guid)
                 // check that it's there
-                update.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onCancelled(error: DatabaseError) = Timber.d("$error")
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        snapshot.getValue<Idea>()?.let {
-                            update.setValue(idea) { error, ref ->
-                                error?.let {
-                                    Timber.w("Unable to update idea at $ref")
-                                } ?: Timber.d("Updated session ${idea.guid} at $ref")
+                try {
+                    update.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onCancelled(error: DatabaseError) = Timber.d("$error")
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            snapshot.getValue<Idea>()?.let {
+                                update.setValue(idea) { error, ref ->
+                                    error?.let {
+                                        Timber.w("Unable to update idea at $ref")
+                                    } ?: Timber.d("Updated session ${idea.guid} at $ref")
+                                }
                             }
+                                ?: Timber.w("Unable to update a non-existent idea, ${idea.guid} at $update")
                         }
-                            ?: Timber.w("Unable to update a non-existent idea, ${idea.guid} at $update")
-                    }
-                })
+                    })
+                } catch (e: Exception) {
+                    Timber.e("Unable to update idea $fireRef, $e")
+                }
             }
         }
     }
@@ -279,34 +307,48 @@ class FullGameObserver(
         // Add to [FullGame] instance
         // Ignore any duplicate sessions already in [FullGame]
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-            snapshot.getValue<PlayerSession>()?.let { added ->
-                _fullGame.value?.players?.firstOrNull { added.guid == it.guid } ?: run {
-                    Timber.d("Adding playersession $added to list of size ${_fullGame.value?.players?.size}")
-                    _fullGame.value?.players?.add(added)
-                    _fullGame.notifyObserver()
+            try {
+                snapshot.getValue<PlayerSession>()?.let { added ->
+                    _fullGame.value?.players?.firstOrNull { added.guid == it.guid } ?: run {
+                        Timber.d("Adding playersession $added to list of size ${_fullGame.value?.players?.size}")
+                        _fullGame.value?.players?.add(added)
+                        _fullGame.notifyObserver()
+                    }
                 }
+            } catch (e: Exception) {
+                Timber.e("Unable to add player $fireRef, $e")
             }
+
         }
 
         override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-            snapshot.getValue<PlayerSession>()?.let { changed ->
-                // find existing playersession in list
-                _fullGame.value?.players
-                    ?.firstOrNull { changed.guid == it.guid }
-                    ?.let { match ->
-                        Timber.d("Remote session ${changed.guid} changed. Replacing local version")
-                        _fullGame.value?.players?.remove(match)
-                        _fullGame.value?.players?.add(changed)
-                        _fullGame.notifyObserver()
-                    }
+            try {
+                snapshot.getValue<PlayerSession>()?.let { changed ->
+                    // find existing playersession in list
+                    _fullGame.value?.players
+                        ?.firstOrNull { changed.guid == it.guid }
+                        ?.let { match ->
+                            Timber.d("Remote session ${changed.guid} changed. Replacing local version")
+                            _fullGame.value?.players?.remove(match)
+                            _fullGame.value?.players?.add(changed)
+                            _fullGame.notifyObserver()
+                        }
+                }
+            } catch (e: Exception) {
+                Timber.e("Unable to modify player $fireRef, $e")
             }
+
         }
 
         override fun onChildRemoved(snapshot: DataSnapshot) {
-            snapshot.getValue<PlayerSession>()?.let {
-                Timber.d("Removing playersession $it")
-                _fullGame.value?.players?.remove(it)
-                _fullGame.notifyObserver()
+            try {
+                snapshot.getValue<PlayerSession>()?.let {
+                    Timber.d("Removing playersession $it")
+                    _fullGame.value?.players?.remove(it)
+                    _fullGame.notifyObserver()
+                }
+            } catch (e: Exception) {
+                Timber.e("Unable to remove player $fireRef, $e")
             }
         }
 
@@ -317,15 +359,19 @@ class FullGameObserver(
          */
         fun insertRemote(session: PlayerSession) {
             // Add remotely to /playersessions/<gameGuid>/<new session>
-            val created = fireRef.push()
-            created.key?.let {
-                val copy = session.copy(guid = created.key!!)
-                created.setValue(copy) { error, ref ->
-                    error?.let {
-                        Timber.w("Unable to add to $ref, session $copy. Got $error")
-                    } ?: Timber.d("Inserting session at $ref")
-                }
-            } ?: Timber.w("Unable to insert session to location $created")
+            try {
+                val created = fireRef.push()
+                created.key?.let {
+                    val copy = session.copy(guid = created.key!!)
+                    created.setValue(copy) { error, ref ->
+                        error?.let {
+                            Timber.w("Unable to add to $ref, session $copy. Got $error")
+                        } ?: Timber.d("Inserting session at $ref")
+                    }
+                } ?: Timber.w("Unable to insert session to location $created")
+            } catch (e: Exception) {
+                Timber.e("Unable to insert player $session, $e")
+            }
         }
 
         /**
@@ -340,19 +386,23 @@ class FullGameObserver(
                 // Update remotely at /playersessions/<gameGuid>/<session guid>
                 val update = fireRef.child(player.guid)
                 // check that it's there
-                update.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onCancelled(error: DatabaseError) = Timber.d("$error")
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        snapshot.getValue<PlayerSession>()?.let {
-                            update.setValue(player) { error, ref ->
-                                error?.let {
-                                    Timber.w("Unable to update session at $ref")
-                                } ?: Timber.d("Updated session ${player.guid} at $ref")
+                try {
+                    update.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onCancelled(error: DatabaseError) = Timber.d("$error")
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            snapshot.getValue<PlayerSession>()?.let {
+                                update.setValue(player) { error, ref ->
+                                    error?.let {
+                                        Timber.w("Unable to update session at $ref")
+                                    } ?: Timber.d("Updated session ${player.guid} at $ref")
+                                }
                             }
+                                ?: Timber.w("Unable to update a non-existent session, ${player.guid} at $update")
                         }
-                            ?: Timber.w("Unable to update a non-existent session, ${player.guid} at $update")
-                    }
-                })
+                    })
+                } catch (e: Exception) {
+                    Timber.w("Unable to update player $player, $e")
+                }
             }
         }
     }

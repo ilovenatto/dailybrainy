@@ -1,5 +1,6 @@
 package org.chenhome.dailybrainy.repo
 
+import com.google.firebase.database.Exclude
 import java.security.SecureRandom
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -202,6 +203,13 @@ data class PlayerSession(
         name = name,
         imgFn = null
     )
+
+    @Exclude
+    fun isValid(): Boolean = guid.isNotEmpty()
+            && userGuid.isNotEmpty()
+            && gameGuid.isNotEmpty()
+            && name.isNotEmpty()
+            && imgFn?.isNotEmpty() ?: false
 
 }
 

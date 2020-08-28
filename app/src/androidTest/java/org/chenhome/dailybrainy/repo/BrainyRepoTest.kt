@@ -5,7 +5,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.getValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.chenhome.dailybrainy.TestLifecycleOwner
@@ -135,6 +139,85 @@ class BrainyRepoTest {
                 }
             })
             delay(3000)
+        }
+    }
+
+    @Test
+    fun testInsertSession() {
+        runBlocking {
+            // add game
+            val gameRef = fireDb.getReference(DbFolder.GAMES.path)
+                .push()
+            val game = Game(gameRef.key!!, "", "")
+            suspendCoroutine<Unit> {
+                gameRef.setValue(game) { e, _ ->
+                    assertNull(e)
+                    it.resume(Unit)
+                }
+            }
+
+            // register observers
+            owner.reg.currentState = Lifecycle.State.STARTED
+
+            val player = PlayerSession()
+            player.name = "asdf"
+            player.gameGuid = game.guid
+            player.imgFn = "asdfads"
+            player.userGuid = user.currentPlayerGuid
+            val guid = repo.insertPlayerSession(game.guid, player)
+            assertNotNull(guid)
+
+            suspendCoroutine<Unit> {
+                val playerRef = fireDb.getReference(DbFolder.PLAYERSESSION.path)
+                    .child(gameRef.key!!)
+                    .child(guid!!)
+                Timber.d("Getting session at $playerRef")
+                playerRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val compare = player.copy(guid = guid, gameGuid = game.guid)
+                        val remote = snapshot.getValue<PlayerSession>()
+                        Timber.d("Got session $remote")
+                        assertEquals(compare, remote)
+                        it.resume(Unit)
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        it.resume(Unit)
+                    }
+                })
+            }
+
+        }
+    }
+
+    @Test
+    fun testInsertGame() {
+        val player = PlayerSession()
+        player.name = "asdf"
+        player.imgFn = "asdfads"
+
+        runBlocking {
+            val gameGuid = repo.insertNewGame("foobar", player, user.currentPlayerGuid)
+            assertNotNull(gameGuid)
+
+            // get game
+            suspendCoroutine<Unit> {
+                val gameRef = fireDb.getReference(DbFolder.GAMES.path).child(gameGuid!!)
+                gameRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val remote = snapshot.getValue<Game>()
+                        assertEquals(gameGuid, remote?.guid)
+                        assertEquals("foobar", remote?.challengeGuid)
+                        assertNotNull(remote?.playerGuid)
+                        it.resume(Unit)
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        it.resume(Unit)
+                    }
+
+                })
+            }
         }
     }
 }

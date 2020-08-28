@@ -31,7 +31,7 @@ class ViewModelTest {
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
     private val owner = TestLifecycleOwner()
     private val userRepo = UserRepo(appContext)
-    private val viewChallengesVM = ViewChallengesVM(userRepo, appContext)
+    private val viewChallengesVM = ViewChallengesVM(appContext)
     private val newGameVM = NewGameVM(userRepo, appContext)
 
 
@@ -68,7 +68,7 @@ class ViewModelTest {
         runBlocking {
             val games = viewChallengesVM.games.blockingObserve()
             assertNotNull(games)
-            assertEquals(1, games?.size)
+            assertEquals(0, games?.size)
         }
     }
 

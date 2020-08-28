@@ -45,3 +45,8 @@ class EventObserver<T>(private val onEventUnhandledContent: (T) -> Unit) : Obser
         }
     }
 }
+
+data class UiError(
+    val titleResId: Int, // String resource id describing the error
+    val actionResId: Int, // String resource id describing the action one can take
+)
