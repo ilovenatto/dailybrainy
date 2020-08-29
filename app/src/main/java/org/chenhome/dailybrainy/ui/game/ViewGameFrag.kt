@@ -5,26 +5,31 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.R
 import timber.log.Timber
 
 /**
  * A fragment representing a list of Items.
  */
+@AndroidEntryPoint // injecting viewmodels with hilt
 class ViewGameFrag : Fragment() {
 
     private var columnCount = 1
 
-    val args: ViewGameFragArgs by navArgs()
+    private val args: ViewGameFragArgs by navArgs()
+    private val vm: ViewGameVM by viewModels {
+        ViewGameVMFactory(requireContext(), args.gameGuid)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        Timber.d("Args ${args.gameGuid}")
+        Timber.d("vm ${vm.fullGame}")
         arguments?.let {
             columnCount = it.getInt(ARG_COLUMN_COUNT)
         }
@@ -32,7 +37,7 @@ class ViewGameFrag : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         val view = inflater.inflate(R.layout.view_game_frag, container, false)
 

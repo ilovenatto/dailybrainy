@@ -1,9 +1,15 @@
 package org.chenhome.dailybrainy.repo
 
 import android.content.Context
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.getValue
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.components.ApplicationComponent
 import org.chenhome.dailybrainy.repo.FullGameObserver.GameObserver
 import org.chenhome.dailybrainy.repo.helper.notifyObserver
 import timber.log.Timber
@@ -16,44 +22,51 @@ import timber.log.Timber
  *
  * Not injectable b/c it requires [gameGuid] parameter to be set at construction time. Cannot
  * lazily initialize [gameGuid] b/c that value is required by the [GameObserver] and others.
- * These observers are created when the [lifecycleOwner]'s lifecycle begins
+ * These observers are created and start listening when this class is instantiated.
  */
 class FullGameObserver(
+    context: Context,
     val gameGuid: String,
-    private val lifecycleOwner: LifecycleOwner,
-    val context: Context
-) : LifecycleObserver {
-    init {
-        lifecycleOwner.lifecycle.addObserver(this)
+) {
+    // Define this class entry point to access its dependency, BrainyRepo
+    @EntryPoint
+    @InstallIn(ApplicationComponent::class)
+    interface FullGameObserverEP {
+        fun brainyRepo(): BrainyRepo
     }
+
+    private val brainyRepo = EntryPointAccessors
+        .fromApplication(context, FullGameObserverEP::class.java)
+        .brainyRepo()
 
     private var _fullGame: MutableLiveData<FullGame> =
         MutableLiveData(FullGame())
-    private val brainyRepo = BrainyRepo.singleton(context)
     private val fireDb = FirebaseDatabase.getInstance()
 
-
-    /**
-     * Expose [FullGame] data to be used by clients
-     */
-    val fullGame: LiveData<FullGame> = _fullGame
-
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    fun register() {
-        Timber.d("Registering FullGameObserver")
+    init {
+        Timber.d("Registering FullGameObserver for game $gameGuid")
         this.GameObserver().register()
         this.IdeaObserver().register()
         this.PlayerSessionObserver().register()
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    fun deregister() {
+
+    /**
+     * Clean up and Deregister listeners to FireDB. Should be called
+     * by whoever is managing this instance's lifecycle (typically [ViewGameVM] or
+     * some other [ViewModel]
+     */
+    fun onDestroy() {
         Timber.d("Deregistering FullGameObserver")
         this.GameObserver().deregister()
         this.IdeaObserver().deregister()
         this.PlayerSessionObserver().deregister()
     }
+
+    /**
+     * Expose [FullGame] data to be used by clients
+     */
+    val fullGame: LiveData<FullGame> = _fullGame
 
     /**
      * Insert into [FullGame] instance managed by [FullGameObserver] as well
@@ -125,7 +138,7 @@ class FullGameObserver(
         override fun onDataChange(snapshot: DataSnapshot) {
             try {
                 snapshot.getValue<Game>()?.let { game ->
-                    Timber.d("Remote game $gameGuid changed to $game.")
+                    Timber.d("Remote game $gameGuid changed to $game. There are ${brainyRepo.challenges.value?.size} challenges.")
                     _fullGame.value?.game = game
 
                     // Set challenge

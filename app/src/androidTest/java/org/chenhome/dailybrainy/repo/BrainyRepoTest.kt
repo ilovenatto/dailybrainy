@@ -30,8 +30,9 @@ class BrainyRepoTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-    private val repo = BrainyRepo.singleton(appContext)
+
     private val user = UserRepo(appContext)
+    private val repo = BrainyRepo(user)
     private val owner = TestLifecycleOwner()
     private val fireDb = FirebaseDatabase.getInstance()
 
@@ -52,7 +53,7 @@ class BrainyRepoTest {
         runBlocking {
             assertNotNull(repo.challenges)
             owner.reg.currentState = Lifecycle.State.STARTED
-
+            delay(2000)
             suspendCoroutine<Unit> { cont ->
                 repo.challenges.observe(owner, Observer<List<Challenge>> {
                     Timber.d("Found ${it.size} challenges")

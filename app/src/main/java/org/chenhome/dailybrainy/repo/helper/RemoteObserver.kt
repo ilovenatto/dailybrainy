@@ -1,7 +1,9 @@
 package org.chenhome.dailybrainy.repo.helper
 
-import android.content.Context
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.OnLifecycleEvent
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -19,8 +21,11 @@ import kotlin.coroutines.suspendCoroutine
 /**
  * Listens for Challenges offered by DailyBrainy in remote database. Challenges
  * will only change if app publishes new challenges (rarely).
+ *
+ * Lifecycle is dictated by a lifecycle owner. This instance should be added as an
+ * observer of a lifecycle.
  */
-internal class ChallengeObserver : ValueEventListener {
+internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
     private val fireRef = FirebaseDatabase.getInstance()
         .getReference(DbFolder.CHALLENGES.path)
 
@@ -47,7 +52,10 @@ internal class ChallengeObserver : ValueEventListener {
         }
     }
 
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun register() = fireRef.addValueEventListener(this)
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun deregister() = fireRef.removeEventListener(this)
 }
 
@@ -56,11 +64,13 @@ internal class ChallengeObserver : ValueEventListener {
  * playersessions in /playersession/<new game guid>/<session that started by [userGuid]>.
  *
  * Add these new sessions to [_gameStubs] and expose.
+ *
+ * Lifecycle is dictated by a lifecycle owner. This instance should be added as an
+ * observer of a lifecycle.
  */
 
-internal class GameStubObserver(context: Context) : ValueEventListener {
+internal class GameStubObserver(val userGuid: String) : ValueEventListener, LifecycleObserver {
 
-    private val userGuid = UserRepo(context).currentPlayerGuid
     private val fireDb = FirebaseDatabase.getInstance()
     private val fireRef = fireDb
         .getReference(DbFolder.PLAYERSESSION.path)
@@ -71,7 +81,10 @@ internal class GameStubObserver(context: Context) : ValueEventListener {
      */
     var _gameStubs: MutableLiveData<List<GameStub>> = MutableLiveData(listOf())
 
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun register() = fireRef.addValueEventListener(this)
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun deregister() = fireRef.removeEventListener(this)
 
     override fun onCancelled(error: DatabaseError) = Timber.d(error.message)

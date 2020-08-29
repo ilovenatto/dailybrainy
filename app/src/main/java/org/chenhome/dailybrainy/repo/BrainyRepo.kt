@@ -1,34 +1,31 @@
 package org.chenhome.dailybrainy.repo
 
-import android.content.Context
-import androidx.lifecycle.*
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.firebase.database.FirebaseDatabase
 import org.chenhome.dailybrainy.repo.helper.ChallengeObserver
 import org.chenhome.dailybrainy.repo.helper.GameStubObserver
-import org.chenhome.dailybrainy.repo.helper.SingletonHolder
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 /**
  * Singleton that offers observable domain objects like [Challenge] to clients. These domain objects will
- * notify their observers when their state has changed.
- *b9
- * Get singleton by:
- * `BrainyRepo.singleton(context)`
+ * notify their observers when their state has changed. Obtain instance by injecting with Hilt.
+ * `@Inject val brainyRepo:BrainRepo`
+ *
  *
  * This singleton's setup and teardown lifecycle is dictated by [ProcessLifecycleOwner]. Data is only available
  * after the lifecycle has begun.
  *
  */
-class BrainyRepo
-private constructor(
-    val context: Context
+@Singleton
+class BrainyRepo @Inject constructor(
+    val userRepo: UserRepo, // Injected
 ) : LifecycleObserver {
-    /**
-     * Private
-     */
-    private val lifecycleOwner = ProcessLifecycleOwner.get()
     private val fireDb: FirebaseDatabase = FirebaseDatabase.getInstance()
 
     /**
@@ -37,35 +34,15 @@ private constructor(
     private val challengeObs =
         ChallengeObserver()
     private val gameStubObs =
-        GameStubObserver(context)
+        GameStubObserver(userRepo.currentPlayerGuid)
 
-    /**
-     * Access singleton with
-     * `BrainyRepo.singleton(context)`
-     */
-    companion object : SingletonHolder<BrainyRepo, Context>({
-        val instance = BrainyRepo(it)
-        instance.lifecycleOwner.lifecycle.addObserver(instance)
-        instance
-    })
-
-    /**
-     * Lifecycle
-     * - onCreate: register observers of the Firebase remote database
-     * - onStop: deregister them
-     */
-    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun onCreate() {
+    init {
         Timber.d("Challenge and GameStub remote observers registered")
-        challengeObs.register()
-        gameStubObs.register()
-    }
+        ProcessLifecycleOwner.get().lifecycle.run {
+            addObserver(challengeObs)
+            addObserver(gameStubObs)
+        }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    private fun onStop() {
-        Timber.d("Challenge and GameStub remote observers deregistered")
-        challengeObs.deregister()
-        gameStubObs.deregister()
     }
 
     /**

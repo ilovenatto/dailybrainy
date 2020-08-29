@@ -1,9 +1,7 @@
 package org.chenhome.dailybrainy.ui.game
 
-import android.content.Context
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.R
 import org.chenhome.dailybrainy.repo.BrainyRepo
@@ -17,9 +15,8 @@ import timber.log.Timber
 
 class NewGameVM @ViewModelInject constructor(
     val userRepo: UserRepo, // injected by Hilt
-    @ApplicationContext context: Context
+    val brainyRepo: BrainyRepo, // injected by Hilt
 ) : ViewModel() {
-    private val brainyRepo = BrainyRepo.singleton(context)
 
     // Current player, changeable by View, via 2-way data binding
     var player: MutableLiveData<PlayerSession> = MutableLiveData(PlayerSession())

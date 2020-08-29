@@ -3,13 +3,14 @@ package org.chenhome.dailybrainy.repo
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.getValue
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.chenhome.dailybrainy.TestLifecycleOwner
@@ -21,15 +22,16 @@ import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.rules.RuleChain
 import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class FullGameObserverTest {
     @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
+    val rule = RuleChain.outerRule(HiltAndroidRule(this))
+        .around(InstantTaskExecutorRule())
 
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
     private val fireDb: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -56,6 +58,7 @@ class FullGameObserverTest {
                         override fun onCancelled(error: DatabaseError) {}
                         override fun onDataChange(snapshot: DataSnapshot) {
                             challenge = snapshot.getValue<Challenge>() ?: error("expected value")
+                            Timber.d("Got remote challenge $challenge at location ${snapshot.ref}")
                             it.resume(Unit)
                         }
                     })
@@ -100,7 +103,7 @@ class FullGameObserverTest {
                 }
             }
 
-            fullGameRepo = FullGameObserver(game.guid, lifecycleOwner, appContext)
+            fullGameRepo = FullGameObserver(appContext, game.guid)
             lifecycleOwner.reg.currentState = Lifecycle.State.CREATED
             lifecycleOwner.reg.currentState = Lifecycle.State.STARTED
             delay(1500)

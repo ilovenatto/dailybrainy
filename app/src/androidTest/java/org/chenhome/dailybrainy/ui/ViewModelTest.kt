@@ -10,6 +10,7 @@ import kotlinx.coroutines.runBlocking
 import org.chenhome.dailybrainy.TestLifecycleOwner
 import org.chenhome.dailybrainy.blockingObserve
 import org.chenhome.dailybrainy.createFullGame
+import org.chenhome.dailybrainy.repo.BrainyRepo
 import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.repo.helper.nukeRemoteDb
 import org.chenhome.dailybrainy.ui.challenges.ViewChallengesVM
@@ -31,8 +32,9 @@ class ViewModelTest {
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
     private val owner = TestLifecycleOwner()
     private val userRepo = UserRepo(appContext)
-    private val viewChallengesVM = ViewChallengesVM(appContext)
-    private val newGameVM = NewGameVM(userRepo, appContext)
+    private val brainyRepo = BrainyRepo(userRepo)
+    private val viewChallengesVM = ViewChallengesVM(brainyRepo)
+    private val newGameVM = NewGameVM(userRepo, brainyRepo)
 
 
     @Before
