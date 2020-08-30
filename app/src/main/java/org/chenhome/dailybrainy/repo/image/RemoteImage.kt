@@ -32,7 +32,8 @@ enum class RemoteImageFolder {
  * references images by
  */
 class RemoteImage(
-    val context: Context
+    // TODO: 8/30/20 remove cotext 
+    val context: Context,
 ) {
     val fstorage: FirebaseStorage = Firebase.storage
     val scope = CoroutineScope(Dispatchers.IO)

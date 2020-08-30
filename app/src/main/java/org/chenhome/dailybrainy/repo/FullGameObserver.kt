@@ -296,11 +296,14 @@ class FullGameObserver(
          * remote database.
          */
         fun insertRemote(idea: Idea) {
+            // Add name to Idea
+            val namedIdea = addNameToCopy(idea)
+
             // Add remotely to /ideas/<gameGuid>/<new idea>
             try {
                 val created = fireRef.push()
                 created.key?.let {
-                    val copy = idea.copy(guid = created.key!!)
+                    val copy = namedIdea.copy(guid = created.key!!)
                     created.setValue(copy) { error, ref ->
                         error?.let {
                             Timber.w("Unable to add to $ref, idea $copy, got $error")
@@ -310,6 +313,15 @@ class FullGameObserver(
             } catch (e: Exception) {
                 Timber.e("Unable to insert idea $fireRef, $e")
             }
+        }
+
+        private fun addNameToCopy(idea: Idea): Idea {
+            Timber.d("Got idea $idea and players ${_fullGame.value?.players}")
+            val copy = idea.copy(playerName = _fullGame.value?.players?.firstOrNull { session ->
+                session.userGuid == idea.playerGuid
+            }?.name)
+            Timber.d("Added name ${copy.playerName} to ${idea.guid}")
+            return copy
         }
 
         fun updateRemote(idea: Idea) {

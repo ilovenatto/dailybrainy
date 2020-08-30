@@ -6,8 +6,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.FullGame
 import org.chenhome.dailybrainy.repo.FullGameObserver
@@ -25,7 +23,6 @@ class ViewGameVM(
 
     // Observer gets initialized as soon as ViewGameVM is instantiated
     private val fullGameObs = FullGameObserver(context, gameGuid)
-    private val ioScope = CoroutineScope(Dispatchers.IO)
 
     /**
      * Full Game state. Read-only

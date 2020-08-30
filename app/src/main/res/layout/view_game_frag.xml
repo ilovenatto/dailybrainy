@@ -52,13 +52,14 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listSteps"
-            android:layout_width="406dp"
-            android:layout_height="383dp"
+            android:layout_width="414dp"
+            android:layout_height="288dp"
             android:layout_marginTop="32dp"
             android:layout_marginBottom="28dp"
             app:layoutManager="LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@+id/listPlayers"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.666"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout"
             tools:context=".ui.game.ViewGameFrag"

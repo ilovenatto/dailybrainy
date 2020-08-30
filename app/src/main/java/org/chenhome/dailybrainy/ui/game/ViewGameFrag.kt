@@ -10,15 +10,12 @@ import androidx.lifecycle.Observer
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.ViewGameFragBinding
-import org.chenhome.dailybrainy.databinding.ViewGameItemPlayerBinding
 import org.chenhome.dailybrainy.databinding.ViewGameItemStepBinding
 import org.chenhome.dailybrainy.repo.Challenge
-import org.chenhome.dailybrainy.repo.PlayerSession
+import org.chenhome.dailybrainy.ui.PlayerAdapter
 import org.chenhome.dailybrainy.ui.bindImage
 import org.jetbrains.annotations.NotNull
 import timber.log.Timber
@@ -31,27 +28,19 @@ class ViewGameFrag : Fragment() {
     private val vm: ViewGameVM by viewModels {
         ViewGameVMFactory(requireContext(), args.gameGuid)
     }
+    private val stepAdap = StepAdapter(StepAdapter.Listener { step ->
+        // Fragment listens to this
+        vm.navToStep(step)
+    })
+    private val playerAdap = PlayerAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        val stepAdap = StepAdapter(StepAdapter.StepListener { step ->
-            // Fragment listens to this
-            vm.navToStep(step)
-        })
-        val playerAdap = PlayerAdapter()
-
         val binding = ViewGameFragBinding.inflate(LayoutInflater.from(context), container, false)
-
-        with(binding.listSteps) {
-            adapter = stepAdap
-            layoutManager = LinearLayoutManager(context)
-        }
-        with(binding.listPlayers) {
-            adapter = playerAdap
-            layoutManager = GridLayoutManager(context, 5)
-        }
+        binding.listSteps.adapter = stepAdap
+        binding.listPlayers.adapter = playerAdap
 
         // observe current step & players
         vm.fullGame.observe(viewLifecycleOwner, Observer {
@@ -87,38 +76,7 @@ class ViewGameFrag : Fragment() {
 
 }
 
-internal class PlayerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    private var players: MutableList<PlayerSession> = mutableListOf()
-    fun setPlayers(value: MutableList<PlayerSession>) {
-        players = value
-        notifyDataSetChanged()
-    }
-
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return PlayerVH(ViewGameItemPlayerBinding.inflate(LayoutInflater.from(parent.context),
-            parent,
-            false))
-    }
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as PlayerVH).bind(players[position])
-    }
-
-    override fun getItemCount(): Int = players.size
-
-    class PlayerVH(val binding: @NotNull ViewGameItemPlayerBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(player: PlayerSession) {
-            binding.player = player
-            binding.playerAvatar.setImageResource(player.avatarImage().imgResId)
-        }
-    }
-
-}
-
-internal class StepAdapter(val stepListener: StepListener) :
+internal class StepAdapter(val stepListener: Listener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val steps = Challenge.Step.values()
@@ -151,7 +109,7 @@ internal class StepAdapter(val stepListener: StepListener) :
         }
     }
 
-    class StepListener(val listener: (Challenge.Step) -> Unit) {
+    class Listener(val listener: (Challenge.Step) -> Unit) {
         // Called by item's layout XML onClick attribute
         fun onClick(step: Challenge.Step) {
             listener(step)

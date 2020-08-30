@@ -142,14 +142,15 @@ class FullGameObserverTest {
     fun testInsert() {
         runBlocking {
             // insert and wait
-            val idea2 = Idea("", game.guid, userId, Idea.Origin.SKETCH)
-            fullGameRepo.insertRemote(idea2)
-            fullGameRepo.insertRemote(idea2)
+            val player2 = PlayerSession("1234", userId, game.guid, "foobar")
+            fullGameRepo.insertRemote(player2)
+            fullGameRepo.insertRemote(player2)
+            delay(2000)
 
             // insert and wait
-            val player2 = PlayerSession("", userId, game.guid, "foobar")
-            fullGameRepo.insertRemote(player2)
-            fullGameRepo.insertRemote(player2)
+            val idea2 = Idea("123", game.guid, userId, Idea.Origin.SKETCH)
+            fullGameRepo.insertRemote(idea2)
+            fullGameRepo.insertRemote(idea2)
 
             delay(1500)
 
@@ -159,6 +160,7 @@ class FullGameObserverTest {
                     Timber.d("Observed ${fullGame.ideas.size} ideas and ${fullGame.players.size} sessions")
                     assertEquals(3, fullGame.ideas.size)
                     assertEquals(idea, fullGame.ideas[0])
+                    assert(idea.playerName!!.isNotEmpty())
 
                     assertEquals(3, fullGame.players.size)
                     assertEquals(session, fullGame.players[0])

@@ -10,7 +10,7 @@
 
         <variable
             name="listener"
-            type="org.chenhome.dailybrainy.ui.game.StepAdapter.StepListener" />
+            type="org.chenhome.dailybrainy.ui.game.StepAdapter.Listener" />
 
     </data>
 

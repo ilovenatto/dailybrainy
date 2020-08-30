@@ -224,7 +224,7 @@ data class PlayerSession(
 }
 
 data class Idea(
-    val guid: String,
+    var guid: String, // can be modified
 
     // Foreign key to its parent, Game
     val gameGuid: String,
@@ -232,6 +232,7 @@ data class Idea(
     // Unique user that originated this idea. Helpful
     // for counting points per player
     val playerGuid: String,
+    var playerName: String?, // set on insertion
 
     // Maps to unique name [Challenge.Phase]
     val origin: Origin,
@@ -245,7 +246,7 @@ data class Idea(
     ) {
     // No-arg constructur so that Firebase can create this POJO
     constructor() : this(
-        "", "", "",
+        "", "", "", "",
         Origin.BRAINSTORM, 0, null, null
     )
 
@@ -254,6 +255,7 @@ data class Idea(
         guid = guid,
         gameGuid = gameGuid,
         playerGuid = playerGuid,
+        playerName = "Unknown",
         origin = origin,
         votes = 0,
         title = null,
@@ -272,6 +274,15 @@ data class Idea(
         STORY_SOLUTION,
         STORY_RESOLUTION
     }
+
+    @Exclude
+    fun isValid(): Boolean = guid.isNotEmpty()
+            && gameGuid.isNotEmpty()
+            && playerGuid.isNotEmpty()
+            && playerName?.isNotEmpty() ?: false
+            && origin != null
+            && votes >= 0
+            && (title != null || imgFn != null)
 }
 
 enum class DbFolder(val path: String) {

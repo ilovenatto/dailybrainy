@@ -28,7 +28,6 @@ class ViewChallengesFrag : Fragment() {
         // Set the adapter
         if (view is RecyclerView) {
             with(view) {
-                //layoutManager = LinearLayoutManager(context)
                 val challAdapter = ViewChallengesAdapter(ChallengeListener { guid, category ->
                     when (category) {
                         Challenge.Category.CHALLENGE -> viewChallengesVM.navToNewGame(guid)
