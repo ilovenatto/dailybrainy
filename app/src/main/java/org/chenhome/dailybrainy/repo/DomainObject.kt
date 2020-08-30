@@ -25,10 +25,9 @@ data class FullGame(
     var ideas: MutableList<Idea> = mutableListOf(),
     var challenge: Challenge = Challenge() // current challenge
 ) {
-    // TODO: 8/14/20 inject UserRepo
-    /*fun mySession() : PlayerSession {
-        players.firstOrNull {
-            it.userGuid == UserRepo().currentPlayerGuid
+    fun mySession(currentPlayerGuid: String): PlayerSession? {
+        return players.firstOrNull {
+            it.userGuid == currentPlayerGuid
         }
-    }*/
+    }
 }

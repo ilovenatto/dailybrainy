@@ -103,6 +103,9 @@ class ViewModelTest {
                 assertEquals(name, session?.name)
                 assertEquals(imgFn, session?.imgFn)
             }
+
+            val uri = viewGameVM.challengeImgUri.blockingObserve()
+            assertNotNull(uri)
         }
     }
 }

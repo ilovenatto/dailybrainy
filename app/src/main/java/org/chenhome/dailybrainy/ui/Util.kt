@@ -1,6 +1,13 @@
 package org.chenhome.dailybrainy.ui
 
+import android.net.Uri
+import android.widget.ImageView
+import androidx.databinding.BindingAdapter
 import androidx.lifecycle.Observer
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import org.chenhome.dailybrainy.R
+import timber.log.Timber
 
 
 /**
@@ -50,3 +57,28 @@ data class UiError(
     val titleResId: Int, // String resource id describing the error
     val actionResId: Int, // String resource id describing the action one can take
 )
+
+/**
+ * Binding adapter for "app:imageUrl=.." for <ImageView> XML elements.
+ * Used during XML binding
+ *
+ * @param imgView
+ * @param imgUri
+ */
+@BindingAdapter("imageUrl") // creates new attribute
+fun bindImage(imgView: ImageView, imgUri: Uri?): Unit {
+    Timber.d("Binding $imgUri to ${imgView}")
+    imgUri?.let {
+        val imgUrl = imgUri
+            .buildUpon()
+            .scheme("https")
+            .build()
+        Timber.d("Loading image $imgUrl")
+        Glide.with(imgView.context)
+            .load(imgUrl)
+            .apply(RequestOptions() // set error and loading placeholders
+                .placeholder(R.drawable.ic_broken_image)
+                .error(R.drawable.ic_broken_image))
+            .into(imgView)
+    }
+}

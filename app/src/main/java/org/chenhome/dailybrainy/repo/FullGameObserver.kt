@@ -1,6 +1,7 @@
 package org.chenhome.dailybrainy.repo
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,8 +11,12 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ApplicationComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.repo.FullGameObserver.GameObserver
 import org.chenhome.dailybrainy.repo.helper.notifyObserver
+import org.chenhome.dailybrainy.repo.image.RemoteImage
 import timber.log.Timber
 
 /**
@@ -25,7 +30,7 @@ import timber.log.Timber
  * These observers are created and start listening when this class is instantiated.
  */
 class FullGameObserver(
-    context: Context,
+    val context: Context,
     val gameGuid: String,
 ) {
     // Define this class entry point to access its dependency, BrainyRepo
@@ -42,6 +47,7 @@ class FullGameObserver(
     private var _fullGame: MutableLiveData<FullGame> =
         MutableLiveData(FullGame())
     private val fireDb = FirebaseDatabase.getInstance()
+    private val scope = CoroutineScope(Dispatchers.Main)
 
     init {
         Timber.d("Registering FullGameObserver for game $gameGuid")
@@ -67,6 +73,16 @@ class FullGameObserver(
      * Expose [FullGame] data to be used by clients
      */
     val fullGame: LiveData<FullGame> = _fullGame
+
+    /**
+     * challengeImgUri is downloadable URI of the challenge hero image.
+     * The value is available after the Game's challenge information has been retrieved.
+     *
+     * Observers wait for the value.
+     */
+    private var _challengeImgUri = MutableLiveData<Uri>()
+    val challengeImgUri: LiveData<Uri>
+        get() = _challengeImgUri
 
     /**
      * Insert into [FullGame] instance managed by [FullGameObserver] as well
@@ -124,7 +140,6 @@ class FullGameObserver(
         PlayerSessionObserver().updateRemote(player)
     }
 
-
     /**
      * Observes /games/<gameGuid> for changes
      */
@@ -146,6 +161,13 @@ class FullGameObserver(
                         it.guid == game.challengeGuid
                     }?.let { challenge ->
                         _fullGame.value?.challenge = challenge
+
+                        // handle challenge
+                        if (challenge.imgFn.isNotEmpty()) {
+                            observeChallengeUriRequest(challenge.imgFn)
+                        } else {
+                            Timber.w("Challenge ImgURL is invalid $challenge")
+                        }
                     }
                     _fullGame.notifyObserver()
                 }
@@ -153,6 +175,25 @@ class FullGameObserver(
                 Timber.e("Unable to observe game $fireRef, $e")
             }
         }
+
+        fun observeChallengeUriRequest(challengeImgFn: String) {
+            scope.launch {
+                val imgRef = RemoteImage(context).getValidStorageRef(challengeImgFn)
+                imgRef?.downloadUrl?.apply {
+                    addOnSuccessListener {
+                        Timber.d("Got challenge img url $it")
+                        _challengeImgUri.value = it
+                    }
+                    addOnFailureListener {
+                        Timber.e("Unable to obtain challenge img uri $it")
+                    }
+                    addOnCompleteListener {
+                        Timber.d("Finished getting challenge uri ${it.isSuccessful}")
+                    }
+                }
+            }
+        }
+
 
         fun register() = fireRef.addValueEventListener(this)
         fun deregister() = fireRef.removeEventListener(this)

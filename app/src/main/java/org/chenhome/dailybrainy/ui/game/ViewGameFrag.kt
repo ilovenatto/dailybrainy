@@ -19,6 +19,7 @@ import org.chenhome.dailybrainy.databinding.ViewGameItemPlayerBinding
 import org.chenhome.dailybrainy.databinding.ViewGameItemStepBinding
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.PlayerSession
+import org.chenhome.dailybrainy.ui.bindImage
 import org.jetbrains.annotations.NotNull
 import timber.log.Timber
 
@@ -42,24 +43,31 @@ class ViewGameFrag : Fragment() {
         val playerAdap = PlayerAdapter()
 
         val binding = ViewGameFragBinding.inflate(LayoutInflater.from(context), container, false)
+
         with(binding.listSteps) {
             adapter = stepAdap
             layoutManager = LinearLayoutManager(context)
         }
-
         with(binding.listPlayers) {
             adapter = playerAdap
             layoutManager = GridLayoutManager(context, 5)
         }
-
 
         // observe current step & players
         vm.fullGame.observe(viewLifecycleOwner, Observer {
             it?.let {
                 stepAdap.setCurrentStep(it.game.currentStep)
                 playerAdap.setPlayers(it.players)
+                binding.vm = vm
+                binding.executePendingBindings()
+
             }
         })
+        vm.challengeImgUri.observe(viewLifecycleOwner) {
+            Timber.d("Observed challenge img uri $it")
+            // specially handle the image
+            bindImage(binding.imageChallenge, it)
+        }
 
         vm.navToStep.observe(viewLifecycleOwner, Observer {
             it.contentIfNotHandled()?.run {
@@ -76,8 +84,8 @@ class ViewGameFrag : Fragment() {
         binding.executePendingBindings()
         return binding.root
     }
-}
 
+}
 
 internal class PlayerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -110,7 +118,7 @@ internal class PlayerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 }
 
-internal class StepAdapter(val listener: StepListener) :
+internal class StepAdapter(val stepListener: StepListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val steps = Challenge.Step.values()
@@ -120,7 +128,6 @@ internal class StepAdapter(val listener: StepListener) :
         currentStep = step
         notifyDataSetChanged()
     }
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return StepVH(
@@ -140,7 +147,7 @@ internal class StepAdapter(val listener: StepListener) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(step: Challenge.Step) {
             binding.step = step
-            binding.listener = listener
+            binding.listener = stepListener
         }
     }
 
@@ -150,5 +157,6 @@ internal class StepAdapter(val listener: StepListener) :
             listener(step)
         }
     }
-
 }
+
+
