@@ -1,6 +1,7 @@
 package org.chenhome.dailybrainy.repo
 
 import com.google.firebase.database.Exclude
+import org.chenhome.dailybrainy.repo.image.AvatarImage
 import java.security.SecureRandom
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -44,7 +45,7 @@ data class Challenge(
     val desc: String,
     val category: Category,
     val hmw: String?, // only set for Challenge category
-    val youtubeUrl: String? // only set for Lesson category
+    val youtubeUrl: String?, // only set for Lesson category
 
 ) {
     // No-arg constructor so that Firebase can create this POJO
@@ -81,8 +82,9 @@ data class Challenge(
         val titleRsc: Int,
         val phase: Phase,
         val allowedSecs: Long,
-        val countType: CountType
+        val countType: CountType,
     ) {
+
         // Brainstorm
         GEN_IDEA(
             org.chenhome.dailybrainy.R.string.genidea,
@@ -162,9 +164,9 @@ data class Game(
     var currentStep: Challenge.Step = Challenge.Step.GEN_IDEA,
 
     var storyTitle: String?,
-    var storyDesc: String?
+    var storyDesc: String?,
 
-) {
+    ) {
     // No-arg constructur so that Firebase can create this POJO
     constructor() : this(
         "", "", "", "", 0L,
@@ -190,7 +192,7 @@ data class PlayerSession(
     var userGuid: String, // There is one application user per device.
     var gameGuid: String,
     var name: String,
-    var imgFn: String?
+    var imgFn: String?,
 ) {
     // No-arg constructur so that Firebase can create this POJO
     constructor() : this("", "", "", "", null)
@@ -203,6 +205,14 @@ data class PlayerSession(
         name = name,
         imgFn = null
     )
+
+    @Exclude
+    fun avatarImage(): AvatarImage {
+        if (!imgFn.isNullOrEmpty()) {
+            return AvatarImage.valueOf(imgFn!!)
+        }
+        return AvatarImage.PLACEHOLDER // just return default avatar
+    }
 
     @Exclude
     fun isValid(): Boolean = guid.isNotEmpty()
@@ -229,10 +239,10 @@ data class Idea(
     // defaults to 0
     var votes: Int = 0,
     var title: String?,
-    var imgFn: String?
+    var imgFn: String?,
 
 
-) {
+    ) {
     // No-arg constructur so that Firebase can create this POJO
     constructor() : this(
         "", "", "",

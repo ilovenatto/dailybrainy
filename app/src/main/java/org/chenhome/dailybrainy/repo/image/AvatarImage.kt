@@ -15,5 +15,6 @@ enum class AvatarImage(
     A3(R.drawable.avatar3),
     A4(R.drawable.avatar4),
     A5(R.drawable.avatar5),
-    A6(R.drawable.avatar6)
+    A6(R.drawable.avatar6),
+    PLACEHOLDER(R.drawable.avatar1)
 }

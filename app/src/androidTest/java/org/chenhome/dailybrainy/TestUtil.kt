@@ -55,11 +55,12 @@ class CustomTestRunner : AndroidJUnitRunner() {
     }
 }
 
-fun createFullGame(context: Context) {
+fun createFullGame(context: Context): Pair<Game, PlayerSession> {
     val userId = UserRepo(context).currentPlayerGuid
     val fireDb = FirebaseDatabase.getInstance()
-
-    runBlocking {
+    lateinit var game: Game
+    lateinit var session: PlayerSession
+    return runBlocking {
         lateinit var challenge: Challenge
         suspendCoroutine<Unit> {
             fireDb.getReference(DbFolder.CHALLENGES.path)
@@ -102,7 +103,7 @@ fun createFullGame(context: Context) {
             val playerRef = fireDb.getReference(DbFolder.PLAYERSESSION.path)
                 .child(game.guid)
                 .push()
-            val session = PlayerSession(
+            session = PlayerSession(
                 playerRef.key!!,
                 userId,
                 game.guid,
@@ -112,5 +113,6 @@ fun createFullGame(context: Context) {
                 it.resume(Unit)
             }
         }
+        return@runBlocking Pair(game, session)
     }
 }

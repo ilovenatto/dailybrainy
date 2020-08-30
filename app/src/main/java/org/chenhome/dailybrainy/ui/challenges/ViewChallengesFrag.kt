@@ -9,7 +9,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.R
@@ -29,7 +28,7 @@ class ViewChallengesFrag : Fragment() {
         // Set the adapter
         if (view is RecyclerView) {
             with(view) {
-                layoutManager = LinearLayoutManager(context)
+                //layoutManager = LinearLayoutManager(context)
                 val challAdapter = ViewChallengesAdapter(ChallengeListener { guid, category ->
                     when (category) {
                         Challenge.Category.CHALLENGE -> viewChallengesVM.navToNewGame(guid)

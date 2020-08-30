@@ -31,7 +31,7 @@ class NewGameFrag : Fragment() {
     ): View? {
         val binding = NewGameFragBinding.inflate(inflater, container, false)
         with(binding.listAvatars) {
-            layoutManager = GridLayoutManager(context, 2)
+            layoutManager = GridLayoutManager(context, 3)
             adapter = AvatarAdapter(AvatarAdapter.AvatarListener {
                 viewModel.onAvatarSelected(it)
             })
@@ -65,7 +65,7 @@ class NewGameFrag : Fragment() {
 
 }
 
-class AvatarAdapter(val listener: AvatarListener) :
+internal class AvatarAdapter(val listener: AvatarListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     val avatars = AvatarImage.values()
