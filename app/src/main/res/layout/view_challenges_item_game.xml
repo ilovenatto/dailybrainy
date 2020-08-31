@@ -5,7 +5,7 @@
 
         <variable
             name="game"
-            type="org.chenhome.dailybrainy.repo.GameStub" />
+            type="org.chenhome.dailybrainy.repo.game.GameStub" />
     </data>
 
     <LinearLayout

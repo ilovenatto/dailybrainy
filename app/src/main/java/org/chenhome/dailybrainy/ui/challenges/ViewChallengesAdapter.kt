@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import org.chenhome.dailybrainy.databinding.ViewChallengesItemChallengeBinding
 import org.chenhome.dailybrainy.databinding.ViewChallengesItemGameBinding
 import org.chenhome.dailybrainy.repo.Challenge
-import org.chenhome.dailybrainy.repo.GameStub
+import org.chenhome.dailybrainy.repo.game.GameStub
 import org.jetbrains.annotations.NotNull
 
 

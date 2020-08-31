@@ -7,9 +7,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import org.chenhome.dailybrainy.repo.Challenge
-import org.chenhome.dailybrainy.repo.FullGame
-import org.chenhome.dailybrainy.repo.FullGameObserver
+import org.chenhome.dailybrainy.repo.FullGameRepo
 import org.chenhome.dailybrainy.repo.Idea
+import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.ui.Event
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -22,8 +22,8 @@ class GenIdeaVM(
     /**
      * Expose FullGame
      */
-    private val fullGameObs = FullGameObserver(context, gameGuid)
-    val fullGame: LiveData<FullGame> = fullGameObs.fullGame
+    private val fullGameRepo = FullGameRepo(context, gameGuid)
+    val fullGame: LiveData<FullGame> = fullGameRepo.fullGame
 
     // Timer
     val countdownTimer = object : CountDownTimer(
@@ -106,12 +106,12 @@ class GenIdeaVM(
                 imgFn = null
             )
             // attempt to insert
-            fullGameObs.IdeaObserver().insertRemote(idea)
+            fullGameRepo.insertRemote(idea)
         }
     }
 
     override fun onCleared() {
-        fullGameObs.onDestroy()
+        fullGameRepo.onClear()
     }
 }
 

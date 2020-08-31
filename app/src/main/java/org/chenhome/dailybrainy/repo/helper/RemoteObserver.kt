@@ -13,7 +13,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.chenhome.dailybrainy.repo.*
+import org.chenhome.dailybrainy.repo.Challenge
+import org.chenhome.dailybrainy.repo.DbFolder
+import org.chenhome.dailybrainy.repo.Game
+import org.chenhome.dailybrainy.repo.PlayerSession
+import org.chenhome.dailybrainy.repo.game.GameStub
 import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -69,7 +73,8 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
  * observer of a lifecycle.
  */
 
-internal class GameStubObserver(val userGuid: String) : ValueEventListener, LifecycleObserver {
+internal class GameStubObserver(private val userGuid: String) : ValueEventListener,
+    LifecycleObserver {
 
     private val fireDb = FirebaseDatabase.getInstance()
     private val fireRef = fireDb

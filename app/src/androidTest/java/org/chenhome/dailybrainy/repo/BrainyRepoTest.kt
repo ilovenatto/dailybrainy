@@ -13,6 +13,7 @@ import com.google.firebase.database.ktx.getValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.chenhome.dailybrainy.TestLifecycleOwner
+import org.chenhome.dailybrainy.repo.game.GameStub
 import org.chenhome.dailybrainy.repo.helper.nukeRemoteDb
 import org.junit.After
 import org.junit.Assert.*

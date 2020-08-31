@@ -7,8 +7,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import org.chenhome.dailybrainy.repo.Challenge
-import org.chenhome.dailybrainy.repo.FullGame
-import org.chenhome.dailybrainy.repo.FullGameObserver
+import org.chenhome.dailybrainy.repo.FullGameRepo
+import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.ui.Event
 import timber.log.Timber
 
@@ -22,21 +22,21 @@ class ViewGameVM(
 ) : ViewModel() {
 
     // Observer gets initialized as soon as ViewGameVM is instantiated
-    private val fullGameObs = FullGameObserver(context, gameGuid)
+    private val fullGameRepo = FullGameRepo(context, gameGuid)
 
     /**
      * Full Game state. Read-only
      */
-    val fullGame: LiveData<FullGame> = fullGameObs.fullGame
+    val fullGame: LiveData<FullGame> = fullGameRepo.fullGame
 
     /**
      * challengeImgUri is URI for challenge hero image
      */
-    val challengeImgUri: LiveData<Uri> = fullGameObs.challengeImgUri
+    val challengeImgUri: LiveData<Uri> = fullGameRepo.challengeImgUri
 
     override fun onCleared() {
         super.onCleared()
-        fullGameObs.onDestroy()
+        fullGameRepo.onClear()
     }
 
     /**

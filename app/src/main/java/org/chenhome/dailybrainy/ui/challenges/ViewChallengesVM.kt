@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import org.chenhome.dailybrainy.repo.BrainyRepo
 import org.chenhome.dailybrainy.repo.Challenge
-import org.chenhome.dailybrainy.repo.GameStub
+import org.chenhome.dailybrainy.repo.game.GameStub
 import org.chenhome.dailybrainy.ui.Event
 
 /**

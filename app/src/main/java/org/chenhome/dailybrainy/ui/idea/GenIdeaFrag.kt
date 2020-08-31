@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.GenIdeaFragBinding
 import org.chenhome.dailybrainy.databinding.GenIdeaItemIdeaBinding
-import org.chenhome.dailybrainy.repo.FullGame
 import org.chenhome.dailybrainy.repo.Idea
+import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.ui.Event
 import org.chenhome.dailybrainy.ui.PlayerAdapter
 import org.jetbrains.annotations.NotNull
@@ -76,6 +76,7 @@ class GenIdeaFrag : Fragment() {
     ) {
         fullGame.observe(viewLifecycleOwner, Observer {
             it?.let {
+                Timber.d("Got challenge ${it.challenge.title}")
                 ideaAdap.ideas = it.ideas
                 playerAdap.setPlayers(it.players)
             }

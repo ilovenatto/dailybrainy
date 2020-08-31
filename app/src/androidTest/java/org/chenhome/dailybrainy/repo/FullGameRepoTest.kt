@@ -28,7 +28,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 @HiltAndroidTest
-class FullGameObserverTest {
+class FullGameRepoTest {
     @get:Rule
     val rule = RuleChain.outerRule(HiltAndroidRule(this))
         .around(InstantTaskExecutorRule())
@@ -42,7 +42,7 @@ class FullGameObserverTest {
     lateinit var session: PlayerSession
     lateinit var challenge: Challenge
     lateinit var userId: String
-    lateinit var fullGameRepo: FullGameObserver
+    lateinit var fullGameRepo: FullGameRepo
 
     @Before
     fun before() {
@@ -103,7 +103,7 @@ class FullGameObserverTest {
                 }
             }
 
-            fullGameRepo = FullGameObserver(appContext, game.guid)
+            fullGameRepo = FullGameRepo(appContext, game.guid)
             lifecycleOwner.reg.currentState = Lifecycle.State.CREATED
             lifecycleOwner.reg.currentState = Lifecycle.State.STARTED
             delay(1500)

@@ -1,4 +1,9 @@
-package org.chenhome.dailybrainy.repo
+package org.chenhome.dailybrainy.repo.game
+
+import org.chenhome.dailybrainy.repo.Challenge
+import org.chenhome.dailybrainy.repo.Game
+import org.chenhome.dailybrainy.repo.Idea
+import org.chenhome.dailybrainy.repo.PlayerSession
 
 /**
  * Domain objects that align more closely with how the UI renders the data.
