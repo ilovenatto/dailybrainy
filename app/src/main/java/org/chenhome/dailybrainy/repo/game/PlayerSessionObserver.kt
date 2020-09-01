@@ -53,12 +53,13 @@ class PlayerSessionObserver(
             snapshot.getValue<PlayerSession>()?.let { changed ->
                 // find existing playersession in list
                 fullGame.value?.players
-                    ?.firstOrNull { changed.guid == it.guid }
-                    ?.let { match ->
-                        Timber.d("Remote session ${changed.guid} changed. Replacing local version")
-                        fullGame.value?.players?.remove(match)
-                        fullGame.value?.players?.add(changed)
-                        fullGame.notifyObserver()
+                    ?.indexOfFirst { changed.guid == it.guid }
+                    ?.let { index ->
+                        if (index >= 0) {
+                            Timber.d("Remote session ${changed.guid} changed. Replacing local version")
+                            fullGame.value?.players?.set(index, changed)
+                            fullGame.notifyObserver()
+                        }
                     }
             }
         } catch (e: Exception) {

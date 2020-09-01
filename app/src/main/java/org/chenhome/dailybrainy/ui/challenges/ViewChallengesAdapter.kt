@@ -23,8 +23,15 @@ class ChallengeListener(val clickListener: (challengeGuid: String, category: Cha
     fun onClick(challenge: Challenge) = clickListener(challenge.guid, challenge.category)
 }
 
+class GameListener(val clickListener: (gameGuid: String) -> Unit) {
+    fun onClick(gameStub: GameStub) = clickListener(gameStub.game.guid)
+}
 
-class ViewChallengesAdapter(private val challengeListener: ChallengeListener) :
+
+class ViewChallengesAdapter(
+    private val challengeListener: ChallengeListener,
+    private val gameListener: GameListener,
+) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var merged = listOf<Any>()
@@ -70,7 +77,7 @@ class ViewChallengesAdapter(private val challengeListener: ChallengeListener) :
                 holder.bind(merged[position] as Challenge, challengeListener)
             }
             is GameViewHolder -> {
-                holder.bind(merged[position] as GameStub)
+                holder.bind(merged[position] as GameStub, gameListener)
             }
             is ViewHolder -> {
                 holder.text1.text = "Unrecognized item"
@@ -81,15 +88,15 @@ class ViewChallengesAdapter(private val challengeListener: ChallengeListener) :
     override fun getItemCount(): Int = merged.size
 
 
-    fun setChallenges(challenges: List<Challenge>) {
+    fun setChallenges(challengesNew: List<Challenge>) {
+        this.challenges = challengesNew
         merged = listOf(challenges, games).flatten()
-        this.challenges = challenges
         notifyDataSetChanged()
     }
 
     fun setGames(gameStubs: List<GameStub>) {
-        merged = listOf(challenges, games).flatten()
         this.games = gameStubs
+        merged = listOf(challenges, games).flatten()
         notifyDataSetChanged()
     }
 
@@ -109,8 +116,9 @@ class ViewChallengesAdapter(private val challengeListener: ChallengeListener) :
 
     inner class GameViewHolder(val binding: @NotNull ViewChallengesItemGameBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(gameStub: GameStub) {
+        fun bind(gameStub: GameStub, listener: GameListener) {
             binding.game = gameStub
+            binding.listener = listener
             binding.executePendingBindings()
         }
     }

@@ -142,10 +142,17 @@ internal class GameStubObserver(private val userGuid: String) : ValueEventListen
                         _gameStubs.value = updatedGameStubs
                     }
 
-                } ?: Timber.w("No remote player sessions found")
+                } ?: handleNoSessions()
             } catch (ex: Exception) {
                 Timber.e("Unable to process game stubs $ex")
             }
+        }
+    }
+
+    private suspend fun handleNoSessions() {
+        withContext(Dispatchers.Main) {
+            Timber.w("No remote player sessions found. Nuking all game stubs locally")
+            _gameStubs.value = listOf()
         }
     }
 }

@@ -36,7 +36,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text='@{"You have " +Integer.toString(vm.vote_votesLeft) + " votes left"'
+                android:text='@{"You have " +Integer.toString(vm.vote_votesLeft) + " votes left"}'
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                 tools:text="You have 5 votes left" />
 
@@ -64,8 +64,8 @@
             android:id="@+id/buttonDone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="@{()->vm.navToNext()}"
             android:enabled="@{vm.vote_votesLeft == 0}"
-            android:onClick="@{()->vm.navToNext()"
             android:text="Done" />
 
     </LinearLayout>

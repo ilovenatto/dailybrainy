@@ -52,12 +52,13 @@ class IdeaObserver(
             snapshot.getValue<Idea>()?.let { changed ->
                 // find existing idea in list
                 fullGame.value?.ideas
-                    ?.firstOrNull { changed.guid == it.guid }
-                    ?.let { match ->
-                        Timber.d("Remote copy changed. Replacing local ${match.guid} with remote ${changed.guid}")
-                        fullGame.value?.ideas?.remove(match)
-                        fullGame.value?.ideas?.add(changed)
-                        fullGame.notifyObserver()
+                    ?.indexOfFirst { changed.guid == it.guid }
+                    ?.let { index ->
+                        if (index >= 0) {
+                            Timber.d("Remote copy changed. Replacing with remote ${changed.guid}")
+                            fullGame.value?.ideas?.set(index, changed)
+                            fullGame.notifyObserver()
+                        }
                     }
             }
         } catch (e: Exception) {

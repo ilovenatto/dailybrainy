@@ -130,7 +130,6 @@ class IdeaVM(
         }
     }
 
-
     /**
      * =======================================
      * Used for Voting Idea "vote_" UI
@@ -141,9 +140,24 @@ class IdeaVM(
      * vote_votesLeft is a external immutable LiveData observable
      * by others
      */
-    private var _vote_votesLeft = MutableLiveData<Integer>()
-    val vote_votesLeft: LiveData<Integer>
+    private var _vote_votesLeft = MutableLiveData<Int>(3)
+    val vote_votesLeft: LiveData<Int>
         get() = _vote_votesLeft
+
+
+    /**
+     * Increments vote for this idea and updates the remote database
+     *
+     * @param idea
+     */
+    fun vote_incrementVoteRemotely(idea: Idea) {
+        val updated = idea.copy()
+        updated.vote()
+        val votes = _vote_votesLeft.value?.dec() ?: 0
+        _vote_votesLeft.value = if (votes < 0) 0 else votes
+        fullGameRepo.updateRemote(updated)
+    }
+
 
     /**
      * =======================================

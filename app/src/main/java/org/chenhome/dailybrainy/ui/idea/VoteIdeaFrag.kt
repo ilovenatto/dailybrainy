@@ -32,7 +32,7 @@ class VoteIdeaFrag : Fragment() {
 
     private val playerAdap = PlayerAdapter()
     private val ideaAdap = VoteIdeaAdapter(VoteIdeaAdapter.Listener { idea ->
-        idea.vote()
+        vm.vote_incrementVoteRemotely(idea)
         Timber.d("voted for idea ${idea}")
     })
 
@@ -45,6 +45,7 @@ class VoteIdeaFrag : Fragment() {
         binding.listIdeas.adapter = ideaAdap
         binding.listPlayers.adapter = playerAdap
         binding.lifecycleOwner = viewLifecycleOwner
+
         binding.executePendingBindings()
 
         initAdapterObservers(vm.fullGame, ideaAdap, playerAdap)

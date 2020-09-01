@@ -43,10 +43,6 @@ class GenIdeaFrag : Fragment() {
         binding.listPlayers.adapter = playerAdap
         binding.lifecycleOwner = viewLifecycleOwner
 
-        binding.buttonDone.setOnClickListener {
-            vm.navToNext()
-        }
-
         binding.executePendingBindings()
 
         initAdapterObservers(vm.fullGame, ideaAdap, playerAdap)
