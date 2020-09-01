@@ -61,9 +61,22 @@ class ViewGameFrag : Fragment() {
         vm.navToStep.observe(viewLifecycleOwner, Observer {
             it.contentIfNotHandled()?.run {
                 val dir: NavDirections = when (this) {
-                    Challenge.Step.GEN_IDEA -> ViewGameFragDirections.actionViewGameFragToGenIdeaFrag(
-                        vm.gameGuid)
-                    // TODO: 8/29/20  put in other directions
+                    Challenge.Step.GEN_IDEA -> ViewGameFragDirections
+                        .actionViewGameFragToGenIdeaFrag(vm.gameGuid)
+                    Challenge.Step.VOTE_IDEA -> ViewGameFragDirections
+                        .actionViewGameFragToVoteIdeaFrag(vm.gameGuid)
+                    Challenge.Step.REVIEW_IDEA -> ViewGameFragDirections
+                        .actionViewGameFragToRevIdeaFrag(vm.gameGuid)
+                    Challenge.Step.GEN_SKETCH -> ViewGameFragDirections
+                        .actionViewGameFragToGenSketchFrag(vm.gameGuid)
+                    Challenge.Step.VOTE_SKETCH -> ViewGameFragDirections
+                        .actionViewGameFragToVoteSketchFrag(vm.gameGuid)
+                    Challenge.Step.REVIEW_SKETCH -> ViewGameFragDirections
+                        .actionViewGameFragToRevSketchFrag(vm.gameGuid)
+                    Challenge.Step.CREATE_STORYBOARD -> ViewGameFragDirections
+                        .actionViewGameFragToCreateStoryFrag(vm.gameGuid)
+                    Challenge.Step.VIEW_STORYBOARD -> ViewGameFragDirections
+                        .actionViewGameFragToReviewStoryFrag(vm.gameGuid)
                     else -> throw Exception("Encountered unsupported Challenge step $this")
                 }
                 Timber.d("Navigating to $dir")

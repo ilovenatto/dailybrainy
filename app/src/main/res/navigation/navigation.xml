@@ -55,6 +55,34 @@
             android:id="@+id/action_viewGameFrag_to_genIdeaFrag"
             app:destination="@id/genIdeaFrag"
             app:popUpTo="@id/viewGameFrag" />
+        <action
+            android:id="@+id/action_viewGameFrag_to_voteIdeaFrag"
+            app:destination="@id/voteIdeaFrag"
+            app:popUpTo="@id/viewGameFrag" />
+        <action
+            android:id="@+id/action_viewGameFrag_to_revIdeaFrag"
+            app:destination="@id/revIdeaFrag"
+            app:popUpTo="@id/viewGameFrag" />
+        <action
+            android:id="@+id/action_viewGameFrag_to_genSketchFrag"
+            app:destination="@id/genSketchFrag"
+            app:popUpTo="@id/viewGameFrag" />
+        <action
+            android:id="@+id/action_viewGameFrag_to_voteSketchFrag"
+            app:destination="@id/voteSketchFrag"
+            app:popUpTo="@id/viewGameFrag" />
+        <action
+            android:id="@+id/action_viewGameFrag_to_revSketchFrag"
+            app:destination="@id/revSketchFrag"
+            app:popUpTo="@id/viewGameFrag" />
+        <action
+            android:id="@+id/action_viewGameFrag_to_createStoryFrag"
+            app:destination="@id/createStoryFrag"
+            app:popUpTo="@id/viewGameFrag" />
+        <action
+            android:id="@+id/action_viewGameFrag_to_reviewStoryFrag"
+            app:destination="@id/reviewStoryFrag"
+            app:popUpTo="@id/viewGameFrag" />
     </fragment>
     <fragment
         android:id="@+id/genIdeaFrag"
@@ -64,15 +92,96 @@
         <argument
             android:name="gameGuid"
             app:argType="string" />
-        <action
-            android:id="@+id/action_genIdeaFrag_to_voteIdeaFrag"
-            app:destination="@id/voteIdeaFrag" />
     </fragment>
     <fragment
         android:id="@+id/voteIdeaFrag"
-        android:name="org.chenhome.dailybrainy.VoteIdeaFrag"
+        android:name="org.chenhome.dailybrainy.ui.idea.VoteIdeaFrag"
         android:label="fragment_vote_idea"
-        tools:layout="@layout/fragment_vote_idea">
+        tools:layout="@layout/vote_idea_frag">
+        <argument
+            android:name="gameGuid"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/revIdeaFrag"
+        android:name="org.chenhome.dailybrainy.ui.idea.RevIdeaFrag"
+        android:label="fragment_rev_idea"
+        tools:layout="@layout/rev_idea_frag">
+        <argument
+            android:name="gameGuid"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/genSketchFrag"
+        android:name="org.chenhome.dailybrainy.ui.sketch.GenSketchFrag"
+        android:label="fragment_gen_sketch"
+        tools:layout="@layout/gen_sketch_frag">
+        <argument
+            android:name="gameGuid"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_genSketchFrag_to_captureSketchFrag"
+            app:destination="@id/captureSketchFrag"
+            app:popUpTo="@id/genSketchFrag" />
+        <action
+            android:id="@+id/action_genSketchFrag_to_viewSketchFrag"
+            app:destination="@id/viewSketchFrag"
+            app:popUpTo="@id/genSketchFrag" />
+    </fragment>
+    <fragment
+        android:id="@+id/voteSketchFrag"
+        android:name="org.chenhome.dailybrainy.ui.sketch.VoteSketchFrag"
+        android:label="fragment_vote_sketch"
+        tools:layout="@layout/vote_sketch_frag">
+        <argument
+            android:name="gameGuid"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_voteSketchFrag_to_viewSketchFrag"
+            app:destination="@id/viewSketchFrag"
+            app:popUpTo="@id/voteSketchFrag" />
+    </fragment>
+    <fragment
+        android:id="@+id/revSketchFrag"
+        android:name="org.chenhome.dailybrainy.ui.sketch.RevSketchFrag"
+        android:label="fragment_rev_sketch"
+        tools:layout="@layout/rev_sketch_frag">
+        <argument
+            android:name="gameGuid"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_revSketchFrag_to_viewSketchFrag"
+            app:destination="@id/viewSketchFrag"
+            app:popUpTo="@id/revSketchFrag" />
+    </fragment>
+    <fragment
+        android:id="@+id/viewSketchFrag"
+        android:name="org.chenhome.dailybrainy.ui.sketch.ViewSketchFrag"
+        android:label="fragment_view_sketch"
+        tools:layout="@layout/view_sketch_frag">
+        <argument
+            android:name="imgFn"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/captureSketchFrag"
+        android:name="org.chenhome.dailybrainy.ui.sketch.CaptureSketchFrag"
+        android:label="fragment_capture_sketch"
+        tools:layout="@layout/cap_sketch_frag" />
+    <fragment
+        android:id="@+id/createStoryFrag"
+        android:name="org.chenhome.dailybrainy.ui.story.CreateStoryFrag"
+        android:label="fragment_create_story"
+        tools:layout="@layout/create_story_frag">
+        <argument
+            android:name="gameGuid"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/reviewStoryFrag"
+        android:name="org.chenhome.dailybrainy.ui.story.ReviewStoryFrag"
+        android:label="fragment_review_story"
+        tools:layout="@layout/rev_story_frag">
         <argument
             android:name="gameGuid"
             app:argType="string" />

@@ -28,42 +28,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:text="@string/genidea_instruction"
+                android:text="@string/vote_idea"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
             <TextView
-                android:id="@+id/textHmw"
+                android:id="@+id/textVotes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@{vm.fullGame.challenge.title}"
+                android:text='@{"You have " +Integer.toString(vm.vote_votesLeft) + " votes left"'
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                tools:text="How might we foo bar" />
+                tools:text="You have 5 votes left" />
 
-            <EditText
-                android:id="@+id/textIdea"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:ems="10"
-                android:gravity="start|top"
-                android:hint="What's your idea?"
-                android:inputType="textMultiLine"
-                android:text="@={vm.gen_newIdea}" />
-
-            <TextView
-                android:id="@+id/textTimer"
-                android:layout_width="106dp"
-                android:layout_height="wrap_content"
-                android:text='@{"Time left " + vm.gen_countdown}' />
-
-            <Button
-                android:id="@+id/buttonAdd"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="@{()->vm.gen_addIdea()}"
-                android:enabled="@{vm.gen_newIdea.length() >=0}"
-                android:text="Add" />
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -88,7 +64,8 @@
             android:id="@+id/buttonDone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
+            android:enabled="@{vm.vote_votesLeft == 0}"
+            android:onClick="@{()->vm.navToNext()"
             android:text="Done" />
 
     </LinearLayout>

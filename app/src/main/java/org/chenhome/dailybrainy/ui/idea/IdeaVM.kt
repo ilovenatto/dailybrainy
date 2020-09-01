@@ -5,7 +5,6 @@ import android.os.CountDownTimer
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.FullGameRepo
 import org.chenhome.dailybrainy.repo.Idea
@@ -14,19 +13,51 @@ import org.chenhome.dailybrainy.ui.Event
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
-class GenIdeaVM(
+class IdeaVM(
     context: Context,
     gameGuid: String,
 ) : ViewModel() {
 
     /**
+     * =======================================
+     * Common UI state across Generate, Vote and Review Idea
+     * =======================================
+     *
+     *
+     */
+
+    /**
      * Expose FullGame
      */
-    private val fullGameRepo = FullGameRepo(context, gameGuid)
+    internal val fullGameRepo = FullGameRepo(context, gameGuid)
     val fullGame: LiveData<FullGame> = fullGameRepo.fullGame
 
+    /**
+     * navToNext is a external immutable LiveData observable
+     * by others
+     */
+    private var _navToNext = MutableLiveData<Event<Boolean>>()
+    val navToNext: LiveData<Event<Boolean>>
+        get() = _navToNext
+
+    fun navToNext() {
+        _navToNext.value = Event(true)
+    }
+
+    override fun onCleared() {
+        fullGameRepo.onClear()
+    }
+
+
+    /**
+     * =======================================
+     * Used for Generating Idea "gen_" UI
+     * =======================================
+     *
+     *
+     */
     // Timer
-    val countdownTimer = object : CountDownTimer(
+    val gen_countdownTimer = object : CountDownTimer(
         TimeUnit.SECONDS.toMillis(Challenge.Step.GEN_IDEA.allowedSecs),
         TimeUnit.SECONDS.toMillis(1)) {
         override fun onTick(millisUntilFinished: Long) {
@@ -50,7 +81,7 @@ class GenIdeaVM(
      * by others
      */
     private var _countdown = MutableLiveData<String>("N/A")
-    val countdown: LiveData<String>
+    val gen_countdown: LiveData<String>
         get() = _countdown
 
     /**
@@ -58,36 +89,25 @@ class GenIdeaVM(
      * by others
      */
     private var _countdownOver = MutableLiveData<Boolean>(false)
-    val countdownOver: LiveData<Boolean>
+    val gen_countdownOver: LiveData<Boolean>
         get() = _countdownOver
 
     /**
      * New idea from user
      */
-    var newIdea: MutableLiveData<String> = MutableLiveData("")
+    var gen_newIdea: MutableLiveData<String> = MutableLiveData("")
 
-    /**
-     * navToNext is a external immutable LiveData observable
-     * by others
-     */
-    private var _navToNext = MutableLiveData<Event<Boolean>>()
-    val navToNext: LiveData<Event<Boolean>>
-        get() = _navToNext
-
-    fun navToNext() {
-        _navToNext.value = Event(true)
-    }
 
     /**
      * addIdea is a external immutable LiveData observable
      * by others
      */
     private var _addIdea = MutableLiveData<Event<Boolean>>()
-    val addIdea: LiveData<Event<Boolean>>
+    val gen_addIdea: LiveData<Event<Boolean>>
         get() = _addIdea
 
-    fun addIdea() {
-        if (newIdea.value?.isEmpty() != false) {
+    fun gen_addIdea() {
+        if (gen_newIdea.value?.isEmpty() != false) {
             Timber.w("No idea to add")
             return
         }
@@ -102,7 +122,7 @@ class GenIdeaVM(
                 playerName = "",
                 origin = Idea.Origin.BRAINSTORM,
                 votes = 0,
-                title = newIdea.value,
+                title = gen_newIdea.value,
                 imgFn = null
             )
             // attempt to insert
@@ -110,20 +130,25 @@ class GenIdeaVM(
         }
     }
 
-    override fun onCleared() {
-        fullGameRepo.onClear()
-    }
-}
 
+    /**
+     * =======================================
+     * Used for Voting Idea "vote_" UI
+     * =======================================
+     *
+     */
+    /**
+     * vote_votesLeft is a external immutable LiveData observable
+     * by others
+     */
+    private var _vote_votesLeft = MutableLiveData<Integer>()
+    val vote_votesLeft: LiveData<Integer>
+        get() = _vote_votesLeft
 
-class GenIdeaVMFactory(
-    private val context: Context,
-    private val gameGuid: String,
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(GenIdeaVM::class.java)) {
-            return GenIdeaVM(context, gameGuid) as T
-        }
-        throw IllegalArgumentException("Unsupported GenIdeaVM type $modelClass")
-    }
+    /**
+     * =======================================
+     * Used for Review Idea "rev_" UI
+     * =======================================
+     *
+     */
 }
