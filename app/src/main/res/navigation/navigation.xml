@@ -105,15 +105,6 @@
             app:argType="string" />
     </fragment>
     <fragment
-        android:id="@+id/revIdeaFrag"
-        android:name="org.chenhome.dailybrainy.ui.idea.RevIdeaFrag"
-        android:label="fragment_rev_idea"
-        tools:layout="@layout/rev_idea_frag">
-        <argument
-            android:name="gameGuid"
-            app:argType="string" />
-    </fragment>
-    <fragment
         android:id="@+id/genSketchFrag"
         android:name="org.chenhome.dailybrainy.ui.sketch.GenSketchFrag"
         android:label="fragment_gen_sketch"
@@ -142,19 +133,6 @@
             android:id="@+id/action_voteSketchFrag_to_viewSketchFrag"
             app:destination="@id/viewSketchFrag"
             app:popUpTo="@id/voteSketchFrag" />
-    </fragment>
-    <fragment
-        android:id="@+id/revSketchFrag"
-        android:name="org.chenhome.dailybrainy.ui.sketch.RevSketchFrag"
-        android:label="fragment_rev_sketch"
-        tools:layout="@layout/rev_sketch_frag">
-        <argument
-            android:name="gameGuid"
-            app:argType="string" />
-        <action
-            android:id="@+id/action_revSketchFrag_to_viewSketchFrag"
-            app:destination="@id/viewSketchFrag"
-            app:popUpTo="@id/revSketchFrag" />
     </fragment>
     <fragment
         android:id="@+id/viewSketchFrag"
