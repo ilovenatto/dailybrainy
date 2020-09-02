@@ -36,11 +36,13 @@ class IdeaObserver(
         try {
             snapshot.getValue<Idea>()?.let { added ->
                 // only add item if it's not already in list
-                fullGame.value?.ideas?.firstOrNull { added.guid == it.guid } ?: run {
-                    Timber.d("Adding idea $added to list of size ${fullGame.value?.ideas?.size}")
-                    fullGame.value?.ideas?.add(added)
+                var ideaList = if (added.isSketch()) fullGame.value?.sketches else
+                    fullGame.value?.ideas
+                ideaList?.firstOrNull { added.guid == it.guid } ?: ideaList?.let {
+                    Timber.d("Adding idea $added to list of size ${it.size}")
+                    it.add(added)
                     fullGame.notifyObserver()
-                }
+                } ?: Timber.w("Null list. Unable to add idea to it")
             }
         } catch (e: Exception) {
             Timber.e("Unable to add idea $fireRef, $e")
@@ -51,12 +53,13 @@ class IdeaObserver(
         try {
             snapshot.getValue<Idea>()?.let { changed ->
                 // find existing idea in list
-                fullGame.value?.ideas
-                    ?.indexOfFirst { changed.guid == it.guid }
+                var ideaList = if (changed.isSketch()) fullGame.value?.sketches else
+                    fullGame.value?.ideas
+                ideaList?.indexOfFirst { changed.guid == it.guid }
                     ?.let { index ->
                         if (index >= 0) {
                             Timber.d("Remote copy changed. Replacing with remote ${changed.guid}")
-                            fullGame.value?.ideas?.set(index, changed)
+                            ideaList.set(index, changed)
                             fullGame.notifyObserver()
                         }
                     }
@@ -73,6 +76,7 @@ class IdeaObserver(
             snapshot.getValue<Idea>()?.let {
                 Timber.d("Removing idea $it")
                 fullGame.value?.ideas?.remove(it)
+                fullGame.value?.sketches?.remove(it)
                 fullGame.notifyObserver()
             }
         } catch (e: Exception) {

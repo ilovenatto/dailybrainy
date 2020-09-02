@@ -7,19 +7,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.GenIdeaFragBinding
-import org.chenhome.dailybrainy.databinding.GenIdeaItemIdeaBinding
-import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.ui.Event
 import org.chenhome.dailybrainy.ui.GameVMFactory
+import org.chenhome.dailybrainy.ui.IdeaAdapter
 import org.chenhome.dailybrainy.ui.PlayerAdapter
-import org.jetbrains.annotations.NotNull
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -53,60 +49,37 @@ class GenIdeaFrag : Fragment() {
     override fun onResume() {
         super.onResume()
         Timber.d("Starting timer")
-        vm.gen_countdownTimer.start()
+        vm.generate.countdownTimer.start()
     }
 
     override fun onPause() {
         super.onPause()
-        vm.gen_countdownTimer.cancel()
+        vm.generate.countdownTimer.cancel()
     }
 
-    private fun initNavObserver(navToNext: LiveData<Event<Boolean>>) {
-        navToNext.observe(viewLifecycleOwner, Observer {
+    private fun initNavObserver(
+        navToNext: LiveData<Event<Boolean>>,
+    ) {
+        navToNext.observe(viewLifecycleOwner, {
             it.contentIfNotHandled()?.run {
                 findNavController().popBackStack()
             }
         })
     }
 
+
     private fun initAdapterObservers(
         fullGame: LiveData<FullGame>,
         ideaAdap: IdeaAdapter,
         playerAdap: PlayerAdapter,
     ) {
-        fullGame.observe(viewLifecycleOwner, Observer {
+        fullGame.observe(viewLifecycleOwner, {
             it?.let {
                 Timber.d("Got challenge ${it.challenge.title}")
                 ideaAdap.ideas = it.ideas
-                playerAdap.setPlayers(it.players)
+                playerAdap.players = it.players
             }
         })
     }
 
-}
-
-internal class IdeaAdapter :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    var ideas: MutableList<Idea> = mutableListOf()
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
-        IdeaVH(GenIdeaItemIdeaBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as IdeaVH).bind(ideas[position])
-    }
-
-    override fun getItemCount(): Int = ideas.size
-
-    inner class IdeaVH(val binding: @NotNull GenIdeaItemIdeaBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(idea: Idea) {
-            binding.idea = idea
-        }
-    }
 }

@@ -1,14 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.sketch.GenSketchFrag">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <data>
+
+        <variable
+            name="vm"
+            type="org.chenhome.dailybrainy.ui.sketch.SketchVM" />
+    </data>
+
+    <LinearLayout
+        android:id="@+id/linear"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_margin="12dp"
+        android:orientation="vertical">
 
-</FrameLayout>
+        <LinearLayout
+            android:id="@+id/header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textInstruction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="@string/gen_sketch"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+            <TextView
+                android:id="@+id/textHmw"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@{vm.fullGame.challenge.title}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                tools:text="How might we foo bar" />
+
+
+            <TextView
+                android:id="@+id/textTimer"
+                android:layout_width="106dp"
+                android:layout_height="wrap_content"
+                android:text='@{"Time left " + vm.generate.countdown}'
+                tools:text="Time left 03:00" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/listIdeas"
+                android:layout_width="match_parent"
+                android:layout_height="75dp"
+                android:layout_marginTop="24dp"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:spanCount="3"
+                tools:itemCount="3"
+                tools:listitem="@layout/gen_idea_item_idea" />
+            <!--
+                        <Button
+                            android:id="@+id/buttonCapture"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:onClick="@{()->vm.gen_navToCapture()}"
+                            android:text="Capture sketch" />
+            -->
+        </LinearLayout>
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listSketches"
+            android:layout_width="match_parent"
+            android:layout_height="190dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="16dp"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="3"
+            tools:itemCount="4"
+            tools:listitem="@layout/gen_sketch_item" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listPlayers"
+            android:layout_width="357dp"
+            android:layout_height="92dp"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="5"
+            tools:itemCount="4"
+            tools:listitem="@layout/view_game_item_player" />
+
+        <Button
+            android:id="@+id/buttonDone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{()->vm.navToNext()}"
+            android:text="Done" />
+
+    </LinearLayout>
+</layout>

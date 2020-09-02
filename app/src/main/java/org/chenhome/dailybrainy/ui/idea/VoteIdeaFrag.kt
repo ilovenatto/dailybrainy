@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
@@ -32,8 +31,8 @@ class VoteIdeaFrag : Fragment() {
 
     private val playerAdap = PlayerAdapter()
     private val ideaAdap = VoteIdeaAdapter(VoteIdeaAdapter.Listener { idea ->
-        vm.vote_incrementVoteRemotely(idea)
-        Timber.d("voted for idea ${idea}")
+        vm.vote.incrementVoteRemotely(idea)
+        Timber.d("voted for idea $idea")
     })
 
     override fun onCreateView(
@@ -56,16 +55,16 @@ class VoteIdeaFrag : Fragment() {
     override fun onResume() {
         super.onResume()
         Timber.d("Starting timer")
-        vm.gen_countdownTimer.start()
+        vm.generate.countdownTimer.start()
     }
 
     override fun onPause() {
         super.onPause()
-        vm.gen_countdownTimer.cancel()
+        vm.generate.countdownTimer.cancel()
     }
 
     private fun initNavObserver(navToNext: LiveData<Event<Boolean>>) {
-        navToNext.observe(viewLifecycleOwner, Observer {
+        navToNext.observe(viewLifecycleOwner, {
             it.contentIfNotHandled()?.run {
                 findNavController().popBackStack()
             }
@@ -77,10 +76,10 @@ class VoteIdeaFrag : Fragment() {
         voteIdeaAdap: VoteIdeaAdapter,
         playerAdap: PlayerAdapter,
     ) {
-        fullGame.observe(viewLifecycleOwner, Observer {
+        fullGame.observe(viewLifecycleOwner, {
             it?.let {
                 voteIdeaAdap.ideas = it.ideas
-                playerAdap.setPlayers(it.players)
+                playerAdap.players = it.players
             }
         })
     }

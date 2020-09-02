@@ -98,12 +98,6 @@ data class Challenge(
             TimeUnit.MINUTES.toSeconds(3),
             CountType.NUM_VOTES
         ),
-        REVIEW_IDEA(
-            org.chenhome.dailybrainy.R.string.reviewidea,
-            Phase.BRAINSTORM,
-            TimeUnit.MINUTES.toSeconds(1),
-            CountType.NUM_POPULAR
-        ),
 
         // Sketch
         GEN_SKETCH(
@@ -118,13 +112,6 @@ data class Challenge(
             Phase.SKETCH,
             TimeUnit.MINUTES.toSeconds(2),
             CountType.NUM_VOTES
-        ),
-
-        REVIEW_SKETCH(
-            org.chenhome.dailybrainy.R.string.reviewsketch,
-            Phase.SKETCH,
-            TimeUnit.MINUTES.toSeconds(2),
-            CountType.NUM_POPULAR
         ),
 
         // Share
@@ -261,6 +248,11 @@ data class Idea(
         title = null,
         imgFn = null
     )
+
+    /**
+     * @return whether this IDea is considered a sketch (with a drawing) or not
+     */
+    fun isSketch(): Boolean = imgFn?.isNotEmpty() ?: false
 
     fun vote() {
         votes += 1

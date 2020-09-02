@@ -62,20 +62,12 @@
             app:destination="@id/voteIdeaFrag"
             app:popUpTo="@id/viewGameFrag" />
         <action
-            android:id="@+id/action_viewGameFrag_to_revIdeaFrag"
-            app:destination="@id/revIdeaFrag"
-            app:popUpTo="@id/viewGameFrag" />
-        <action
             android:id="@+id/action_viewGameFrag_to_genSketchFrag"
             app:destination="@id/genSketchFrag"
             app:popUpTo="@id/viewGameFrag" />
         <action
             android:id="@+id/action_viewGameFrag_to_voteSketchFrag"
             app:destination="@id/voteSketchFrag"
-            app:popUpTo="@id/viewGameFrag" />
-        <action
-            android:id="@+id/action_viewGameFrag_to_revSketchFrag"
-            app:destination="@id/revSketchFrag"
             app:popUpTo="@id/viewGameFrag" />
         <action
             android:id="@+id/action_viewGameFrag_to_createStoryFrag"

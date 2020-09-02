@@ -39,6 +39,7 @@ class FullGameRepoTest {
 
     lateinit var game: Game
     lateinit var idea: Idea
+    lateinit var sketch: Idea
     lateinit var session: PlayerSession
     lateinit var challenge: Challenge
     lateinit var userId: String
@@ -87,6 +88,19 @@ class FullGameRepoTest {
                 }
             }
 
+            suspendCoroutine<Unit> {
+                val ideaRef2 = fireDb.getReference(DbFolder.IDEAS.path)
+                    .child(game.guid)
+                    .push()
+                sketch = Idea(
+                    ideaRef2.key!!, game.guid, userId,
+                    Idea.Origin.SKETCH)
+                sketch.imgFn = "12341342"
+                ideaRef2.setValue(sketch) { _, _ ->
+                    it.resume(Unit)
+                }
+            }
+
             // create session
             suspendCoroutine<Unit> {
                 val playerRef = fireDb.getReference(DbFolder.PLAYERSESSION.path)
@@ -128,7 +142,9 @@ class FullGameRepoTest {
                     assertEquals(game, fullGame.game)
                     assertEquals(challenge, fullGame.challenge)
                     assertEquals(1, fullGame.ideas.size)
+                    assertEquals(1, fullGame.sketches.size)
                     assertEquals(idea, fullGame.ideas[0])
+                    assertEquals(sketch, fullGame.sketches[0])
                     assertEquals(1, fullGame.players.size)
                     assertEquals(session, fullGame.players[0])
                     cont.resume(Unit)
@@ -150,7 +166,9 @@ class FullGameRepoTest {
             // insert and wait
             val idea2 = Idea("123", game.guid, userId, Idea.Origin.SKETCH)
             fullGameRepo.insertRemote(idea2)
-            fullGameRepo.insertRemote(idea2)
+
+            val idea3 = idea2.copy(imgFn = "asdfadfs")
+            fullGameRepo.insertRemote(idea3)
 
             delay(1500)
 
@@ -158,7 +176,8 @@ class FullGameRepoTest {
             suspendCoroutine<Unit> { cont ->
                 fullGameRepo.fullGame.observe(lifecycleOwner, Observer { fullGame ->
                     Timber.d("Observed ${fullGame.ideas.size} ideas and ${fullGame.players.size} sessions")
-                    assertEquals(3, fullGame.ideas.size)
+                    assertEquals(2, fullGame.ideas.size)
+                    assertEquals(2, fullGame.sketches.size)
                     assertEquals(idea, fullGame.ideas[0])
                     assert(idea.playerName!!.isNotEmpty())
 

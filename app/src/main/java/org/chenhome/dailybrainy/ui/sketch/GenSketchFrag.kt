@@ -5,56 +5,81 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import org.chenhome.dailybrainy.R
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.LiveData
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import dagger.hilt.android.AndroidEntryPoint
+import org.chenhome.dailybrainy.databinding.GenSketchFragBinding
+import org.chenhome.dailybrainy.repo.game.FullGame
+import org.chenhome.dailybrainy.ui.*
+import timber.log.Timber
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [GenSketchFrag.newInstance] factory method to
- * create an instance of this fragment.
- */
+@AndroidEntryPoint
 class GenSketchFrag : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+    private val args: GenSketchFragArgs by navArgs()
+    private val vm: SketchVM by viewModels {
+        GameVMFactory(requireContext(), args.gameGuid)
     }
+
+    private val playerAdap = PlayerAdapter()
+    private val ideaAdap = IdeaAdapter()
+    private val sketchAdap = SketchAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.gen_sketch_frag, container, false)
+        val binding = GenSketchFragBinding.inflate(LayoutInflater.from(context), container, false)
+        binding.vm = vm
+        binding.listIdeas.adapter = ideaAdap
+        binding.listPlayers.adapter = playerAdap
+        binding.listSketches.adapter = sketchAdap
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.executePendingBindings()
+
+        initAdapterObservers(vm.fullGame, ideaAdap, playerAdap, sketchAdap)
+        initNavObserver(vm.navToNext)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment GenSketchFrag.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            GenSketchFrag().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onResume() {
+        super.onResume()
+        vm.generate.countdownTimer.start()
     }
+
+    override fun onPause() {
+        super.onPause()
+        vm.generate.countdownTimer.cancel()
+    }
+
+    private fun initNavObserver(
+        navToNext: LiveData<Event<Boolean>>,
+    ) {
+        navToNext.observe(viewLifecycleOwner, {
+            it.contentIfNotHandled()?.run {
+                findNavController().popBackStack()
+            }
+        })
+    }
+
+
+    private fun initAdapterObservers(
+        fullGame: LiveData<FullGame>,
+        ideaAdap: IdeaAdapter,
+        playerAdap: PlayerAdapter,
+        sketchAdap: SketchAdapter,
+    ) {
+        fullGame.observe(viewLifecycleOwner, {
+            it?.let {
+                Timber.d("Got challenge ${it.challenge.title}")
+                ideaAdap.ideas = it.ideas
+                playerAdap.players = it.players
+                sketchAdap.sketches = it.sketches
+            }
+        })
+    }
+
 }
+

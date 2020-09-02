@@ -49,20 +49,20 @@
                 android:gravity="start|top"
                 android:hint="What's your idea?"
                 android:inputType="textMultiLine"
-                android:text="@={vm.gen_newIdea}" />
+                android:text="@={vm.newIdea}" />
 
             <TextView
                 android:id="@+id/textTimer"
                 android:layout_width="106dp"
                 android:layout_height="wrap_content"
-                android:text='@{"Time left " + vm.gen_countdown}' />
+                android:text='@{"Time left " + vm.generate.countdown}' />
 
             <Button
                 android:id="@+id/buttonAdd"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="@{()->vm.gen_addIdea()}"
-                android:enabled="@{vm.gen_newIdea.length() >=0}"
+                android:onClick="@{()->vm.addIdea()}"
+                android:enabled="@{vm.newIdea.length() >=0}"
                 android:text="Add" />
         </LinearLayout>
 

@@ -46,7 +46,7 @@ class ViewGameFrag : Fragment() {
         vm.fullGame.observe(viewLifecycleOwner, Observer {
             it?.let {
                 stepAdap.setCurrentStep(it.game.currentStep)
-                playerAdap.setPlayers(it.players)
+                playerAdap.players = it.players
                 binding.vm = vm
                 binding.executePendingBindings()
 
@@ -65,14 +65,10 @@ class ViewGameFrag : Fragment() {
                         .actionViewGameFragToGenIdeaFrag(vm.gameGuid)
                     Challenge.Step.VOTE_IDEA -> ViewGameFragDirections
                         .actionViewGameFragToVoteIdeaFrag(vm.gameGuid)
-                    Challenge.Step.REVIEW_IDEA -> ViewGameFragDirections
-                        .actionViewGameFragToRevIdeaFrag(vm.gameGuid)
                     Challenge.Step.GEN_SKETCH -> ViewGameFragDirections
                         .actionViewGameFragToGenSketchFrag(vm.gameGuid)
                     Challenge.Step.VOTE_SKETCH -> ViewGameFragDirections
                         .actionViewGameFragToVoteSketchFrag(vm.gameGuid)
-                    Challenge.Step.REVIEW_SKETCH -> ViewGameFragDirections
-                        .actionViewGameFragToRevSketchFrag(vm.gameGuid)
                     Challenge.Step.CREATE_STORYBOARD -> ViewGameFragDirections
                         .actionViewGameFragToCreateStoryFrag(vm.gameGuid)
                     Challenge.Step.VIEW_STORYBOARD -> ViewGameFragDirections

@@ -3,18 +3,20 @@ package org.chenhome.dailybrainy.ui
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import org.chenhome.dailybrainy.databinding.GenIdeaItemIdeaBinding
+import org.chenhome.dailybrainy.databinding.GenSketchItemBinding
 import org.chenhome.dailybrainy.databinding.ViewGameItemPlayerBinding
+import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.PlayerSession
 import org.jetbrains.annotations.NotNull
 
 internal class PlayerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var players: MutableList<PlayerSession> = mutableListOf()
-    fun setPlayers(value: MutableList<PlayerSession>) {
-        players = value
-        notifyDataSetChanged()
-    }
-
+    var players: MutableList<PlayerSession> = mutableListOf()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return PlayerVH(ViewGameItemPlayerBinding.inflate(LayoutInflater.from(parent.context),
@@ -36,4 +38,63 @@ internal class PlayerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
+}
+
+internal class IdeaAdapter :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    var ideas: MutableList<Idea> = mutableListOf()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
+        IdeaVH(GenIdeaItemIdeaBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        (holder as IdeaVH).bind(ideas[position])
+    }
+
+    override fun getItemCount(): Int = ideas.size
+
+    class IdeaVH(val binding: @NotNull GenIdeaItemIdeaBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(idea: Idea) {
+            binding.idea = idea
+        }
+    }
+}
+
+
+internal class SketchAdapter :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    var sketches: MutableList<Idea> = mutableListOf()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
+        SketchVH(GenSketchItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        (holder as SketchVH).bind(sketches[position])
+    }
+
+    override fun getItemCount(): Int = sketches.size
+
+    class SketchVH(val binding: @NotNull GenSketchItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(idea: Idea) {
+            binding.idea = idea
+
+            // specially handle the image
+            idea.imgFn?.let {
+                // TODO: 9/1/20 Get StorageRef URI for this sketch
+//                bindImage(binding.imageSketch,it)
+            }
+        }
+    }
 }
