@@ -57,14 +57,14 @@
                 app:spanCount="3"
                 tools:itemCount="3"
                 tools:listitem="@layout/gen_idea_item_idea" />
-            <!--
-                        <Button
-                            android:id="@+id/buttonCapture"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:onClick="@{()->vm.gen_navToCapture()}"
-                            android:text="Capture sketch" />
-            -->
+
+            <Button
+                android:id="@+id/buttonCapture"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="@{()->vm.captureSketch()}"
+                android:text="Capture sketch" />
+
         </LinearLayout>
 
 

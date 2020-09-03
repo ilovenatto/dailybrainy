@@ -135,6 +135,7 @@ class FullGameRepoTest {
     fun testFullGame() {
         runBlocking {
             Timber.d("Started test")
+            delay(3000) // give time for BrainyRepo to get some challenges
             suspendCoroutine<Unit> { cont ->
                 fullGameRepo.fullGame.observe(lifecycleOwner, Observer { fullGame ->
                     Timber.d("Observed ${fullGame.ideas.size} ideas and ${fullGame.players.size} sessions")

@@ -48,15 +48,11 @@ class ViewGameFrag : Fragment() {
                 stepAdap.setCurrentStep(it.game.currentStep)
                 playerAdap.players = it.players
                 binding.vm = vm
+                bindImage(binding.imageChallenge, it.challenge.imageUri)
                 binding.executePendingBindings()
 
             }
         })
-        vm.challengeImgUri.observe(viewLifecycleOwner) {
-            Timber.d("Observed challenge img uri $it")
-            // specially handle the image
-            bindImage(binding.imageChallenge, it)
-        }
 
         vm.navToStep.observe(viewLifecycleOwner, Observer {
             it.contentIfNotHandled()?.run {

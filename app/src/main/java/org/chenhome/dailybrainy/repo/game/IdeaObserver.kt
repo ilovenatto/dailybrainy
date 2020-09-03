@@ -1,13 +1,20 @@
 package org.chenhome.dailybrainy.repo.game
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.getValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.repo.DbFolder
 import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.helper.notifyObserver
+import org.chenhome.dailybrainy.repo.image.RemoteImage
 import timber.log.Timber
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Observes /ideas/<gameGuid> for child-related changes
@@ -21,6 +28,8 @@ class IdeaObserver(
     private val fireDb = FirebaseDatabase.getInstance()
     private val fireRef = fireDb.getReference(DbFolder.IDEAS.path)
         .child(gameGuid)
+    private val scope = CoroutineScope(Dispatchers.IO)
+    private val remoteImage = RemoteImage()
 
     fun register() = fireRef.addChildEventListener(this)
     fun deregister() = fireRef.removeEventListener(this)
@@ -33,39 +42,47 @@ class IdeaObserver(
 
     // Add to [FullGame] instance
     override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-        try {
-            snapshot.getValue<Idea>()?.let { added ->
-                // only add item if it's not already in list
-                var ideaList = if (added.isSketch()) fullGame.value?.sketches else
-                    fullGame.value?.ideas
-                ideaList?.firstOrNull { added.guid == it.guid } ?: ideaList?.let {
-                    Timber.d("Adding idea $added to list of size ${it.size}")
-                    it.add(added)
-                    fullGame.notifyObserver()
-                } ?: Timber.w("Null list. Unable to add idea to it")
+        scope.launch {
+            try {
+                snapshot.getValue<Idea>()?.let { added ->
+                    // only add item if it's not already in list
+                    var ideaList = if (added.isSketch()) fullGame.value?.sketches else
+                        fullGame.value?.ideas
+                    ideaList?.firstOrNull { added.guid == it.guid } ?: ideaList?.let {
+                        val decorated = decorateWithUri(added)
+                        Timber.d("Adding idea $decorated to list of size ${it.size}")
+                        it.add(decorated)
+                        fullGame.postValue(fullGame.value)
+                    } ?: Timber.w("Null list. Unable to add idea to it")
+                }
+            } catch (e: Exception) {
+                Timber.e("Unable to add idea $fireRef, $e")
             }
-        } catch (e: Exception) {
-            Timber.e("Unable to add idea $fireRef, $e")
         }
+
     }
 
+
     override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-        try {
-            snapshot.getValue<Idea>()?.let { changed ->
-                // find existing idea in list
-                var ideaList = if (changed.isSketch()) fullGame.value?.sketches else
-                    fullGame.value?.ideas
-                ideaList?.indexOfFirst { changed.guid == it.guid }
-                    ?.let { index ->
-                        if (index >= 0) {
-                            Timber.d("Remote copy changed. Replacing with remote ${changed.guid}")
-                            ideaList.set(index, changed)
-                            fullGame.notifyObserver()
+        scope.launch {
+            try {
+                snapshot.getValue<Idea>()?.let { changed ->
+                    // find existing idea in list
+                    var ideaList = if (changed.isSketch()) fullGame.value?.sketches else
+                        fullGame.value?.ideas
+                    ideaList?.indexOfFirst { changed.guid == it.guid }
+                        ?.let { index ->
+                            if (index >= 0) {
+                                val decorated = decorateWithUri(changed)
+                                Timber.d("Remote copy changed. Replacing with remote ${decorated}")
+                                ideaList.set(index, decorated)
+                                fullGame.postValue(fullGame.value)
+                            }
                         }
-                    }
+                }
+            } catch (e: Exception) {
+                Timber.e("Unable to modify idea $fireRef, $e")
             }
-        } catch (e: Exception) {
-            Timber.e("Unable to modify idea $fireRef, $e")
         }
     }
 
@@ -108,15 +125,6 @@ class IdeaObserver(
         }
     }
 
-    private fun addNameToCopy(idea: Idea): Idea {
-        Timber.d("Got idea $idea and players ${fullGame.value?.players}")
-        val copy = idea.copy(playerName = fullGame.value?.players?.firstOrNull { session ->
-            session.userGuid == idea.playerGuid
-        }?.name)
-        Timber.d("Added name ${copy.playerName} to ${idea.guid}")
-        return copy
-    }
-
     fun updateRemote(idea: Idea) {
         if (idea.guid.isNotEmpty()
             && idea.gameGuid == gameGuid
@@ -143,4 +151,35 @@ class IdeaObserver(
             }
         }
     }
+
+
+    private fun addNameToCopy(idea: Idea): Idea {
+        Timber.d("Got idea $idea and players ${fullGame.value?.players}")
+        val copy = idea.copy(playerName = fullGame.value?.players?.firstOrNull { session ->
+            session.userGuid == idea.playerGuid
+        }?.name)
+        Timber.d("Added name ${copy.playerName} to ${idea.guid}")
+        return copy
+    }
+
+
+    private suspend fun decorateWithUri(idea: Idea): Idea {
+        // get download URI for this challenge
+        idea.imgFn?.let {
+            remoteImage.getValidStorageRef(it)?.let { storageRef ->
+                val uri = suspendCoroutine<Uri?> { cont ->
+                    storageRef.downloadUrl.addOnSuccessListener {
+                        cont.resume(it)
+                    }
+                    storageRef.downloadUrl.addOnFailureListener {
+                        cont.resume(null)
+                    }
+                }
+                Timber.d("Decorating idea ${idea.guid} with URI $uri")
+                return idea.copy(imgUri = uri)
+            } ?: Timber.w("No storage ref found for imgFn ${idea.imgFn}")
+        }
+        return idea
+    }
+
 }

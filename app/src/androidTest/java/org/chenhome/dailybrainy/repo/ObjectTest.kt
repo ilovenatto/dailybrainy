@@ -42,7 +42,7 @@ class ObjectTest {
             "asdf",
             Challenge.Category.CHALLENGE,
             null,
-            null
+            null, null
         )
     }
 

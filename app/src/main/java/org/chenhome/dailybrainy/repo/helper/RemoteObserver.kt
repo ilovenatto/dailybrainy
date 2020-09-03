@@ -1,5 +1,6 @@
 package org.chenhome.dailybrainy.repo.helper
 
+import android.net.Uri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.MutableLiveData
@@ -18,6 +19,7 @@ import org.chenhome.dailybrainy.repo.DbFolder
 import org.chenhome.dailybrainy.repo.Game
 import org.chenhome.dailybrainy.repo.PlayerSession
 import org.chenhome.dailybrainy.repo.game.GameStub
+import org.chenhome.dailybrainy.repo.image.RemoteImage
 import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -30,14 +32,16 @@ import kotlin.coroutines.suspendCoroutine
  * observer of a lifecycle.
  */
 internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
-    private val fireRef = FirebaseDatabase.getInstance()
-        .getReference(DbFolder.CHALLENGES.path)
+    private val fireDb = FirebaseDatabase.getInstance()
+    private val fireRef = fireDb.getReference(DbFolder.CHALLENGES.path)
+    private val remoteImage = RemoteImage()
 
     /**
      * List of challenges offered by DailyBrainy
      */
     // mutable private challenges
     var _challenges: MutableLiveData<List<Challenge>> = MutableLiveData(listOf())
+    val scope = CoroutineScope(Dispatchers.IO)
 
     override fun onCancelled(error: DatabaseError) {
         Timber.w("onCancelled $error")
@@ -45,15 +49,39 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
 
     override fun onDataChange(snapshot: DataSnapshot) {
         Timber.d("Challenges data has changed at location ${snapshot.key}")
-        try {
-            snapshot.getValue<Map<String, Challenge>>()?.let {
-                Timber.d("${snapshot.children} challenges encountered. Replacing all existing challenges.")
-                // calling [MutableLiveData.value] will inform observers of the data change
-                _challenges.value = it.map { entry -> entry.value }
-            } ?: Timber.w("No challenges found in snapshot ${snapshot.key}")
-        } catch (ex: Exception) {
-            Timber.e("Unable to observe challenges $ex")
+        scope.launch {
+            try {
+                snapshot.getValue<Map<String, Challenge>>()?.let {
+                    Timber.d("${snapshot.children} challenges encountered. Replacing all existing challenges.")
+                    // calling [MutableLiveData.value] will inform observers of the data change
+                    _challenges.postValue(it.map { entry ->
+                        decorateWithUri(entry.value)
+                    })
+                } ?: Timber.w("No challenges found in snapshot ${snapshot.key}")
+            } catch (ex: Exception) {
+                Timber.e("Unable to observe challenges $ex")
+            }
         }
+
+    }
+
+    private suspend fun decorateWithUri(challenge: Challenge): Challenge {
+        // get download URI for this challenge
+        if (challenge.imgFn.isNotEmpty()) {
+            remoteImage.getValidStorageRef(challenge.imgFn)?.let { storageRef ->
+                val uri = suspendCoroutine<Uri?> { cont ->
+                    storageRef.downloadUrl.addOnSuccessListener {
+                        cont.resume(it)
+                    }
+                    storageRef.downloadUrl.addOnFailureListener {
+                        cont.resume(null)
+                    }
+                }
+                Timber.d("Decorating challenge ${challenge.guid} with URI $uri")
+                return challenge.copy(imageUri = uri)
+            } ?: Timber.w("No storage ref found for imgFn ${challenge.imgFn}")
+        }
+        return challenge
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)

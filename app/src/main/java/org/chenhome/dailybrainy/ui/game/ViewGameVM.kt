@@ -1,7 +1,6 @@
 package org.chenhome.dailybrainy.ui.game
 
 import android.content.Context
-import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -28,11 +27,6 @@ class ViewGameVM(
      * Full Game state. Read-only
      */
     val fullGame: LiveData<FullGame> = fullGameRepo.fullGame
-
-    /**
-     * challengeImgUri is URI for challenge hero image
-     */
-    val challengeImgUri: LiveData<Uri> = fullGameRepo.challengeImgUri
 
     override fun onCleared() {
         super.onCleared()

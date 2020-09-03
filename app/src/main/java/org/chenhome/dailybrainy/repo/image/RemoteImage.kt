@@ -1,6 +1,5 @@
 package org.chenhome.dailybrainy.repo.image
 
-import android.content.Context
 import android.net.Uri
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -21,6 +20,7 @@ import kotlin.coroutines.suspendCoroutine
 enum class RemoteImageFolder {
     CHALLENGES,
     IDEAS,
+    SKETCHES
 }
 
 /**
@@ -31,10 +31,7 @@ enum class RemoteImageFolder {
  * App layer should use Glide to retrieve remote images. App layer
  * references images by
  */
-class RemoteImage(
-    // TODO: 8/30/20 remove cotext 
-    val context: Context,
-) {
+class RemoteImage {
     val fstorage: FirebaseStorage = Firebase.storage
     val scope = CoroutineScope(Dispatchers.IO)
 
@@ -64,6 +61,7 @@ class RemoteImage(
                     continuation.resume(null)
                 }
             }
+
 
         }
     }

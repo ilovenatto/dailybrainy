@@ -36,7 +36,7 @@ class ImageRepoTest {
         localRepo =
             LocalImageRepo(appContext)
         remote =
-            RemoteImage(appContext)
+            RemoteImage()
 
         // create a random file
         val tempFile = File.createTempFile("temp", "tmp", null)

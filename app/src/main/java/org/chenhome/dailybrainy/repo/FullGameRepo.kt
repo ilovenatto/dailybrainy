@@ -1,7 +1,6 @@
 package org.chenhome.dailybrainy.repo
 
 import android.content.Context
-import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import org.chenhome.dailybrainy.repo.game.FullGame
@@ -29,8 +28,7 @@ class FullGameRepo(
      * Private
      */
     private var _fullGame: MutableLiveData<FullGame> = MutableLiveData(FullGame())
-    private var _challengeImgUri = MutableLiveData<Uri>()
-    private val gameObs = GameObserver(context, gameGuid, _fullGame, _challengeImgUri)
+    private val gameObs = GameObserver(context, gameGuid, _fullGame)
     private val ideaObs = IdeaObserver(context, gameGuid, _fullGame)
     private val playerObs = PlayerSessionObserver(context, gameGuid, _fullGame)
 
@@ -57,16 +55,6 @@ class FullGameRepo(
      * Expose [FullGame] data to be used by clients
      */
     val fullGame: LiveData<FullGame> = _fullGame
-
-    /**
-     * challengeImgUri is downloadable URI of the challenge hero image.
-     * The value is available after the Game's challenge information has been retrieved.
-     *
-     * Observers wait for the value.
-     */
-    val challengeImgUri: LiveData<Uri>
-        get() = _challengeImgUri
-
 
     /**
      * Insert into [FullGame] instance managed by [FullGameRepo] as well

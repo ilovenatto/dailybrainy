@@ -91,9 +91,8 @@ internal class SketchAdapter :
             binding.idea = idea
 
             // specially handle the image
-            idea.imgFn?.let {
-                // TODO: 9/1/20 Get StorageRef URI for this sketch
-//                bindImage(binding.imageSketch,it)
+            idea.imgUri?.let {
+                bindImage(binding.imageSketch, it)
             }
         }
     }

@@ -1,5 +1,6 @@
 package org.chenhome.dailybrainy.repo
 
+import android.net.Uri
 import com.google.firebase.database.Exclude
 import org.chenhome.dailybrainy.repo.image.AvatarImage
 import java.security.SecureRandom
@@ -46,12 +47,13 @@ data class Challenge(
     val category: Category,
     val hmw: String?, // only set for Challenge category
     val youtubeUrl: String?, // only set for Lesson category
+    var imageUri: Uri?, // Permanent URI where this image lives. Set by the local observer and not persisted in reomte db.
 
 ) {
     // No-arg constructor so that Firebase can create this POJO
     constructor() : this(
         "", "", "", "",
-        Category.CHALLENGE, null, null
+        Category.CHALLENGE, null, null, null
     )
 
     enum class Category {
@@ -228,13 +230,14 @@ data class Idea(
     var votes: Int = 0,
     var title: String?,
     var imgFn: String?,
+    var imgUri: Uri?,
 
 
     ) {
     // No-arg constructur so that Firebase can create this POJO
     constructor() : this(
         "", "", "", "",
-        Origin.BRAINSTORM, 0, null, null
+        Origin.BRAINSTORM, 0, null, null, null
     )
 
     // Convenience constructor for an empty object that has all its required fields set
@@ -246,7 +249,8 @@ data class Idea(
         origin = origin,
         votes = 0,
         title = null,
-        imgFn = null
+        imgFn = null,
+        imgUri = null
     )
 
     /**
