@@ -1,5 +1,6 @@
 package org.chenhome.dailybrainy.repo
 
+import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
@@ -15,7 +16,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.chenhome.dailybrainy.TestLifecycleOwner
 import org.chenhome.dailybrainy.blockingObserve
+import org.chenhome.dailybrainy.repo.game.Sketch
 import org.chenhome.dailybrainy.repo.helper.nukeRemoteDb
+import org.chenhome.dailybrainy.repo.image.RemoteImage
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -29,6 +32,7 @@ import kotlin.coroutines.suspendCoroutine
 
 @HiltAndroidTest
 class FullGameRepoTest {
+
     @get:Rule
     val rule = RuleChain.outerRule(HiltAndroidRule(this))
         .around(InstantTaskExecutorRule())
@@ -36,14 +40,16 @@ class FullGameRepoTest {
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
     private val fireDb: FirebaseDatabase = FirebaseDatabase.getInstance()
     private val lifecycleOwner: TestLifecycleOwner = TestLifecycleOwner()
+    private val remoteImg = RemoteImage()
 
     lateinit var game: Game
     lateinit var idea: Idea
-    lateinit var sketch: Idea
+    lateinit var sketch: Sketch
     lateinit var session: PlayerSession
     lateinit var challenge: Challenge
     lateinit var userId: String
     lateinit var fullGameRepo: FullGameRepo
+    var challengeImgUri: Uri? = null
 
     @Before
     fun before() {
@@ -88,15 +94,23 @@ class FullGameRepoTest {
                 }
             }
 
+            // create sketch
+            challengeImgUri = remoteImg.getValidStorageRef(challenge.imgFn)?.let {
+                remoteImg.getDownloadUri(it)
+            }
+            assertNotNull(challengeImgUri)
+
+
             suspendCoroutine<Unit> {
-                val ideaRef2 = fireDb.getReference(DbFolder.IDEAS.path)
+                val sketchRef = fireDb.getReference(DbFolder.IDEAS.path)
                     .child(game.guid)
                     .push()
-                sketch = Idea(
-                    ideaRef2.key!!, game.guid, userId,
+                val idea = Idea(
+                    sketchRef.key!!, game.guid, userId,
                     Idea.Origin.SKETCH)
-                sketch.imgFn = "12341342"
-                ideaRef2.setValue(sketch) { _, _ ->
+                sketch = Sketch(idea, challengeImgUri)
+                sketch.idea.imgFn = challenge.imgFn
+                sketchRef.setValue(sketch.idea) { _, _ ->
                     it.resume(Unit)
                 }
             }
@@ -131,11 +145,24 @@ class FullGameRepoTest {
         nukeRemoteDb()
     }
 
+
+    @Test
+    fun doNothing() {
+        runBlocking {
+
+            suspendCoroutine<Unit> { cont ->
+                fullGameRepo.fullGame.observe(lifecycleOwner, Observer { fullGame ->
+                    Timber.d("Observed ${fullGame.ideas.size} ideas and ${fullGame.sketches.size} sketches, ${fullGame.players.size} sessions")
+                    cont.resume(Unit)
+                })
+            }
+        }
+    }
+
     @Test
     fun testFullGame() {
         runBlocking {
             Timber.d("Started test")
-            delay(3000) // give time for BrainyRepo to get some challenges
             suspendCoroutine<Unit> { cont ->
                 fullGameRepo.fullGame.observe(lifecycleOwner, Observer { fullGame ->
                     Timber.d("Observed ${fullGame.ideas.size} ideas and ${fullGame.players.size} sessions")
@@ -164,24 +191,28 @@ class FullGameRepoTest {
             fullGameRepo.insertRemote(player2)
             delay(2000)
 
-            // insert and wait
-            val idea2 = Idea("123", game.guid, userId, Idea.Origin.SKETCH)
+            // insert 2nd idea
+            val idea2 = idea.copy(guid = "")
             fullGameRepo.insertRemote(idea2)
 
-            val idea3 = idea2.copy(imgFn = "asdfadfs")
-            fullGameRepo.insertRemote(idea3)
+            // insert 2nd sketch
+            val sketch2 = Sketch(idea.copy(imgFn = challenge.imgFn, guid = ""), challengeImgUri)
+            fullGameRepo.insertRemote(sketch2)
 
             delay(1500)
 
             // then observe
             suspendCoroutine<Unit> { cont ->
                 fullGameRepo.fullGame.observe(lifecycleOwner, Observer { fullGame ->
-                    Timber.d("Observed ${fullGame.ideas.size} ideas and ${fullGame.players.size} sessions")
+                    Timber.d("Observed ${fullGame.ideas.size} ideas and ${fullGame.sketches.size} sketches, ${fullGame.players.size} sessions")
                     assertEquals(2, fullGame.ideas.size)
-                    assertEquals(2, fullGame.sketches.size)
-                    assertEquals(idea, fullGame.ideas[0])
-                    assert(idea.playerName!!.isNotEmpty())
+                    assertEquals(idea.copy(guid = ""),
+                        fullGame.ideas[0].copy(guid = "")) // ignore guid
 
+                    assertEquals(2, fullGame.sketches.size)
+                    assertEquals(sketch, fullGame.sketches[0])
+
+                    assert(idea.playerName!!.isNotEmpty())
                     assertEquals(3, fullGame.players.size)
                     assertEquals(session, fullGame.players[0])
 
@@ -219,18 +250,23 @@ class FullGameRepoTest {
         runBlocking {
             // get from fullGame
             fullGameRepo.fullGame.blockingObserve()
-                ?.let {
-                    assertNotNull(it.ideas[0])
-                    val idea1 = it.ideas[0]
+                ?.let { fullGame ->
+                    assertEquals(1, fullGame.ideas.size)
+                    val idea1 = fullGame.ideas[0]
                     idea1.vote()
                     fullGameRepo.updateRemote(idea1)
+
+                    assertEquals(1, fullGame.sketches.size)
+                    val sketch1 = fullGame.sketches[0]
+                    sketch1.idea.vote()
+                    sketch1.idea.imgFn = challenge.imgFn
                     delay(3000)
 
                     // check result
                     fullGameRepo.fullGame.blockingObserve()
                         ?.let {
-                            assertNotNull(it.ideas[0])
                             assertEquals(idea1, it.ideas[0])
+                            assertEquals(sketch1, it.sketches[0])
                         }
                 }
         }

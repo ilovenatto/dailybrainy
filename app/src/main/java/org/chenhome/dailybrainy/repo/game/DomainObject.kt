@@ -1,5 +1,6 @@
 package org.chenhome.dailybrainy.repo.game
 
+import android.net.Uri
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.Game
 import org.chenhome.dailybrainy.repo.Idea
@@ -28,12 +29,16 @@ data class FullGame(
     var game: Game = Game(),
     var players: MutableList<PlayerSession> = mutableListOf(),
     var ideas: MutableList<Idea> = mutableListOf(), // ideas that don't have drawings (and have a title)
-    var sketches: MutableList<Idea> = mutableListOf(), // ideas that have drawings
+    var sketches: MutableList<Sketch> = mutableListOf(), // ideas that have drawings
     var challenge: Challenge = Challenge(), // current challenge
-) {
-    fun mySession(currentPlayerGuid: String): PlayerSession? {
-        return players.firstOrNull {
-            it.userGuid == currentPlayerGuid
-        }
-    }
-}
+)
+
+/**
+ * Composes an Idea and decorates with an image URI.
+ * Image URI set by [IdeaObserver] when it downloads from remote DB.
+ */
+data class Sketch(
+    val idea: Idea,
+    var imgUri: Uri?,
+)
+

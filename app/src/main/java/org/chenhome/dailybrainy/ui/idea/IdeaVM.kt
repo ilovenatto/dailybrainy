@@ -69,8 +69,7 @@ class IdeaVM(
                 origin = Idea.Origin.BRAINSTORM,
                 votes = 0,
                 title = newIdea.value,
-                imgFn = null,
-                imgUri = null
+                imgFn = null
             )
             // attempt to insert
             fullGameRepo.insertRemote(idea)

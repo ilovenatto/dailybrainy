@@ -92,6 +92,18 @@ class RemoteImage {
         }
     }
 
+    suspend fun getDownloadUri(storageRef: StorageReference): Uri? {
+        return suspendCoroutine<Uri?> { cont ->
+            storageRef.downloadUrl.addOnSuccessListener {
+                cont.resume(it)
+            }
+            storageRef.downloadUrl.addOnFailureListener {
+                cont.resume(null)
+            }
+        }
+    }
+
+
     /**
      * @param target Firebase remote asset that will be deleted
      * @return whether delete succeeded

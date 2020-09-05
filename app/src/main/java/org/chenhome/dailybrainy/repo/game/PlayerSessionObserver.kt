@@ -118,14 +118,15 @@ class PlayerSessionObserver(
                 update.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onCancelled(error: DatabaseError) = Timber.d("$error")
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        snapshot.getValue<PlayerSession>()?.let {
+                        if (snapshot.exists()) {
                             update.setValue(player) { error, ref ->
                                 error?.let {
                                     Timber.w("Unable to update session at $ref")
                                 } ?: Timber.d("Updated session ${player.guid} at $ref")
                             }
+                        } else {
+                            Timber.w("Unable to update a non-existent session, ${player.guid} at $update")
                         }
-                            ?: Timber.w("Unable to update a non-existent session, ${player.guid} at $update")
                     }
                 })
             } catch (e: Exception) {

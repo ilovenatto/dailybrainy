@@ -12,7 +12,6 @@ import org.chenhome.dailybrainy.repo.FullGameRepo
 import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.repo.game.FullGame
-import org.chenhome.dailybrainy.repo.image.RemoteImage
 import org.chenhome.dailybrainy.ui.Event
 import org.chenhome.dailybrainy.ui.GenerateVMHelper
 import org.chenhome.dailybrainy.ui.VoteVMHelper
@@ -54,10 +53,8 @@ class SketchVM(
         _navToNext.value = Event(true)
     }
 
-
     val generate = GenerateVMHelper()
     val vote = VoteVMHelper(fullGameRepo)
-    val remoteImage = RemoteImage()
 
     fun captureSketch() {
         // create idea and post it remotely

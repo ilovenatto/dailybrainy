@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.FullGameRepo
 import org.chenhome.dailybrainy.repo.Idea
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 class GenerateVMHelper {
@@ -58,9 +59,9 @@ class VoteVMHelper(val fullGameRepo: FullGameRepo) {
      * vote_votesLeft is a external immutable LiveData observable
      * by others
      */
-    private var _vote_votesLeft = MutableLiveData<Int>(3)
+    private var _votesLeft = MutableLiveData<Int>(3)
     val votesLeft: LiveData<Int>
-        get() = _vote_votesLeft
+        get() = _votesLeft
 
 
     /**
@@ -71,8 +72,9 @@ class VoteVMHelper(val fullGameRepo: FullGameRepo) {
     fun incrementVoteRemotely(idea: Idea) {
         val updated = idea.copy()
         updated.vote()
-        val votes = _vote_votesLeft.value?.dec() ?: 0
-        _vote_votesLeft.value = if (votes < 0) 0 else votes
+        val votes = _votesLeft.value?.dec() ?: 0
+        _votesLeft.value = if (votes < 0) 0 else votes
+        Timber.d("Incremeting vote on idean $idea")
         fullGameRepo.updateRemote(updated)
     }
 

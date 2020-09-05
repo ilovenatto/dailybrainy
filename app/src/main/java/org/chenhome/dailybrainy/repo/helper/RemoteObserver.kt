@@ -52,7 +52,7 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
         scope.launch {
             try {
                 snapshot.getValue<Map<String, Challenge>>()?.let {
-                    Timber.d("${snapshot.children} challenges encountered. Replacing all existing challenges.")
+                    Timber.d("${it.size} challenges encountered. Replacing all existing challenges.")
                     // calling [MutableLiveData.value] will inform observers of the data change
                     _challenges.postValue(it.map { entry ->
                         decorateWithUri(entry.value)
@@ -77,7 +77,6 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
                         cont.resume(null)
                     }
                 }
-                Timber.d("Decorating challenge ${challenge.guid} with URI $uri")
                 return challenge.copy(imageUri = uri)
             } ?: Timber.w("No storage ref found for imgFn ${challenge.imgFn}")
         }

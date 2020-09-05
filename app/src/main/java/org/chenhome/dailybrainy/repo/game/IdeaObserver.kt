@@ -13,8 +13,6 @@ import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.helper.notifyObserver
 import org.chenhome.dailybrainy.repo.image.RemoteImage
 import timber.log.Timber
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * Observes /ideas/<gameGuid> for child-related changes
@@ -46,14 +44,18 @@ class IdeaObserver(
             try {
                 snapshot.getValue<Idea>()?.let { added ->
                     // only add item if it's not already in list
-                    var ideaList = if (added.isSketch()) fullGame.value?.sketches else
-                        fullGame.value?.ideas
-                    ideaList?.firstOrNull { added.guid == it.guid } ?: ideaList?.let {
-                        val decorated = decorateWithUri(added)
-                        Timber.d("Adding idea $decorated to list of size ${it.size}")
-                        it.add(decorated)
+                    if (!isExistAlready(added)) {
+                        if (added.isSketch()) {
+                            Timber.d("Adding sketch $added.guid")
+                            fullGame.value?.sketches?.add(
+                                Sketch(added, getImgUri(added.imgFn!!))
+                            )
+                        } else {
+                            Timber.d("Adding idea $added.guid")
+                            fullGame.value?.ideas?.add(added)
+                        }
                         fullGame.postValue(fullGame.value)
-                    } ?: Timber.w("Null list. Unable to add idea to it")
+                    }
                 }
             } catch (e: Exception) {
                 Timber.e("Unable to add idea $fireRef, $e")
@@ -63,22 +65,46 @@ class IdeaObserver(
     }
 
 
+    private fun isExistAlready(idea: Idea): Boolean {
+        if (fullGame.value?.sketches?.firstOrNull {
+                idea.guid == it.idea.guid
+            } != null) {
+            return true
+        }
+        if (fullGame.value?.ideas?.firstOrNull {
+                idea.guid == it.guid
+            } != null) {
+            return true
+        }
+        return false
+    }
+
     override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
         scope.launch {
             try {
                 snapshot.getValue<Idea>()?.let { changed ->
                     // find existing idea in list
-                    var ideaList = if (changed.isSketch()) fullGame.value?.sketches else
-                        fullGame.value?.ideas
-                    ideaList?.indexOfFirst { changed.guid == it.guid }
-                        ?.let { index ->
-                            if (index >= 0) {
-                                val decorated = decorateWithUri(changed)
-                                Timber.d("Remote copy changed. Replacing with remote ${decorated}")
-                                ideaList.set(index, decorated)
-                                fullGame.postValue(fullGame.value)
+                    if (!changed.isSketch()) {
+                        val ideaList = fullGame.value?.ideas
+                        ideaList?.indexOfFirst { changed.guid == it.guid }
+                            ?.let { index ->
+                                if (index >= 0) {
+                                    Timber.d("Remote copy changed. Replacing with remote ${changed}")
+                                    ideaList.set(index, changed)
+                                    fullGame.postValue(fullGame.value)
+                                }
                             }
-                        }
+                    } else {
+                        val sketchList = fullGame.value?.sketches
+                        sketchList?.indexOfFirst { changed.guid == it.idea.guid }
+                            ?.let { index ->
+                                if (index >= 0) {
+                                    Timber.d("Remote copy changed. Replacing with remote ${changed}")
+                                    sketchList.set(index, Sketch(changed, getImgUri(changed.imgFn)))
+                                    fullGame.postValue(fullGame.value)
+                                }
+                            }
+                    }
                 }
             } catch (e: Exception) {
                 Timber.e("Unable to modify idea $fireRef, $e")
@@ -90,10 +116,16 @@ class IdeaObserver(
         // should never happen b/c app is not designed for any user to remove ideas
         // but including it in case it does (or if testing requires it)
         try {
-            snapshot.getValue<Idea>()?.let {
-                Timber.d("Removing idea $it")
-                fullGame.value?.ideas?.remove(it)
-                fullGame.value?.sketches?.remove(it)
+            snapshot.getValue<Idea>()?.let { removed ->
+                Timber.d("Removing idea $removed")
+                val ideas = fullGame.value?.ideas
+                ideas?.remove(ideas.firstOrNull {
+                    it.guid == removed.guid
+                })
+                val sketches = fullGame.value?.sketches
+                sketches?.remove(sketches.firstOrNull {
+                    it.idea.guid == removed.guid
+                })
                 fullGame.notifyObserver()
             }
         } catch (e: Exception) {
@@ -136,14 +168,16 @@ class IdeaObserver(
                 update.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onCancelled(error: DatabaseError) = Timber.d("$error")
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        snapshot.getValue<Idea>()?.let {
+                        if (snapshot.exists()) {
                             update.setValue(idea) { error, ref ->
                                 error?.let {
-                                    Timber.w("Unable to update idea at $ref")
+                                    Timber.w("Unable to update idea at $ref, $error")
                                 } ?: Timber.d("Updated session ${idea.guid} at $ref")
                             }
+                        } else {
+                            Timber.w("Unable to update a non-existent idea, ${idea.guid} at $update")
                         }
-                            ?: Timber.w("Unable to update a non-existent idea, ${idea.guid} at $update")
+
                     }
                 })
             } catch (e: Exception) {
@@ -163,23 +197,10 @@ class IdeaObserver(
     }
 
 
-    private suspend fun decorateWithUri(idea: Idea): Idea {
-        // get download URI for this challenge
-        idea.imgFn?.let {
+    private suspend fun getImgUri(path: String?): Uri? =
+        path?.let {
             remoteImage.getValidStorageRef(it)?.let { storageRef ->
-                val uri = suspendCoroutine<Uri?> { cont ->
-                    storageRef.downloadUrl.addOnSuccessListener {
-                        cont.resume(it)
-                    }
-                    storageRef.downloadUrl.addOnFailureListener {
-                        cont.resume(null)
-                    }
-                }
-                Timber.d("Decorating idea ${idea.guid} with URI $uri")
-                return idea.copy(imgUri = uri)
-            } ?: Timber.w("No storage ref found for imgFn ${idea.imgFn}")
+                remoteImage.getDownloadUri(storageRef)
+            }
         }
-        return idea
-    }
-
 }

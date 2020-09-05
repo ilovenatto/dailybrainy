@@ -3,10 +3,7 @@ package org.chenhome.dailybrainy.repo
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import org.chenhome.dailybrainy.repo.game.FullGame
-import org.chenhome.dailybrainy.repo.game.GameObserver
-import org.chenhome.dailybrainy.repo.game.IdeaObserver
-import org.chenhome.dailybrainy.repo.game.PlayerSessionObserver
+import org.chenhome.dailybrainy.repo.game.*
 import timber.log.Timber
 
 /**
@@ -69,6 +66,20 @@ class FullGameRepo(
     fun insertRemote(idea: Idea) = ideaObs.insertRemote(idea)
 
     /**
+     * Just insert the child Idea. URI value will get reconstituted
+     * when sketch is retrieved from remote DB.
+     *
+     * @param sketch
+     */
+    fun insertRemote(sketch: Sketch) {
+        if (!sketch.idea.isSketch()) {
+            Timber.w("This idea is not a sketch. No image set. ${sketch.idea}")
+            return
+        }
+        ideaObs.insertRemote(sketch.idea)
+    }
+
+    /**
      * Insert into [FullGame] instance managed by [FullGameRepo].
      *
      * Method will ensure that no
@@ -100,6 +111,10 @@ class FullGameRepo(
      */
     fun updateRemote(idea: Idea) {
         ideaObs.updateRemote(idea)
+    }
+
+    fun updateRemote(sketch: Sketch) {
+        ideaObs.updateRemote(sketch.idea)
     }
 
     /**

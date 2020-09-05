@@ -16,4 +16,5 @@
     <string name="enter_your_name">Enter your name</string>
     <string name="vote_idea">Vote for the ideas that best meet the needs of the person impacted.</string>
     <string name="gen_sketch">Create sketches for the following ideas.</string>
+    <string name="vote_sketch">Well done! Your team sketched these drawings. Vote for solution you like best.</string>
 </resources>

@@ -12,6 +12,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ApplicationComponent
 import org.chenhome.dailybrainy.repo.BrainyRepo
+import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.DbFolder
 import org.chenhome.dailybrainy.repo.Game
 import org.chenhome.dailybrainy.repo.helper.notifyObserver
@@ -53,22 +54,37 @@ class GameObserver(
     override fun onDataChange(snapshot: DataSnapshot) {
         try {
             snapshot.getValue<Game>()?.let { game ->
-                Timber.d("Remote game $gameGuid changed to $game. There are ${brainyRepo.challenges.value?.size} challenges.")
+                Timber.d("Remote game $gameGuid changed to $game.")
                 fullGame.value?.game = game
 
                 // Set challenge
-                brainyRepo.challenges.value?.firstOrNull {
-                    it.guid == game.challengeGuid
-                }?.let { challenge ->
-                    Timber.d("For game ${game.guid} loading challenge ${challenge}")
-                    fullGame.value?.challenge = challenge
-                    fullGame.notifyObserver()
-                }
-
+                setChallenge(game)
+                fullGame.notifyObserver()
             }
         } catch (e: Exception) {
             Timber.e("Unable to observe game $fireRef, $e")
         }
+    }
+
+    private fun setChallenge(game: Game) {
+        val challengesRef = fireDb.getReference(DbFolder.CHALLENGES.path)
+
+        challengesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                snapshot.getValue<Map<String, Challenge>>()?.values?.firstOrNull {
+                    it.guid == game.challengeGuid
+                }?.let { challenge ->
+                    Timber.d("For game ${game.guid} loading challenge $challenge")
+                    fullGame.value?.challenge = challenge
+                } ?: Timber.w("Unable to obtain challenges ${snapshot.ref}")
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Timber.w("Get challenge cancelled, ${error.message}")
+            }
+        })
+
+
     }
 
 
@@ -86,14 +102,15 @@ class GameObserver(
                 override fun onCancelled(error: DatabaseError) = Timber.d("$error")
                 override fun onDataChange(snapshot: DataSnapshot) {
                     try {
-                        snapshot.getValue<Game>()?.let {
-                            update.setValue(game) { error, ref ->
-                                error?.let {
-                                    Timber.w("Unable to update game at $ref")
-                                } ?: Timber.d("Updated game ${game.guid} at $ref")
-                            }
+                        if (!snapshot.exists()) {
+                            Timber.w("Unable to update a non-existent game, ${game.guid} at $update")
+                            return
                         }
-                            ?: Timber.w("Unable to update a non-existent game, ${game.guid} at $update")
+                        update.setValue(game) { error, ref ->
+                            error?.let {
+                                Timber.w("Unable to update game at $ref")
+                            } ?: Timber.d("Updated game ${game.guid} at $ref")
+                        }
                     } catch (e: Exception) {
                         Timber.e("Unable to update game $game, $e")
                     }

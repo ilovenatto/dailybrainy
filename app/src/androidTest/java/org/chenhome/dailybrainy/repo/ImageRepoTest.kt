@@ -90,6 +90,9 @@ class ImageRepoTest {
             assertNotNull(r2)
             assertEquals(r, r2)
 
+            val uri = remote.getDownloadUri(r2!!)
+            assert(uri != null && (uri.path?.isNotEmpty() ?: false))
+
             // delete it
             assertTrue(remote.deleteRemote(r))
         }

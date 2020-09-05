@@ -8,6 +8,7 @@ import org.chenhome.dailybrainy.databinding.GenSketchItemBinding
 import org.chenhome.dailybrainy.databinding.ViewGameItemPlayerBinding
 import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.PlayerSession
+import org.chenhome.dailybrainy.repo.game.Sketch
 import org.jetbrains.annotations.NotNull
 
 internal class PlayerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -66,11 +67,10 @@ internal class IdeaAdapter :
     }
 }
 
-
 internal class SketchAdapter :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    var sketches: MutableList<Idea> = mutableListOf()
+    var sketches: MutableList<Sketch> = mutableListOf()
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -87,11 +87,11 @@ internal class SketchAdapter :
 
     class SketchVH(val binding: @NotNull GenSketchItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(idea: Idea) {
-            binding.idea = idea
+        fun bind(sketch: Sketch) {
+            binding.sketch = sketch
 
             // specially handle the image
-            idea.imgUri?.let {
+            sketch.imgUri?.let {
                 bindImage(binding.imageSketch, it)
             }
         }

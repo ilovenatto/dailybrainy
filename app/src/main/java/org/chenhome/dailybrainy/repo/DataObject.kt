@@ -230,14 +230,12 @@ data class Idea(
     var votes: Int = 0,
     var title: String?,
     var imgFn: String?,
-    var imgUri: Uri?,
-
 
     ) {
     // No-arg constructur so that Firebase can create this POJO
     constructor() : this(
         "", "", "", "",
-        Origin.BRAINSTORM, 0, null, null, null
+        Origin.BRAINSTORM, 0, null, null
     )
 
     // Convenience constructor for an empty object that has all its required fields set
@@ -249,13 +247,13 @@ data class Idea(
         origin = origin,
         votes = 0,
         title = null,
-        imgFn = null,
-        imgUri = null
+        imgFn = null
     )
 
     /**
      * @return whether this IDea is considered a sketch (with a drawing) or not
      */
+    @Exclude
     fun isSketch(): Boolean = imgFn?.isNotEmpty() ?: false
 
     fun vote() {
@@ -271,14 +269,6 @@ data class Idea(
         STORY_RESOLUTION
     }
 
-    @Exclude
-    fun isValid(): Boolean = guid.isNotEmpty()
-            && gameGuid.isNotEmpty()
-            && playerGuid.isNotEmpty()
-            && playerName?.isNotEmpty() ?: false
-            && origin != null
-            && votes >= 0
-            && (title != null || imgFn != null)
 }
 
 enum class DbFolder(val path: String) {
