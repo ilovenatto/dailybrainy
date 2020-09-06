@@ -156,6 +156,9 @@ class FullGameRepoTest {
                     val notes = fullGame.ideas(Idea.Origin.BRAINSTORM)
                     val sketches = fullGame.ideas(Idea.Origin.SKETCH)
 
+                    // just copy over the imageUri
+                    challenge.imageUri = fullGame.challenge.imageUri
+
                     Timber.d("Observed ${notes.size} notes, ${sketches.size} sketches and ${fullGame.players.size} sessions")
                     assertNotNull(fullGame)
                     assertEquals(game, fullGame.game)

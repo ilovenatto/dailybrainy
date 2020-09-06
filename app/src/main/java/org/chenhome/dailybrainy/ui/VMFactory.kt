@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import org.chenhome.dailybrainy.ui.idea.IdeaVM
 import org.chenhome.dailybrainy.ui.sketch.SketchVM
+import org.chenhome.dailybrainy.ui.story.StoryVM
 
 
 class GameVMFactory(
@@ -17,6 +18,9 @@ class GameVMFactory(
         }
         if (modelClass.isAssignableFrom(SketchVM::class.java)) {
             return SketchVM(context, gameGuid) as T
+        }
+        if (modelClass.isAssignableFrom(StoryVM::class.java)) {
+            return StoryVM(context, gameGuid) as T
         }
 
         throw IllegalArgumentException("Unsupported ViewModel type $modelClass")

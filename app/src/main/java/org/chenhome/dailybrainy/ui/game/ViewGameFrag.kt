@@ -16,7 +16,6 @@ import org.chenhome.dailybrainy.databinding.ViewGameFragBinding
 import org.chenhome.dailybrainy.databinding.ViewGameItemStepBinding
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.ui.PlayerAdapter
-import org.chenhome.dailybrainy.ui.bindImage
 import org.jetbrains.annotations.NotNull
 import timber.log.Timber
 
@@ -48,7 +47,6 @@ class ViewGameFrag : Fragment() {
                 stepAdap.setCurrentStep(it.game.currentStep)
                 playerAdap.players = it.players
                 binding.vm = vm
-                bindImage(binding.imageChallenge, it.challenge.imageUri)
                 binding.executePendingBindings()
 
             }

@@ -5,56 +5,86 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import org.chenhome.dailybrainy.R
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.LiveData
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import dagger.hilt.android.AndroidEntryPoint
+import org.chenhome.dailybrainy.databinding.CreateStoryFragBinding
+import org.chenhome.dailybrainy.repo.Idea
+import org.chenhome.dailybrainy.repo.game.FullGame
+import org.chenhome.dailybrainy.repo.game.Sketch
+import org.chenhome.dailybrainy.ui.Event
+import org.chenhome.dailybrainy.ui.GameVMFactory
+import org.chenhome.dailybrainy.ui.PlayerAdapter
+import org.chenhome.dailybrainy.ui.SketchAdapter
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [CreateStoryFrag.newInstance] factory method to
- * create an instance of this fragment.
- */
+@AndroidEntryPoint
 class CreateStoryFrag : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+    private val args: CreateStoryFragArgs by navArgs()
+    private val vm: StoryVM by viewModels {
+        GameVMFactory(requireContext(), args.gameGuid)
     }
+
+
+    private val playerAdap = PlayerAdapter()
+    private val settingAdap = SketchAdapter()
+    private val solutionAdap = SketchAdapter()
+    private val resolutionAdap = SketchAdapter()
+    private lateinit var binding: CreateStoryFragBinding
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.create_story_frag, container, false)
+        binding = CreateStoryFragBinding.inflate(inflater, container, false)
+
+        binding.vm = vm
+        binding.listPlayers.adapter = playerAdap
+        binding.listSetting.adapter = settingAdap
+        binding.listSolution.adapter = solutionAdap
+        binding.listResolution.adapter = resolutionAdap
+
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.executePendingBindings()
+
+        initAdapterObservers(vm.fullGame, playerAdap, settingAdap, solutionAdap, resolutionAdap)
+        initNavObserver(vm.navToNext)
+        return binding.root
+
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment CreateStoryFrag.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            CreateStoryFrag().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    private fun initAdapterObservers(
+        fullGame: LiveData<FullGame>,
+        playerAdap: PlayerAdapter,
+        settingAdap: SketchAdapter,
+        solutionAdap: SketchAdapter,
+        resolutionAdap: SketchAdapter,
+    ) {
+        fullGame.observe(viewLifecycleOwner, {
+            it?.let { game ->
+                playerAdap.players = game.players
+                settingAdap.sketches = game.ideas(Idea.Origin.STORY_SETTING).map { Sketch(it) }
+                solutionAdap.sketches = game.ideas(Idea.Origin.STORY_SOLUTION).map { Sketch(it) }
+                resolutionAdap.sketches =
+                    game.ideas(Idea.Origin.STORY_RESOLUTION).map { Sketch(it) }
             }
+        })
+
+
     }
+
+    private fun initNavObserver(
+        navToNext: LiveData<Event<Boolean>>,
+    ) {
+        navToNext.observe(viewLifecycleOwner, {
+            it.contentIfNotHandled()?.run {
+                findNavController().popBackStack()
+            }
+        })
+    }
+
+
 }

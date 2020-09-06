@@ -1,46 +1,42 @@
-package org.chenhome.dailybrainy.ui.sketch
+package org.chenhome.dailybrainy.ui.story
 
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ApplicationComponent
-import org.chenhome.dailybrainy.repo.BrainyRepo
+import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.repo.FullGameRepo
 import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.ui.Event
-import org.chenhome.dailybrainy.ui.GenerateVMHelper
-import org.chenhome.dailybrainy.ui.VoteVMHelper
 import timber.log.Timber
 
-class SketchVM(
+class StoryVM(
     context: Context,
     gameGuid: String,
 ) : ViewModel() {
 
     @EntryPoint
     @InstallIn(ApplicationComponent::class)
-    interface SketchVMEP {
+    interface StoryVMEP {
         fun userRepo(): UserRepo
-        fun brainyRepo(): BrainyRepo
     }
 
     private val userRepo = EntryPointAccessors.fromApplication(context,
-        SketchVMEP::class.java)
+        StoryVMEP::class.java)
         .userRepo()
-    private val brainyRepo: BrainyRepo = EntryPointAccessors.fromApplication(context,
-        SketchVMEP::class.java)
-        .brainyRepo()
+
 
     /**
      * Expose FullGame
      */
-    internal val fullGameRepo = FullGameRepo(context, gameGuid)
+    private val fullGameRepo = FullGameRepo(context, gameGuid)
     val fullGame: LiveData<FullGame> = fullGameRepo.fullGame
 
     override fun onCleared() {
@@ -55,23 +51,27 @@ class SketchVM(
         get() = _navToNext
 
     fun navToNext() {
-        _navToNext.value = Event(true)
+        viewModelScope.launch {
+            fullGame.value?.game?.let {
+                fullGameRepo.updateRemote(it)
+                _navToNext.value = Event(true)
+            }
+        }
     }
 
-    val generate = GenerateVMHelper()
-    val vote = VoteVMHelper(fullGameRepo)
+    fun captureSetting() = captureSketch(Idea.Origin.STORY_SETTING)
+    fun captureSolution() = captureSketch(Idea.Origin.STORY_SOLUTION)
+    fun captureResolution() = captureSketch(Idea.Origin.STORY_RESOLUTION)
 
-    fun captureSketch() {
+    fun captureSketch(origin: Idea.Origin) {
         // create idea and post it remotely
-
         val idea = Idea(
             "",
             fullGame.value?.game?.guid ?: "",
             userRepo.currentPlayerGuid,
-            Idea.Origin.SKETCH)
+            origin)
         // TODO: 9/2/20 remove this later .. test
-        idea.imgFn = brainyRepo.challenges.value?.map { it.imgFn }?.random()
-            ?: "challenges/challenge_cookout.png"
+        idea.imgFn = "challenges/challenge_cookout.png"
         fullGameRepo.insertRemote(idea)
 
         Timber.d("userid ${userRepo.currentPlayerGuid}")
