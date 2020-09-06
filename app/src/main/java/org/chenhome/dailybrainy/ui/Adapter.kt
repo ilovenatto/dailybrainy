@@ -44,7 +44,7 @@ internal class PlayerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 internal class IdeaAdapter :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    var ideas: MutableList<Idea> = mutableListOf()
+    var ideas: List<Idea> = listOf()
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -70,7 +70,7 @@ internal class IdeaAdapter :
 internal class SketchAdapter :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    var sketches: MutableList<Sketch> = mutableListOf()
+    var sketches: List<Sketch> = listOf()
         set(value) {
             field = value
             notifyDataSetChanged()

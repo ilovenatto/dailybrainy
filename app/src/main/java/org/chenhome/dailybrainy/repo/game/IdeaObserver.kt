@@ -40,75 +40,24 @@ class IdeaObserver(
 
     // Add to [FullGame] instance
     override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-        scope.launch {
-            try {
-                snapshot.getValue<Idea>()?.let { added ->
-                    // only add item if it's not already in list
-                    if (!isExistAlready(added)) {
-                        if (added.isSketch()) {
-                            Timber.d("Adding sketch $added.guid")
-                            fullGame.value?.sketches?.add(
-                                Sketch(added, getImgUri(added.imgFn!!))
-                            )
-                        } else {
-                            Timber.d("Adding idea $added.guid")
-                            fullGame.value?.ideas?.add(added)
-                        }
-                        fullGame.postValue(fullGame.value)
-                    }
-                }
-            } catch (e: Exception) {
-                Timber.e("Unable to add idea $fireRef, $e")
+        try {
+            snapshot.getValue<Idea>()?.let { added ->
+                fullGame.value?.add(added)
+                fullGame.notifyObserver()
             }
+        } catch (e: Exception) {
+            Timber.e("Unable to add idea $fireRef, $e")
         }
-
-    }
-
-
-    private fun isExistAlready(idea: Idea): Boolean {
-        if (fullGame.value?.sketches?.firstOrNull {
-                idea.guid == it.idea.guid
-            } != null) {
-            return true
-        }
-        if (fullGame.value?.ideas?.firstOrNull {
-                idea.guid == it.guid
-            } != null) {
-            return true
-        }
-        return false
     }
 
     override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-        scope.launch {
-            try {
-                snapshot.getValue<Idea>()?.let { changed ->
-                    // find existing idea in list
-                    if (!changed.isSketch()) {
-                        val ideaList = fullGame.value?.ideas
-                        ideaList?.indexOfFirst { changed.guid == it.guid }
-                            ?.let { index ->
-                                if (index >= 0) {
-                                    Timber.d("Remote copy changed. Replacing with remote ${changed}")
-                                    ideaList.set(index, changed)
-                                    fullGame.postValue(fullGame.value)
-                                }
-                            }
-                    } else {
-                        val sketchList = fullGame.value?.sketches
-                        sketchList?.indexOfFirst { changed.guid == it.idea.guid }
-                            ?.let { index ->
-                                if (index >= 0) {
-                                    Timber.d("Remote copy changed. Replacing with remote ${changed}")
-                                    sketchList.set(index, Sketch(changed, getImgUri(changed.imgFn)))
-                                    fullGame.postValue(fullGame.value)
-                                }
-                            }
-                    }
-                }
-            } catch (e: Exception) {
-                Timber.e("Unable to modify idea $fireRef, $e")
+        try {
+            snapshot.getValue<Idea>()?.let { changed ->
+                fullGame.value?.update(changed)
+                fullGame.notifyObserver()
             }
+        } catch (e: Exception) {
+            Timber.e("Unable to modify idea $fireRef, $e")
         }
     }
 
@@ -117,15 +66,7 @@ class IdeaObserver(
         // but including it in case it does (or if testing requires it)
         try {
             snapshot.getValue<Idea>()?.let { removed ->
-                Timber.d("Removing idea $removed")
-                val ideas = fullGame.value?.ideas
-                ideas?.remove(ideas.firstOrNull {
-                    it.guid == removed.guid
-                })
-                val sketches = fullGame.value?.sketches
-                sketches?.remove(sketches.firstOrNull {
-                    it.idea.guid == removed.guid
-                })
+                fullGame.value?.remove(removed)
                 fullGame.notifyObserver()
             }
         } catch (e: Exception) {
@@ -138,22 +79,26 @@ class IdeaObserver(
      * remote database.
      */
     fun insertRemote(idea: Idea) {
-        // Add name to Idea
-        val namedIdea = addNameToCopy(idea)
+        scope.launch {
+            // Add remotely to /ideas/<gameGuid>/<new idea>
+            try {
+                val created = fireRef.push()
+                created.key?.let {
 
-        // Add remotely to /ideas/<gameGuid>/<new idea>
-        try {
-            val created = fireRef.push()
-            created.key?.let {
-                val copy = namedIdea.copy(guid = created.key!!)
-                created.setValue(copy) { error, ref ->
-                    error?.let {
-                        Timber.w("Unable to add to $ref, idea $copy, got $error")
-                    } ?: Timber.d("Inserted idea ${copy.guid} at $ref")
-                }
-            } ?: Timber.w("Unable to insert idea to location $created")
-        } catch (e: Exception) {
-            Timber.e("Unable to insert idea $fireRef, $e")
+                    // make a copy in case Idea reference gets used later
+                    val new = idea.copy()
+                    new.playerName = getPlayerName(new.playerGuid)
+                    new.imgUri = new.imgFn?.let { getImgUri(it)?.toString() }
+                    new.guid = created.key!!
+                    created.setValue(new) { error, ref ->
+                        error?.let {
+                            Timber.w("Unable to add to $ref, idea $new, got $error")
+                        } ?: Timber.d("Inserted idea ${new} at $ref")
+                    }
+                } ?: Timber.w("Unable to insert idea to location $created")
+            } catch (e: Exception) {
+                Timber.e("Unable to insert idea $fireRef, $e")
+            }
         }
     }
 
@@ -187,14 +132,10 @@ class IdeaObserver(
     }
 
 
-    private fun addNameToCopy(idea: Idea): Idea {
-        Timber.d("Got idea $idea and players ${fullGame.value?.players}")
-        val copy = idea.copy(playerName = fullGame.value?.players?.firstOrNull { session ->
-            session.userGuid == idea.playerGuid
-        }?.name)
-        Timber.d("Added name ${copy.playerName} to ${idea.guid}")
-        return copy
-    }
+    private fun getPlayerName(playerGuid: String): String =
+        fullGame.value?.players?.firstOrNull { session ->
+            session.userGuid == playerGuid
+        }?.name ?: "Unknown"
 
 
     private suspend fun getImgUri(path: String?): Uri? =

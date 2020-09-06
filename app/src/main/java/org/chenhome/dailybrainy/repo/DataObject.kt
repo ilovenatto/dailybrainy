@@ -230,12 +230,13 @@ data class Idea(
     var votes: Int = 0,
     var title: String?,
     var imgFn: String?,
+    var imgUri: String?,
 
     ) {
     // No-arg constructur so that Firebase can create this POJO
     constructor() : this(
         "", "", "", "",
-        Origin.BRAINSTORM, 0, null, null
+        Origin.BRAINSTORM, 0, null, null, null
     )
 
     // Convenience constructor for an empty object that has all its required fields set
@@ -247,7 +248,8 @@ data class Idea(
         origin = origin,
         votes = 0,
         title = null,
-        imgFn = null
+        imgFn = null,
+        imgUri = null
     )
 
     /**

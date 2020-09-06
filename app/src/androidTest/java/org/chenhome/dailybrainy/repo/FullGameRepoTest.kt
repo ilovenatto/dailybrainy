@@ -87,8 +87,9 @@ class FullGameRepoTest {
                     .push()
                 idea = Idea(
                     ideaRef.key!!, game.guid, userId,
-                    Idea.Origin.SKETCH
+                    Idea.Origin.BRAINSTORM
                 )
+                idea.imgUri = challengeImgUri?.path
                 ideaRef.setValue(idea) { _, _ ->
                     it.resume(Unit)
                 }
@@ -108,7 +109,8 @@ class FullGameRepoTest {
                 val idea = Idea(
                     sketchRef.key!!, game.guid, userId,
                     Idea.Origin.SKETCH)
-                sketch = Sketch(idea, challengeImgUri)
+                idea.imgUri = challengeImgUri?.path
+                sketch = Sketch(idea)
                 sketch.idea.imgFn = challenge.imgFn
                 sketchRef.setValue(sketch.idea) { _, _ ->
                     it.resume(Unit)
@@ -145,34 +147,23 @@ class FullGameRepoTest {
         nukeRemoteDb()
     }
 
-
-    @Test
-    fun doNothing() {
-        runBlocking {
-
-            suspendCoroutine<Unit> { cont ->
-                fullGameRepo.fullGame.observe(lifecycleOwner, Observer { fullGame ->
-                    Timber.d("Observed ${fullGame.ideas.size} ideas and ${fullGame.sketches.size} sketches, ${fullGame.players.size} sessions")
-                    cont.resume(Unit)
-                })
-            }
-        }
-    }
-
     @Test
     fun testFullGame() {
         runBlocking {
             Timber.d("Started test")
             suspendCoroutine<Unit> { cont ->
                 fullGameRepo.fullGame.observe(lifecycleOwner, Observer { fullGame ->
-                    Timber.d("Observed ${fullGame.ideas.size} ideas and ${fullGame.players.size} sessions")
+                    val notes = fullGame.ideas(Idea.Origin.BRAINSTORM)
+                    val sketches = fullGame.ideas(Idea.Origin.SKETCH)
+
+                    Timber.d("Observed ${notes.size} notes, ${sketches.size} sketches and ${fullGame.players.size} sessions")
                     assertNotNull(fullGame)
                     assertEquals(game, fullGame.game)
                     assertEquals(challenge, fullGame.challenge)
-                    assertEquals(1, fullGame.ideas.size)
-                    assertEquals(1, fullGame.sketches.size)
-                    assertEquals(idea, fullGame.ideas[0])
-                    assertEquals(sketch, fullGame.sketches[0])
+                    assertEquals(1, notes.size)
+                    assertEquals(1, sketches.size)
+                    assertEquals(idea, notes[0])
+                    assertEquals(sketch, Sketch(sketches[0]))
                     assertEquals(1, fullGame.players.size)
                     assertEquals(session, fullGame.players[0])
                     cont.resume(Unit)
@@ -196,21 +187,25 @@ class FullGameRepoTest {
             fullGameRepo.insertRemote(idea2)
 
             // insert 2nd sketch
-            val sketch2 = Sketch(idea.copy(imgFn = challenge.imgFn, guid = ""), challengeImgUri)
+            val sketch2 =
+                Sketch(idea.copy(imgFn = challenge.imgFn, guid = "", origin = Idea.Origin.SKETCH,
+                    imgUri = challengeImgUri?.path))
             fullGameRepo.insertRemote(sketch2)
-
             delay(1500)
 
             // then observe
             suspendCoroutine<Unit> { cont ->
                 fullGameRepo.fullGame.observe(lifecycleOwner, Observer { fullGame ->
-                    Timber.d("Observed ${fullGame.ideas.size} ideas and ${fullGame.sketches.size} sketches, ${fullGame.players.size} sessions")
-                    assertEquals(2, fullGame.ideas.size)
-                    assertEquals(idea.copy(guid = ""),
-                        fullGame.ideas[0].copy(guid = "")) // ignore guid
+                    val notes = fullGame.ideas(Idea.Origin.BRAINSTORM)
+                    val sketches = fullGame.ideas(Idea.Origin.SKETCH)
 
-                    assertEquals(2, fullGame.sketches.size)
-                    assertEquals(sketch, fullGame.sketches[0])
+                    Timber.d("Observed ${notes.size} notes, ${sketches.size} sketches and ${fullGame.players.size} sessions")
+
+                    assertEquals(2, notes.size)
+                    assertEquals(idea.copy(guid = ""), notes[0].copy(guid = "")) // ignore guid
+
+                    assertEquals(2, sketches.size)
+                    assertEquals(sketch, Sketch(sketches[0]))
 
                     assert(idea.playerName!!.isNotEmpty())
                     assertEquals(3, fullGame.players.size)
@@ -251,22 +246,27 @@ class FullGameRepoTest {
             // get from fullGame
             fullGameRepo.fullGame.blockingObserve()
                 ?.let { fullGame ->
-                    assertEquals(1, fullGame.ideas.size)
-                    val idea1 = fullGame.ideas[0]
+                    val notes = fullGame.ideas(Idea.Origin.BRAINSTORM)
+                    val sketches = fullGame.ideas(Idea.Origin.SKETCH)
+
+                    assertEquals(1, notes.size)
+                    val idea1 = notes[0]
                     idea1.vote()
                     fullGameRepo.updateRemote(idea1)
 
-                    assertEquals(1, fullGame.sketches.size)
-                    val sketch1 = fullGame.sketches[0]
-                    sketch1.idea.vote()
-                    sketch1.idea.imgFn = challenge.imgFn
+                    assertEquals(1, sketches.size)
+                    val sketch1 = sketches[0]
+                    sketch1.vote()
+                    sketch1.imgFn = challenge.imgFn
+                    fullGameRepo.updateRemote(sketch1)
+
                     delay(3000)
 
                     // check result
                     fullGameRepo.fullGame.blockingObserve()
                         ?.let {
-                            assertEquals(idea1, it.ideas[0])
-                            assertEquals(sketch1, it.sketches[0])
+                            assertEquals(idea1, it.ideas(Idea.Origin.BRAINSTORM)[0])
+                            assertEquals(sketch1, it.ideas(Idea.Origin.SKETCH)[0])
                         }
                 }
         }

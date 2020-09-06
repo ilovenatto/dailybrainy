@@ -11,7 +11,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.GenSketchFragBinding
+import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.game.FullGame
+import org.chenhome.dailybrainy.repo.game.Sketch
 import org.chenhome.dailybrainy.ui.*
 import timber.log.Timber
 
@@ -71,12 +73,12 @@ class GenSketchFrag : Fragment() {
         playerAdap: PlayerAdapter,
         sketchAdap: SketchAdapter,
     ) {
-        fullGame.observe(viewLifecycleOwner, {
-            it?.let {
-                Timber.d("Got challenge ${it.challenge.title}")
-                ideaAdap.ideas = it.ideas
-                playerAdap.players = it.players
-                sketchAdap.sketches = it.sketches
+        fullGame.observe(viewLifecycleOwner, { it ->
+            it?.let { game ->
+                Timber.d("Got challenge ${game.challenge.title}")
+                ideaAdap.ideas = game.ideas(Idea.Origin.BRAINSTORM)
+                playerAdap.players = game.players
+                sketchAdap.sketches = game.ideas(Idea.Origin.SKETCH).map { idea -> Sketch(idea) }
             }
         })
     }

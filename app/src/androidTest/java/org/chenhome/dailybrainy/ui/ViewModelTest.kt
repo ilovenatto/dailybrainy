@@ -51,7 +51,7 @@ class ViewModelTest {
             pair = createFullGame(context)
             owner.reg.currentState = Lifecycle.State.CREATED
             owner.reg.currentState = Lifecycle.State.STARTED
-            delay(2000)
+            delay(5000)
         }
 
     }

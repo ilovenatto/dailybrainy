@@ -78,7 +78,7 @@ class VoteIdeaFrag : Fragment() {
     ) {
         fullGame.observe(viewLifecycleOwner, {
             it?.let {
-                voteIdeaAdap.ideas = it.ideas
+                voteIdeaAdap.ideas = it.ideas(Idea.Origin.BRAINSTORM)
                 playerAdap.players = it.players
             }
         })
@@ -89,7 +89,7 @@ class VoteIdeaFrag : Fragment() {
 internal class VoteIdeaAdapter(val ideaListener: Listener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    var ideas: MutableList<Idea> = mutableListOf()
+    var ideas: List<Idea> = listOf()
         set(value) {
             field = value
             notifyDataSetChanged()

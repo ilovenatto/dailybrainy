@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.GenIdeaFragBinding
+import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.ui.Event
 import org.chenhome.dailybrainy.ui.GameVMFactory
@@ -76,7 +77,7 @@ class GenIdeaFrag : Fragment() {
         fullGame.observe(viewLifecycleOwner, {
             it?.let {
                 Timber.d("Got challenge ${it.challenge.title}")
-                ideaAdap.ideas = it.ideas
+                ideaAdap.ideas = it.ideas(Idea.Origin.BRAINSTORM)
                 playerAdap.players = it.players
             }
         })

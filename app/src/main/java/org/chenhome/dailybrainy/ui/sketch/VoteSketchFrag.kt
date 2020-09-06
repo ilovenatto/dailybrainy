@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.GenSketchItemBinding
 import org.chenhome.dailybrainy.databinding.VoteSketchFragBinding
+import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.repo.game.Sketch
 import org.chenhome.dailybrainy.ui.*
@@ -76,8 +77,8 @@ class VoteSketchFrag : Fragment() {
     ) {
         fullGame.observe(viewLifecycleOwner, {
             it?.let {
-                sketchAdap.sketches = it.sketches
-                ideaAdap.ideas = it.ideas
+                sketchAdap.sketches = it.ideas(Idea.Origin.SKETCH).map { idea -> Sketch(idea) }
+                ideaAdap.ideas = it.ideas(Idea.Origin.BRAINSTORM)
                 playerAdap.players = it.players
             }
         })
@@ -87,7 +88,7 @@ class VoteSketchFrag : Fragment() {
 internal class VoteSketchAdapter(val sketchListener: Listener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    var sketches: MutableList<Sketch> = mutableListOf()
+    var sketches: List<Sketch> = listOf()
         set(value) {
             field = value
             notifyDataSetChanged()

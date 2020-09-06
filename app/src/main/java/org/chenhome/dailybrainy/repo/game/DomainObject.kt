@@ -5,6 +5,7 @@ import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.Game
 import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.PlayerSession
+import timber.log.Timber
 
 /**
  * Domain objects that align more closely with how the UI renders the data.
@@ -28,17 +29,43 @@ data class GameStub(
 data class FullGame(
     var game: Game = Game(),
     var players: MutableList<PlayerSession> = mutableListOf(),
-    var ideas: MutableList<Idea> = mutableListOf(), // ideas that don't have drawings (and have a title)
-    var sketches: MutableList<Sketch> = mutableListOf(), // ideas that have drawings
     var challenge: Challenge = Challenge(), // current challenge
-)
+) {
+    private var _ideas: MutableList<Idea> = mutableListOf()
+
+    fun ideas(origin: Idea.Origin): List<Idea> = _ideas.filter { it.origin == origin }
+
+    fun add(idea: Idea) {
+        // doesn't exist
+        if (_ideas.firstOrNull { idea.guid == it.guid } == null) {
+            _ideas.add(idea)
+        }
+    }
+
+    fun update(idea: Idea) {
+        // doesn't exist
+        val index = _ideas.indexOfFirst { idea.guid == it.guid }
+        if (index >= 0) {
+            _ideas[index] = idea
+        }
+    }
+
+    fun remove(idea: Idea) {
+        _ideas.removeIf { idea.guid == it.guid }
+    }
+}
 
 /**
  * Composes an Idea and decorates with an image URI.
- * Image URI set by [IdeaObserver] when it downloads from remote DB.
  */
 data class Sketch(
     val idea: Idea,
-    var imgUri: Uri?,
-)
+) {
+    val imgUri: Uri?
+        get() = idea.imgUri?.let {
+            val uri = Uri.parse(it)
+            Timber.d("Parsed as uri $uri")
+            uri
+        }
+}
 
