@@ -1,6 +1,9 @@
 package org.chenhome.dailybrainy.ui.sketch
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +18,7 @@ import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.repo.game.Sketch
 import org.chenhome.dailybrainy.ui.*
+import org.chenhome.dailybrainy.ui.SketchAdapter.SketchVHListener
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -27,7 +31,14 @@ class GenSketchFrag : Fragment() {
 
     private val playerAdap = PlayerAdapter()
     private val ideaAdap = IdeaAdapter()
-    private val sketchAdap = SketchAdapter()
+    private val sketchAdap = SketchAdapter(SketchVHListener(
+        { _ ->
+            // do nothing on vote
+        },
+        { sketch ->
+            vm.navToViewSketch(sketch)
+        }), false
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,7 +53,7 @@ class GenSketchFrag : Fragment() {
         binding.executePendingBindings()
 
         initAdapterObservers(vm.fullGame, ideaAdap, playerAdap, sketchAdap)
-        initNavObserver(vm.navToNext)
+        initNavObserver(vm.navToNext, vm.navToCamera, vm.navToViewSketch)
         return binding.root
     }
 
@@ -56,12 +67,53 @@ class GenSketchFrag : Fragment() {
         vm.generate.countdownTimer.cancel()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode != IntentReq.REQ_IMAGE_CAPTURE
+            || resultCode != Activity.RESULT_OK
+        ) {
+            Timber.w("Unable to capture image")
+            return
+        }
+        // save photo in remote database.. which will eventually make it back to local filesystem
+        vm.uploadSketch()
+    }
+
     private fun initNavObserver(
         navToNext: LiveData<Event<Boolean>>,
+        navToCamera: LiveData<Event<Boolean>>,
+        navToViewSketch: LiveData<Event<Sketch>>,
     ) {
         navToNext.observe(viewLifecycleOwner, {
             it.contentIfNotHandled()?.run {
                 findNavController().popBackStack()
+            }
+        })
+
+        navToCamera.observe(viewLifecycleOwner, { event ->
+            event.contentIfNotHandled()?.run {
+                Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
+                    if (intent
+                            .resolveActivity(requireContext().packageManager)
+                            .toString().isNotEmpty()
+                    ) {
+                        vm.genAndSetNewUri()
+                        vm.sketchImageUri?.let { uri ->
+                            intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                            startActivityForResult(intent, IntentReq.REQ_IMAGE_CAPTURE)
+                        } ?: Timber.w("Unable to launch capture image intent")
+                    } else {
+                        Timber.w("Unable to find activity to capture image")
+                    }
+                }
+            }
+        })
+
+        navToViewSketch.observe(viewLifecycleOwner, {
+            it.contentIfNotHandled()?.let { sketch ->
+                findNavController().navigate(GenSketchFragDirections
+                    .actionGenSketchFragToViewSketchFrag(
+                        sketch.idea.gameGuid,
+                        sketch.idea.guid))
             }
         })
     }

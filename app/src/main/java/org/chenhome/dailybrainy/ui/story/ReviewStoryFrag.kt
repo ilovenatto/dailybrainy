@@ -28,12 +28,18 @@ class ReviewStoryFrag : Fragment() {
         GameVMFactory(requireContext(), args.gameGuid)
     }
 
+    private val sketchListener = SketchAdapter.SketchVHListener(
+        { sketch ->
 
+        },
+        { sketch ->
+            // TODO: 9/18/20
+        }
+    )
     private val playerAdap = PlayerAdapter()
-    private val settingAdap = SketchAdapter()
-    private val solutionAdap = SketchAdapter()
-    private val resolutionAdap = SketchAdapter()
-
+    private val settingAdap = SketchAdapter(sketchListener, false)
+    private val solutionAdap = SketchAdapter(sketchListener, false)
+    private val resolutionAdap = SketchAdapter(sketchListener, false)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

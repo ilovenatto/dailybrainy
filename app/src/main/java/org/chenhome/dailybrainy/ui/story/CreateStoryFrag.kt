@@ -27,11 +27,18 @@ class CreateStoryFrag : Fragment() {
         GameVMFactory(requireContext(), args.gameGuid)
     }
 
-
+    private val sketchListener = SketchAdapter.SketchVHListener(
+        { sketch ->
+// TODO: 9/18/20
+        },
+        { sketch ->
+            // TODO: 9/18/20  
+        }
+    )
     private val playerAdap = PlayerAdapter()
-    private val settingAdap = SketchAdapter()
-    private val solutionAdap = SketchAdapter()
-    private val resolutionAdap = SketchAdapter()
+    private val settingAdap = SketchAdapter(sketchListener, true)
+    private val solutionAdap = SketchAdapter(sketchListener, true)
+    private val resolutionAdap = SketchAdapter(sketchListener, true)
     private lateinit var binding: CreateStoryFragBinding
 
 

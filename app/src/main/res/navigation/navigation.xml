@@ -105,10 +105,6 @@
             android:name="gameGuid"
             app:argType="string" />
         <action
-            android:id="@+id/action_genSketchFrag_to_captureSketchFrag"
-            app:destination="@id/captureSketchFrag"
-            app:popUpTo="@id/genSketchFrag" />
-        <action
             android:id="@+id/action_genSketchFrag_to_viewSketchFrag"
             app:destination="@id/viewSketchFrag"
             app:popUpTo="@id/genSketchFrag" />
@@ -132,14 +128,12 @@
         android:label="fragment_view_sketch"
         tools:layout="@layout/view_sketch_frag">
         <argument
-            android:name="imgFn"
+            android:name="gameGuid"
+            app:argType="string" />
+        <argument
+            android:name="ideaGuid"
             app:argType="string" />
     </fragment>
-    <fragment
-        android:id="@+id/captureSketchFrag"
-        android:name="org.chenhome.dailybrainy.ui.sketch.CaptureSketchFrag"
-        android:label="fragment_capture_sketch"
-        tools:layout="@layout/cap_sketch_frag" />
     <fragment
         android:id="@+id/createStoryFrag"
         android:name="org.chenhome.dailybrainy.ui.story.CreateStoryFrag"
@@ -148,6 +142,9 @@
         <argument
             android:name="gameGuid"
             app:argType="string" />
+        <action
+            android:id="@+id/action_createStoryFrag_to_viewSketchFrag"
+            app:destination="@id/viewSketchFrag" />
     </fragment>
     <fragment
         android:id="@+id/reviewStoryFrag"
@@ -157,5 +154,8 @@
         <argument
             android:name="gameGuid"
             app:argType="string" />
+        <action
+            android:id="@+id/action_reviewStoryFrag_to_viewSketchFrag"
+            app:destination="@id/viewSketchFrag" />
     </fragment>
 </navigation>

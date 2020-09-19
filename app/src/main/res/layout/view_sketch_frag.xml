@@ -1,14 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.sketch.ViewSketchFrag">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <data>
+
+        <variable
+            name="vm"
+            type="org.chenhome.dailybrainy.ui.sketch.SketchStubVM" />
+    </data>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-</FrameLayout>
+        <TextView
+            android:id="@+id/textSketchTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@{vm.sketchStub.idea.title}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            tools:text="Sketch title" />
+
+        <TextView
+            android:id="@+id/textPlayer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{vm.sketchStub.idea.playerName}"
+            tools:text="Johnny" />
+
+        <TextView
+            android:id="@+id/textVotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text='@{"Votes: " + vm.sketchStub.idea.votes}'
+            tools:text="Votes: 10" />
+
+        <ImageView
+            android:id="@+id/imageSketch"
+            android:layout_width="400dp"
+            android:layout_height="wrap_content"
+            app:imageUrl="@{vm.sketchStub.imgUri}"
+            tools:src="@tools:sample/backgrounds/scenic" />
+
+    </LinearLayout>
+</layout>

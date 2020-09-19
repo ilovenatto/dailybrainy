@@ -9,15 +9,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
-import org.chenhome.dailybrainy.databinding.GenSketchItemBinding
 import org.chenhome.dailybrainy.databinding.VoteSketchFragBinding
 import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.repo.game.Sketch
 import org.chenhome.dailybrainy.ui.*
-import org.jetbrains.annotations.NotNull
 
 @AndroidEntryPoint
 class VoteSketchFrag : Fragment() {
@@ -29,9 +26,13 @@ class VoteSketchFrag : Fragment() {
 
     private val playerAdap = PlayerAdapter()
     private val ideaAdap = IdeaAdapter()
-    private val sketchAdap = VoteSketchAdapter(VoteSketchAdapter.Listener { sketch ->
-        vm.vote.incrementVoteRemotely(sketch.idea)
-    })
+    private val sketchAdap = SketchAdapter(SketchAdapter.SketchVHListener(
+        { sketch -> // onvote
+            vm.vote.incrementVoteRemotely(sketch.idea)
+        }, { sketch -> // onview
+            vm.navToViewSketch(sketch)
+        }), true
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,7 +48,7 @@ class VoteSketchFrag : Fragment() {
         binding.executePendingBindings()
 
         initAdapterObservers(vm.fullGame, sketchAdap, ideaAdap, playerAdap)
-        initNavObserver(vm.navToNext)
+        initNavObserver(vm.navToNext, vm.navToViewSketch)
         return binding.root
     }
 
@@ -61,17 +62,30 @@ class VoteSketchFrag : Fragment() {
         vm.generate.countdownTimer.cancel()
     }
 
-    private fun initNavObserver(navToNext: LiveData<Event<Boolean>>) {
+    private fun initNavObserver(
+        navToNext: LiveData<Event<Boolean>>,
+        navToViewSketch: LiveData<Event<Sketch>>,
+    ) {
         navToNext.observe(viewLifecycleOwner, {
             it.contentIfNotHandled()?.run {
                 findNavController().popBackStack()
             }
         })
+        navToViewSketch.observe(viewLifecycleOwner, {
+            it.contentIfNotHandled()?.let { sketch ->
+                findNavController()
+                    .navigate(VoteSketchFragDirections
+                        .actionVoteSketchFragToViewSketchFrag(
+                            sketch.idea.gameGuid,
+                            sketch.idea.guid))
+            }
+        })
     }
+
 
     private fun initAdapterObservers(
         fullGame: LiveData<FullGame>,
-        sketchAdap: VoteSketchAdapter,
+        sketchAdap: SketchAdapter,
         ideaAdap: IdeaAdapter,
         playerAdap: PlayerAdapter,
     ) {
@@ -82,40 +96,6 @@ class VoteSketchFrag : Fragment() {
                 playerAdap.players = it.players
             }
         })
-    }
-}
-
-internal class VoteSketchAdapter(val sketchListener: Listener) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    var sketches: List<Sketch> = listOf()
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
-        IdeaVH(GenSketchItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as IdeaVH).bind(sketches[position])
-    }
-
-    override fun getItemCount(): Int = sketches.size
-
-    inner class IdeaVH(val binding: @NotNull GenSketchItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(sketch: Sketch) {
-            binding.sketch = sketch
-            binding.listener = sketchListener
-            bindImage(binding.imageSketch, sketch.imgUri)
-        }
-    }
-
-    class Listener(val listener: (Sketch) -> Unit) {
-        fun onClick(sketch: Sketch) {
-            listener(sketch)
-        }
     }
 }
 

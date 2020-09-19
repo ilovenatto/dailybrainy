@@ -1,6 +1,7 @@
 package org.chenhome.dailybrainy.ui
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.chenhome.dailybrainy.databinding.GenIdeaItemIdeaBinding
@@ -67,9 +68,8 @@ internal class IdeaAdapter :
     }
 }
 
-internal class SketchAdapter :
+internal class SketchAdapter(val sketchListener: SketchVHListener, val voteEnabled: Boolean) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
     var sketches: List<Sketch> = listOf()
         set(value) {
             field = value
@@ -85,15 +85,30 @@ internal class SketchAdapter :
 
     override fun getItemCount(): Int = sketches.size
 
-    class SketchVH(val binding: @NotNull GenSketchItemBinding) :
+    inner class SketchVH(val binding: @NotNull GenSketchItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(sketch: Sketch) {
             binding.sketch = sketch
+            binding.listener = sketchListener
+            binding.buttonVote.visibility = if (voteEnabled) View.VISIBLE else View.GONE
 
             // specially handle the image
             sketch.imgUri?.let {
                 bindImage(binding.imageSketch, it)
             }
+        }
+    }
+
+    class SketchVHListener(
+        val onVoteListener: (Sketch) -> Unit,
+        val onViewListener: (Sketch) -> Unit,
+    ) {
+        fun onVote(sketch: Sketch) {
+            onVoteListener(sketch)
+        }
+
+        fun onView(sketch: Sketch) {
+            onViewListener(sketch)
         }
     }
 }

@@ -9,6 +9,10 @@ import com.bumptech.glide.request.RequestOptions
 import org.chenhome.dailybrainy.R
 import timber.log.Timber
 
+object IntentReq {
+    const val REQ_IMAGE_CAPTURE = 1
+}
+
 
 /**
  * Used as a wrapper for data that is exposed via a LiveData that represents an event.

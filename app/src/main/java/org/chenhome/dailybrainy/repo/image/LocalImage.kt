@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Environment
 import androidx.core.content.FileProvider
 import androidx.core.net.toFile
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,6 +13,7 @@ import timber.log.Timber
 import java.io.*
 import java.nio.channels.FileChannel
 import java.util.*
+import javax.inject.Inject
 
 data class LocalFolder(val context: Context, val location: File?)
 
@@ -23,8 +25,8 @@ data class LocalFolder(val context: Context, val location: File?)
  * - Save and delete local files to app-specific location
  * - File is later retrieved via its URI using a content resolver
  */
-class LocalImageRepo(
-    val context: Context
+class LocalImageRepo @Inject constructor(
+    @ApplicationContext val context: Context,
 ) {
     val scope = CoroutineScope(Dispatchers.IO)
 
