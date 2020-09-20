@@ -1,15 +1,13 @@
 package org.chenhome.dailybrainy.ui.challenges
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import org.chenhome.dailybrainy.databinding.ViewChallengesItemChallengeBinding
-import org.chenhome.dailybrainy.databinding.ViewChallengesItemGameBinding
+import org.chenhome.dailybrainy.databinding.CardGameBinding
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.game.GameStub
 import org.jetbrains.annotations.NotNull
+import timber.log.Timber
 
 
 /**
@@ -19,8 +17,23 @@ import org.jetbrains.annotations.NotNull
  *
  * @property clickListener
  */
-class ChallengeListener(val clickListener: (challengeGuid: String, category: Challenge.Category) -> Unit) {
-    fun onClick(challenge: Challenge) = clickListener(challenge.guid, challenge.category)
+class ChallengeListener(
+    val joinListener: (challengeGuid: String) -> Unit,
+    val newGameListener: (challengeGuid: String) -> Unit,
+) {
+    fun onJoinGame(challenge: Challenge) =
+        if (challenge.category == Challenge.Category.CHALLENGE) joinListener(challenge.guid)
+        else Timber.w("Challenge is the wrong category")
+
+    fun onNewGame(challenge: Challenge) =
+        if (challenge.category == Challenge.Category.CHALLENGE) newGameListener(challenge.guid)
+        else Timber.w("Wrong category")
+}
+
+class LessonListener(val viewListener: (challengeGuid: String) -> Unit) {
+    fun onViewLesson(challenge: Challenge) =
+        if (challenge.category == Challenge.Category.LESSON) viewListener(challenge.guid)
+        else Timber.w("Wrong category")
 }
 
 class GameListener(val clickListener: (gameGuid: String) -> Unit) {
@@ -28,96 +41,33 @@ class GameListener(val clickListener: (gameGuid: String) -> Unit) {
 }
 
 
-class ViewChallengesAdapter(
-    private val challengeListener: ChallengeListener,
+class ViewGamesAdapter(
     private val gameListener: GameListener,
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    private var merged = listOf<Any>()
-    private var challenges = listOf<Challenge>()
     private var games = listOf<GameStub>()
-
-    private val TYPE_UNDEFINED = -1
-    private val TYPE_CHALL = 0
-    private val TYPE_GAME = 1
-
-    override fun getItemViewType(position: Int): Int {
-        merged[position].let {
-            val type = when (it::class) {
-                GameStub::class -> TYPE_GAME
-                Challenge::class -> TYPE_CHALL
-                else -> TYPE_UNDEFINED
-            }
-            return type
-        }
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return when (viewType) {
-            TYPE_GAME -> GameViewHolder(
-                ViewChallengesItemGameBinding
-                    .inflate(inflater, parent, false)
-            )
-            TYPE_CHALL -> ChallViewHolder(
-                ViewChallengesItemChallengeBinding
-                    .inflate(inflater, parent, false)
-            )
-            else -> ViewHolder(
-                LayoutInflater.from(parent.context)
-                    .inflate(android.R.layout.simple_list_item_1, parent, false)
-            )
-        }
+        return GameViewHolder(CardGameBinding
+            .inflate(inflater, parent, false))
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (holder) {
-            is ChallViewHolder -> {
-                holder.bind(merged[position] as Challenge, challengeListener)
-            }
-            is GameViewHolder -> {
-                holder.bind(merged[position] as GameStub, gameListener)
-            }
-            is ViewHolder -> {
-                holder.text1.text = "Unrecognized item"
-            }
-        }
+        (holder as GameViewHolder).bind(games[position], gameListener)
     }
 
-    override fun getItemCount(): Int = merged.size
-
-
-    fun setChallenges(challengesNew: List<Challenge>) {
-        this.challenges = challengesNew
-        merged = listOf(challenges, games).flatten()
-        notifyDataSetChanged()
-    }
+    override fun getItemCount(): Int = games.size
 
     fun setGames(gameStubs: List<GameStub>) {
         this.games = gameStubs
-        merged = listOf(challenges, games).flatten()
         notifyDataSetChanged()
     }
 
-
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val text1: TextView = view.findViewById(android.R.id.text1)
-    }
-
-    inner class ChallViewHolder(val binding: @NotNull ViewChallengesItemChallengeBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(challenge: Challenge, challengeListener: ChallengeListener) {
-            binding.challenge = challenge
-            binding.clickListener = challengeListener
-            binding.executePendingBindings()
-        }
-    }
-
-    inner class GameViewHolder(val binding: @NotNull ViewChallengesItemGameBinding) :
+    inner class GameViewHolder(val binding: @NotNull CardGameBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(gameStub: GameStub, listener: GameListener) {
-            binding.game = gameStub
+            binding.gameStub = gameStub
             binding.listener = listener
             binding.executePendingBindings()
         }

@@ -24,7 +24,8 @@ class ViewChallengesVM @ViewModelInject constructor(
     val games: LiveData<List<GameStub>> = brainyRepo.gameStubs
 
     // List of challenges offered by DailyBrainy
-    val challenges: LiveData<List<Challenge>> = brainyRepo.challenges
+    val todayLesson: LiveData<Challenge> = brainyRepo.todayLesson
+    val todayChallenge: LiveData<Challenge> = brainyRepo.todayChallenge
 
     /**
      * NAVIGATE: Navigate to New Game (challengeGuid required)
@@ -55,6 +56,17 @@ class ViewChallengesVM @ViewModelInject constructor(
     val navToExistingGame: LiveData<Event<String>>
         get() = _navToExistingGame
 
+    /**
+     * navToJoinGame is a external immutable LiveData observable
+     * by others
+     */
+    private var _navToJoinGame = MutableLiveData<Event<String>>()
+    val navToJoinGame: LiveData<Event<String>>
+        get() = _navToJoinGame
+
+    fun navToJoinGame(challengeGuid: String) {
+        _navToJoinGame.value = Event(challengeGuid)
+    }
 
     /**
      * NAVIGATE: Navigate to Challenge (challengeGuid required)

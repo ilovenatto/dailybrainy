@@ -1,12 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/listSteps"
-    android:name="org.chenhome.dailybrainy.ui.ViewChallengesFrag"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
-    app:layoutManager="LinearLayoutManager"
-    tools:context=".ui.challenges.ViewChallengesFrag" />
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="vm"
+            type="org.chenhome.dailybrainy.ui.challenges.ViewChallengesVM" />
+
+        <variable
+            name="listenerLesson"
+            type="org.chenhome.dailybrainy.ui.challenges.LessonListener" />
+
+        <variable
+            name="listenerChallenge"
+            type="org.chenhome.dailybrainy.ui.challenges.ChallengeListener" />
+
+    </data>
+
+    <LinearLayout
+        android:layout_margin="16dp"
+        android:orientation="vertical"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
+        <include
+            android:id="@+id/cardLesson"
+            layout="@layout/card_lesson"
+            app:lesson="@{vm.todayLesson}"
+            app:listener="@{listenerLesson}" />
+
+        <include
+            android:id="@+id/cardChallenge"
+            layout="@layout/card_challenge"
+            app:listener="@{listenerChallenge}"
+            app:challenge="@{vm.todayChallenge}" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listGames"
+            android:name="org.chenhome.dailybrainy.ui.ViewChallengesFrag"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            app:layoutManager="LinearLayoutManager"
+            tools:context=".ui.challenges.ViewChallengesFrag">
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+
+    </LinearLayout>
+</layout>

@@ -22,6 +22,9 @@
             android:id="@+id/action_viewChallengesFrag_to_viewGameFrag"
             app:destination="@id/viewGameFrag"
             app:popUpTo="@id/viewChallengesFrag" />
+        <action
+            android:id="@+id/action_viewChallengesFrag_to_joinGameFrag"
+            app:destination="@id/joinGameFrag" />
     </fragment>
     <fragment
         android:id="@+id/newGameFrag"
@@ -157,5 +160,17 @@
         <action
             android:id="@+id/action_reviewStoryFrag_to_viewSketchFrag"
             app:destination="@id/viewSketchFrag" />
+    </fragment>
+    <fragment
+        android:id="@+id/joinGameFrag"
+        android:name="org.chenhome.dailybrainy.JoinGameFrag"
+        android:label="frag_join_game"
+        tools:layout="@layout/frag_join_game">
+        <action
+            android:id="@+id/action_joinGameFrag_to_viewGameFrag"
+            app:destination="@id/viewGameFrag" />
+        <argument
+            android:name="challengeGuid"
+            app:argType="string" />
     </fragment>
 </navigation>

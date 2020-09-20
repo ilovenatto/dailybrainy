@@ -63,15 +63,6 @@ class ViewModelTest {
     }
 
     @Test
-    fun viewChallenges_testChallenges() {
-        runBlocking {
-            val challenges = viewChallengesVM.challenges.blockingObserve()
-            assertNotNull(challenges)
-            assertEquals(5, challenges?.size)
-        }
-    }
-
-    @Test
     fun viewChallenges_testGames() {
         runBlocking {
             val games = viewChallengesVM.games.blockingObserve()

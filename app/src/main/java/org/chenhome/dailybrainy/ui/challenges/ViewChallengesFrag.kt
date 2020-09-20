@@ -9,57 +9,60 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
-import org.chenhome.dailybrainy.R
-import org.chenhome.dailybrainy.repo.Challenge
+import org.chenhome.dailybrainy.databinding.ViewChallengesFragBinding
 import timber.log.Timber
 
 @AndroidEntryPoint // for injecting ViewModel "by viewModels()"
 class ViewChallengesFrag : Fragment() {
 
-    private val viewChallengesVM: ViewChallengesVM by viewModels()
+    private val vm: ViewChallengesVM by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        val view = inflater.inflate(R.layout.view_challenges_frag, container, false)
-        // Set the adapter
-        if (view is RecyclerView) {
-            with(view) {
-                val challAdapter = ViewChallengesAdapter(
-                    ChallengeListener { guid, category ->
-                        when (category) {
-                            Challenge.Category.CHALLENGE -> viewChallengesVM.navToNewGame(guid)
-                            Challenge.Category.LESSON -> viewChallengesVM.navToLesson(guid)
-                        }
-                    },
-                    GameListener { gameGuid ->
-                        viewChallengesVM.navToExistingGame(gameGuid)
-                    })
+        val binding = ViewChallengesFragBinding.inflate(LayoutInflater.from(requireContext()),
+            container,
+            false)
 
-                // Observe ViewModel data and update the adapter
-                viewChallengesVM.challenges.observe(viewLifecycleOwner, Observer {
-                    it?.let {
-                        Timber.d("Observed ${it.size} challenges changed")
-                        challAdapter.setChallenges(it)
-                    }
-                })
-                viewChallengesVM.games.observe(viewLifecycleOwner, Observer {
-                    it?.let {
-                        Timber.d("Observed ${it.size} games changed")
-                        challAdapter.setGames(it)
-                    }
-                })
-                adapter = challAdapter
+        // Previous games
+        val gamesAdapter = ViewGamesAdapter(GameListener { gameGuid ->
+            vm.navToExistingGame(gameGuid)
+        })
+        binding.listGames.adapter = gamesAdapter
 
-
+        // Today challenge
+        binding.vm = vm
+        binding.listenerChallenge = ChallengeListener(
+            { guid -> // onJoin
+                vm.navToJoinGame(guid)
+            },
+            { guid -> // newGame
+                vm.navToNewGame(guid)
             }
+        )
+        binding.listenerLesson = LessonListener { guid ->
+            vm.navToLesson(guid)
         }
 
         // observe ViewModel
-        viewChallengesVM.navToNewGame.observe(viewLifecycleOwner, {
+        vm.games.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                Timber.d("Observed ${it.size} games changed")
+                gamesAdapter.setGames(it)
+            }
+        })
+
+        vm.todayChallenge.observe(viewLifecycleOwner, Observer {
+            binding.vm = vm
+        })
+
+        vm.todayLesson.observe(viewLifecycleOwner, Observer {
+            binding.vm = vm
+        })
+
+        vm.navToNewGame.observe(viewLifecycleOwner, {
             // navigate
             it.contentIfNotHandled()?.let { challengeGuid ->
                 val dir =
@@ -68,7 +71,7 @@ class ViewChallengesFrag : Fragment() {
             }
         })
 
-        viewChallengesVM.navToLesson.observe(viewLifecycleOwner, {
+        vm.navToLesson.observe(viewLifecycleOwner, {
             // navigate
             it.contentIfNotHandled()?.let { challengeGuid ->
                 val dir =
@@ -77,7 +80,7 @@ class ViewChallengesFrag : Fragment() {
             }
         })
 
-        viewChallengesVM.navToExistingGame.observe(viewLifecycleOwner, {
+        vm.navToExistingGame.observe(viewLifecycleOwner, {
             // navigate
             it.contentIfNotHandled()?.let { gameGuid ->
                 val dir =
@@ -85,6 +88,14 @@ class ViewChallengesFrag : Fragment() {
                 this.findNavController().navigate(dir)
             }
         })
-        return view
+        vm.navToJoinGame.observe(viewLifecycleOwner, {
+            it.contentIfNotHandled()?.let { challengeGuid ->
+                this.findNavController()
+                    .navigate(ViewChallengesFragDirections.actionViewChallengesFragToJoinGameFrag(
+                        challengeGuid))
+            }
+        })
+        binding.executePendingBindings()
+        return binding.root
     }
 }

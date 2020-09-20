@@ -149,6 +149,10 @@ class BrainyRepo @Inject constructor(
      * when the app has published new challenges.
      */
     val challenges: LiveData<List<Challenge>> = challengeObs._challenges
+    val lessons: LiveData<List<Challenge>> = challengeObs._lessons
+
+    val todayLesson: LiveData<Challenge> = challengeObs._todayLesson
+    val todayChallenge: LiveData<Challenge> = challengeObs._todayChallenge
 
     /**
      * List of [GameStub] started by the current user. [GameStub] are

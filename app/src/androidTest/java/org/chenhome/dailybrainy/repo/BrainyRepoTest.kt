@@ -59,8 +59,35 @@ class BrainyRepoTest {
                 repo.challenges.observe(owner, Observer<List<Challenge>> {
                     Timber.d("Found ${it.size} challenges")
                     assertNotNull(it)
-                    assertEquals(5, it.size)
-                    assert(it[0].hmw?.isNotEmpty()!!)
+                    assertEquals(3, it.size)
+                    it.forEach { ch ->
+                        assertEquals(Challenge.Category.CHALLENGE, ch.category)
+                    }
+                    cont.resume(Unit)
+                })
+            }
+            suspendCoroutine<Unit> { cont ->
+                repo.lessons.observe(owner, Observer<List<Challenge>> {
+                    Timber.d("Found ${it.size} lessons")
+                    assertNotNull(it)
+                    assertEquals(2, it.size)
+                    it.forEach { ch ->
+                        assertEquals(Challenge.Category.LESSON, ch.category)
+                    }
+                    cont.resume(Unit)
+                })
+            }
+            suspendCoroutine<Unit> { cont ->
+                repo.todayChallenge.observe(owner, Observer<Challenge> {
+                    assertNotNull(it)
+                    assertEquals(Challenge.Category.CHALLENGE, it.category)
+                    cont.resume(Unit)
+                })
+            }
+            suspendCoroutine<Unit> { cont ->
+                repo.todayLesson.observe(owner, Observer<Challenge> {
+                    assertNotNull(it)
+                    assertEquals(Challenge.Category.LESSON, it.category)
                     cont.resume(Unit)
                 })
             }

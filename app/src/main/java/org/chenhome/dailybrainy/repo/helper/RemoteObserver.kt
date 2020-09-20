@@ -21,6 +21,7 @@ import org.chenhome.dailybrainy.repo.PlayerSession
 import org.chenhome.dailybrainy.repo.game.GameStub
 import org.chenhome.dailybrainy.repo.image.RemoteImage
 import timber.log.Timber
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -35,13 +36,17 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
     private val fireDb = FirebaseDatabase.getInstance()
     private val fireRef = fireDb.getReference(DbFolder.CHALLENGES.path)
     private val remoteImage = RemoteImage()
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     /**
      * List of challenges offered by DailyBrainy
      */
     // mutable private challenges
     var _challenges: MutableLiveData<List<Challenge>> = MutableLiveData(listOf())
-    val scope = CoroutineScope(Dispatchers.IO)
+    var _lessons: MutableLiveData<List<Challenge>> = MutableLiveData(listOf())
+
+    var _todayChallenge: MutableLiveData<Challenge> = MutableLiveData()
+    var _todayLesson: MutableLiveData<Challenge> = MutableLiveData()
 
     override fun onCancelled(error: DatabaseError) {
         Timber.w("onCancelled $error")
@@ -51,12 +56,44 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
         Timber.d("Challenges data has changed at location ${snapshot.key}")
         scope.launch {
             try {
+                // Map of challegeGuid -> Challenge
                 snapshot.getValue<Map<String, Challenge>>()?.let {
                     Timber.d("${it.size} challenges encountered. Replacing all existing challenges.")
-                    // calling [MutableLiveData.value] will inform observers of the data change
-                    _challenges.postValue(it.map { entry ->
-                        decorateWithUri(entry.value)
-                    })
+
+                    var lessons = mutableListOf<Challenge>()
+                    var challenges = mutableListOf<Challenge>()
+                    it.forEach { entry ->
+                        val chall = decorateWithUri(entry.value)
+                        when (chall.category) {
+                            Challenge.Category.LESSON -> lessons.add(chall)
+                            Challenge.Category.CHALLENGE -> challenges.add(chall)
+                        }
+                    }
+
+                    _lessons.postValue(lessons)
+                    _challenges.postValue(challenges)
+
+                    if (challenges.isNotEmpty()) {
+                        val index =
+                            Calendar.getInstance().get(Calendar.DAY_OF_WEEK) % challenges.size
+                        if (index >= 0 && index < challenges.size) {
+                            val todayChallenge = challenges[index]
+                            Timber.d("Today's challenge is $todayChallenge")
+                            _todayChallenge.postValue(todayChallenge)
+                        }
+                    }
+
+                    if (lessons.isNotEmpty()) {
+                        val index =
+                            Calendar.getInstance().get(Calendar.DAY_OF_WEEK) % lessons.size
+                        if (index >= 0 && index < lessons.size) {
+                            val todayLesson = lessons[index]
+                            Timber.d("Today's lessons is $todayLesson")
+                            _todayLesson.postValue(todayLesson)
+                        }
+                    }
+
+
                 } ?: Timber.w("No challenges found in snapshot ${snapshot.key}")
             } catch (ex: Exception) {
                 Timber.e("Unable to observe challenges $ex")

@@ -1,11 +1,13 @@
 package org.chenhome.dailybrainy.repo.game
 
+import android.content.Context
 import android.net.Uri
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.Game
 import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.PlayerSession
 import timber.log.Timber
+import java.util.*
 
 /**
  * Domain objects that align more closely with how the UI renders the data.
@@ -18,8 +20,13 @@ import timber.log.Timber
  */
 data class GameStub(
     val game: Game,
-    val playerSession: PlayerSession
-)
+    val playerSession: PlayerSession,
+) {
+    fun date(context: Context): String? =
+        game.sessionStartMillis?.let { millis ->
+            android.text.format.DateFormat.getDateFormat(context).format(Date(millis))
+        } ?: null
+}
 
 /**
  * Data object representing the full and comprehensive state
