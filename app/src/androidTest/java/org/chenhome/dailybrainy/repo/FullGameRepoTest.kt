@@ -193,7 +193,7 @@ class FullGameRepoTest {
             val sketch2 =
                 Sketch(idea.copy(imgFn = challenge.imgFn, guid = "", origin = Idea.Origin.SKETCH,
                     imgUri = challengeImgUri?.path))
-            fullGameRepo.insertRemote(sketch2)
+            fullGameRepo.insertRemote(sketch2.idea)
             delay(1500)
 
             // then observe

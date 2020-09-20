@@ -75,6 +75,7 @@ class GenSketchFrag : Fragment() {
             return
         }
         // save photo in remote database.. which will eventually make it back to local filesystem
+        // TODO: 9/19/20 show error
         vm.uploadSketch()
     }
 

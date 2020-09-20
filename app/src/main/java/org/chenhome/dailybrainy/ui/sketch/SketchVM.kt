@@ -5,20 +5,16 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ApplicationComponent
-import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.repo.FullGameRepo
-import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.repo.game.Sketch
 import org.chenhome.dailybrainy.repo.image.LocalImageRepo
 import org.chenhome.dailybrainy.repo.image.RemoteImage
-import org.chenhome.dailybrainy.repo.image.RemoteImageFolder
 import org.chenhome.dailybrainy.ui.Event
 import org.chenhome.dailybrainy.ui.GenerateVMHelper
 import org.chenhome.dailybrainy.ui.VoteVMHelper
@@ -97,29 +93,13 @@ class SketchVM(
     }
 
 
+    /**
+     * @return whether upload succeeded or not
+     */
     fun uploadSketch() {
-        if (sketchImageUri == null || !localImageRepo.isExist(sketchImageUri!!)) {
-            Timber.w("No image was saved by camera app. Unable to upload.")
-            return
-        }
-
-        viewModelScope.launch {
-            remoteImageRepo.upload(RemoteImageFolder.SKETCHES, sketchImageUri!!)?.let { ref ->
-                Timber.d("Stored file to ${ref.path}")
-                if (ref.path.isNotEmpty()) {
-                    // create idea and post it remotely
-                    val idea = Idea(
-                        "", // gets set by FullGameRepo
-                        fullGame.value?.game?.guid!!, // we better have a game guid
-                        userRepo.currentPlayerGuid,
-                        Idea.Origin.SKETCH)
-                    idea.imgFn = ref.path
-                    fullGameRepo.insertRemote(idea) // hopefully it worked
-                } else {
-                    Timber.w("Invalid remoate path ${ref.path}. Unable to upload sketch.")
-                }
-            } ?: Timber.w("Unable to upload sketch")
-        }
+        sketchImageUri?.let { uri ->
+            fullGameRepo.insertRemoteSketch(uri, userRepo.currentPlayerGuid)
+        } ?: Timber.w("Unable to upload sketch with $sketchImageUri")
     }
 
 

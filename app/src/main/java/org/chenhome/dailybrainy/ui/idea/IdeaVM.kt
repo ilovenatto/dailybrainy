@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.repo.FullGameRepo
 import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.game.FullGame
@@ -72,8 +74,10 @@ class IdeaVM(
                 imgFn = null,
                 imgUri = null
             )
-            // attempt to insert
-            fullGameRepo.insertRemote(idea)
+            // attempt to insert async
+            viewModelScope.launch {
+                fullGameRepo.insertRemote(idea)
+            }
         }
         // clear the edit text
         newIdea.value = ""

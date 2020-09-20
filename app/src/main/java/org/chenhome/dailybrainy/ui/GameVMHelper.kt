@@ -3,6 +3,9 @@ package org.chenhome.dailybrainy.ui
 import android.os.CountDownTimer
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.FullGameRepo
 import org.chenhome.dailybrainy.repo.Idea
@@ -63,6 +66,8 @@ class VoteVMHelper(val fullGameRepo: FullGameRepo) {
     val votesLeft: LiveData<Int>
         get() = _votesLeft
 
+    val scope = CoroutineScope(Dispatchers.IO)
+
 
     /**
      * Increments vote for this idea and updates the remote database
@@ -75,7 +80,9 @@ class VoteVMHelper(val fullGameRepo: FullGameRepo) {
         val votes = _votesLeft.value?.dec() ?: 0
         _votesLeft.value = if (votes < 0) 0 else votes
         Timber.d("Incremeting vote on idean $idea")
-        fullGameRepo.updateRemote(updated)
+        scope.launch {
+            fullGameRepo.updateRemote(updated)
+        }
     }
 
 }

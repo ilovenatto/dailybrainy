@@ -60,7 +60,7 @@ data class FullGame(
 }
 
 /**
- * Composes an Idea and decorates with an image URI.
+ * Idea decorated with an image URI
  */
 data class Sketch(
     val idea: Idea,

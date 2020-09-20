@@ -86,6 +86,9 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun register() = fireRef.addValueEventListener(this)
 
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun refresh() = _challenges.notifyObserver()
+
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun deregister() = fireRef.removeEventListener(this)
 }
@@ -115,6 +118,9 @@ internal class GameStubObserver(private val userGuid: String) : ValueEventListen
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun register() = fireRef.addValueEventListener(this)
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun refresh() = _gameStubs.notifyObserver()
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun deregister() = fireRef.removeEventListener(this)

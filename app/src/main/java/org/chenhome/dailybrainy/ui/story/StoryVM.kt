@@ -72,7 +72,9 @@ class StoryVM(
             origin)
         // TODO: 9/2/20 remove this later .. test
         idea.imgFn = "challenges/challenge_cookout.png"
-        fullGameRepo.insertRemote(idea)
+        viewModelScope.launch {
+            fullGameRepo.insertRemote(idea)
+        }
 
         Timber.d("userid ${userRepo.currentPlayerGuid}")
     }

@@ -1,9 +1,20 @@
 package org.chenhome.dailybrainy.repo
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import org.chenhome.dailybrainy.repo.game.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.chenhome.dailybrainy.repo.game.FullGame
+import org.chenhome.dailybrainy.repo.game.GameObserver
+import org.chenhome.dailybrainy.repo.game.IdeaObserver
+import org.chenhome.dailybrainy.repo.game.PlayerSessionObserver
+import org.chenhome.dailybrainy.repo.image.LocalImageRepo
+import org.chenhome.dailybrainy.repo.image.RemoteImage
+import org.chenhome.dailybrainy.repo.image.RemoteImageFolder
 import timber.log.Timber
 
 /**
@@ -28,6 +39,9 @@ class FullGameRepo(
     private val gameObs = GameObserver(context, gameGuid, _fullGame)
     private val ideaObs = IdeaObserver(context, gameGuid, _fullGame)
     private val playerObs = PlayerSessionObserver(context, gameGuid, _fullGame)
+    private val scope = CoroutineScope(Dispatchers.IO)
+    private val remoteImage = RemoteImage()
+    private val localImage = LocalImageRepo(context)
 
     init {
         Timber.d("Registering FullGameObserver for game $gameGuid")
@@ -62,22 +76,55 @@ class FullGameRepo(
      * idea since it's already in the [FullGame] instance.
      *
      * @param idea
+     * @return Idean GUID or null if insert failed
      */
-    fun insertRemote(idea: Idea) = ideaObs.insertRemote(idea)
+    suspend fun insertRemote(idea: Idea): String? = ideaObs.insertRemote(idea)
+
 
     /**
-     * Just insert the child Idea. URI value will get reconstituted
-     * when sketch is retrieved from remote DB.
+     * Insert remote idea, then upload the image. After upload, update the remote idea.
      *
-     * @param sketch
+     * This allows a idea stub to be shown by the app while the image gets updated.
+     *
+     * @param sketchImageUri
+     * @param currentPlayerGuid
+     * @return whether image upload succeeded or not
      */
-    fun insertRemote(sketch: Sketch) {
-        if (!sketch.idea.isSketch()) {
-            Timber.w("This idea is not a sketch. No image set. ${sketch.idea}")
+    fun insertRemoteSketch(sketchImageUri: Uri, currentPlayerGuid: String) {
+        if (!localImage.isExist(sketchImageUri)) {
             return
         }
-        ideaObs.insertRemote(sketch.idea)
+
+        scope.launch {
+            runBlocking {
+                val idea = Idea(
+                    "", // gets set by FullGameRepo
+                    gameGuid,
+                    currentPlayerGuid,
+                    Idea.Origin.SKETCH)
+                val ideaGuid = insertRemote(idea) ?: run {
+                    Timber.w("Unable to insert remote idea $idea")
+                    return@runBlocking
+                }
+
+                val ref = remoteImage.upload(RemoteImageFolder.SKETCHES, sketchImageUri) ?: run {
+                    Timber.w("Unable to upload image $sketchImageUri")
+                    return@runBlocking
+                }
+
+                // get newly inserted idea
+                var inserted = ideaObs.getRemote(ideaGuid) ?: run {
+                    Timber.w("Unable to get newly inserted idea. Aborting")
+                    return@runBlocking
+                }
+
+                // update idea with new location of image. launches thread to do work
+                inserted.imgFn = ref.path
+                ideaObs.updateRemote(inserted)
+            }
+        }
     }
+
 
     /**
      * Insert into [FullGame] instance managed by [FullGameRepo].
@@ -109,12 +156,8 @@ class FullGameRepo(
      * @param idea Idea should be from the [FullGame] instance. It should have its [Idea.guid] set and
      * [Idea.gameGuid] set to this Game's guid. This method will check for that.
      */
-    fun updateRemote(idea: Idea) {
+    suspend fun updateRemote(idea: Idea) {
         ideaObs.updateRemote(idea)
-    }
-
-    fun updateRemote(sketch: Sketch) {
-        ideaObs.updateRemote(sketch.idea)
     }
 
     /**
@@ -126,4 +169,5 @@ class FullGameRepo(
     fun updateRemote(player: PlayerSession) {
         playerObs.updateRemote(player)
     }
+
 }
