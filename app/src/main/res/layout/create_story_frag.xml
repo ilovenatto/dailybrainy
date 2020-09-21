@@ -7,7 +7,7 @@
 
         <variable
             name="vm"
-            type="org.chenhome.dailybrainy.ui.story.StoryVM" />
+            type="org.chenhome.dailybrainy.ui.sketch.SketchVM" />
     </data>
 
     <ScrollView
@@ -31,7 +31,7 @@
                 android:id="@+id/imagePopular"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
-                app:imageUrl="@{vm.fullGame.mostPopularSketch.imgUri}"
+                app:imageUrl="@{vm.fullGame.mostPopularSketchUri(org.chenhome.dailybrainy.repo.Idea.Origin.SKETCH)}"
                 tools:src="@tools:sample/backgrounds/scenic" />
 
             <TextView
@@ -77,7 +77,7 @@
                 android:id="@+id/buttonSetting"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="@{()->vm.captureSetting()}"
+                android:onClick="@{()->vm.navToCamera(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_SETTING)}"
                 android:text="Capture" />
 
             <TextView
@@ -99,7 +99,7 @@
                 android:id="@+id/button3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="@{()->vm.captureSolution()}"
+                android:onClick="@{()->vm.navToCamera(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_SOLUTION)}"
                 android:text="Capture" />
 
             <TextView
@@ -120,7 +120,7 @@
                 android:id="@+id/button4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="@{()->vm.captureResolution()}"
+                android:onClick="@{()->vm.navToCamera(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_RESOLUTION)}"
                 android:text="Capture" />
 
             <TextView
@@ -141,7 +141,7 @@
                 android:id="@+id/buttonDone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="@{()->vm.navToNext()}"
+                android:onClick="@{()->vm.navToNext(true)}"
                 android:text="Done" />
 
         </LinearLayout>

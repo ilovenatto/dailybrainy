@@ -90,7 +90,7 @@ class FullGameRepo(
      * @param currentPlayerGuid
      * @return whether image upload succeeded or not
      */
-    fun insertRemoteSketch(sketchImageUri: Uri, currentPlayerGuid: String) {
+    fun insertRemoteSketch(origin: Idea.Origin, sketchImageUri: Uri, currentPlayerGuid: String) {
         if (!localImage.isExist(sketchImageUri)) {
             return
         }
@@ -101,7 +101,7 @@ class FullGameRepo(
                     "", // gets set by FullGameRepo
                     gameGuid,
                     currentPlayerGuid,
-                    Idea.Origin.SKETCH)
+                    origin)
                 val ideaGuid = insertRemote(idea) ?: run {
                     Timber.w("Unable to insert remote idea $idea")
                     return@runBlocking

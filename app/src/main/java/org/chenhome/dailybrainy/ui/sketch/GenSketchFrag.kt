@@ -68,7 +68,7 @@ class GenSketchFrag : Fragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode != IntentReq.REQ_IMAGE_CAPTURE
+        if (requestCode != Idea.Origin.SKETCH.ordinal
             || resultCode != Activity.RESULT_OK
         ) {
             Timber.w("Unable to capture image")
@@ -76,12 +76,12 @@ class GenSketchFrag : Fragment() {
         }
         // save photo in remote database.. which will eventually make it back to local filesystem
         // TODO: 9/19/20 show error
-        vm.uploadSketch()
+        vm.uploadSketch(Idea.Origin.SKETCH)
     }
 
     private fun initNavObserver(
         navToNext: LiveData<Event<Boolean>>,
-        navToCamera: LiveData<Event<Boolean>>,
+        navToCamera: LiveData<Event<Idea.Origin>>,
         navToViewSketch: LiveData<Event<Sketch>>,
     ) {
         navToNext.observe(viewLifecycleOwner, {
@@ -100,7 +100,7 @@ class GenSketchFrag : Fragment() {
                         vm.genAndSetNewUri()
                         vm.sketchImageUri?.let { uri ->
                             intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
-                            startActivityForResult(intent, IntentReq.REQ_IMAGE_CAPTURE)
+                            startActivityForResult(intent, Idea.Origin.SKETCH.ordinal)
                         } ?: Timber.w("Unable to launch capture image intent")
                     } else {
                         Timber.w("Unable to find activity to capture image")

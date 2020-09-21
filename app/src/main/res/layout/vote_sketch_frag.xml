@@ -94,7 +94,7 @@
             android:id="@+id/buttonDone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{()->vm.navToNext()}"
+            android:onClick="@{()->vm.navToNext(false)}"
             android:text="Done" />
 
     </LinearLayout>

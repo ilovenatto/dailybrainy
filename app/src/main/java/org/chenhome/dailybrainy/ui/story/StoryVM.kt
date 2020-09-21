@@ -11,11 +11,10 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ApplicationComponent
 import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.repo.FullGameRepo
-import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.repo.game.FullGame
+import org.chenhome.dailybrainy.repo.game.Sketch
 import org.chenhome.dailybrainy.ui.Event
-import timber.log.Timber
 
 class StoryVM(
     context: Context,
@@ -59,23 +58,15 @@ class StoryVM(
         }
     }
 
-    fun captureSetting() = captureSketch(Idea.Origin.STORY_SETTING)
-    fun captureSolution() = captureSketch(Idea.Origin.STORY_SOLUTION)
-    fun captureResolution() = captureSketch(Idea.Origin.STORY_RESOLUTION)
+    /**
+     * navToViewSketch is a external immutable LiveData observable
+     * by others
+     */
+    private var _navToViewSketch = MutableLiveData<Event<Sketch>>()
+    val navToViewSketch: LiveData<Event<Sketch>>
+        get() = _navToViewSketch
 
-    fun captureSketch(origin: Idea.Origin) {
-        // create idea and post it remotely
-        val idea = Idea(
-            "",
-            fullGame.value?.game?.guid ?: "",
-            userRepo.currentPlayerGuid,
-            origin)
-        // TODO: 9/2/20 remove this later .. test
-        idea.imgFn = "challenges/challenge_cookout.png"
-        viewModelScope.launch {
-            fullGameRepo.insertRemote(idea)
-        }
-
-        Timber.d("userid ${userRepo.currentPlayerGuid}")
+    fun navToViewSketch(sketch: Sketch) {
+        _navToViewSketch.value = Event(sketch)
     }
 }

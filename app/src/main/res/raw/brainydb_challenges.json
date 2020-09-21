@@ -29,7 +29,7 @@
       "guid": "lesson-brainstorming",
       "category": "LESSON",
       "desc": "Learn how you can solve Daily Brainies by brainstorming ideas.",
-      "youtubeUrl": "https://youtu.be/rdWFp7FFkWU",
+      "youtubeId": "rdWFp7FFkWU",
       "imgFn": "challenges/lesson_brainstorm.png"
     },
     "lesson-affinity-mapping": {
@@ -37,7 +37,7 @@
       "guid": "lesson-affinity-mapping",
       "category": "LESSON",
       "desc": "Learn how to organize ideas that you've brainstormed and move forward with your designs.",
-      "youtubeUrl": "https://youtu.be/dnSjwFzlHXU",
+      "youtubeId": "dnSjwFzlHXU",
       "imgFn": "challenges/lesson_affinitymap.png"
     }
   }

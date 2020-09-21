@@ -62,7 +62,7 @@
                 android:id="@+id/buttonCapture"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="@{()->vm.navToCamera()}"
+                android:onClick="@{()->vm.navToCamera(org.chenhome.dailybrainy.repo.Idea.Origin.SKETCH)}"
                 android:text="Capture sketch" />
 
         </LinearLayout>
@@ -92,7 +92,7 @@
             android:id="@+id/buttonDone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{()->vm.navToNext()}"
+            android:onClick="@{()->vm.navToNext(false)}"
             android:text="Done" />
 
     </LinearLayout>

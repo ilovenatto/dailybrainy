@@ -43,9 +43,14 @@ data class FullGame(
 ) {
     private var _ideas: MutableList<Idea> = mutableListOf()
 
-    val mostPopularSketch: Sketch?
-        get() = ideas(Idea.Origin.SKETCH).maxByOrNull { it.votes }?.let { Sketch(it) }
+    fun mostPopularSketchUri(origin: Idea.Origin): Uri? =
+        ideas(origin).maxByOrNull { it.votes }?.let { Sketch(it) }?.imgUri
             ?: null
+
+    fun mostPopularSketch(origin: Idea.Origin): Sketch? =
+        ideas(origin).maxByOrNull { it.votes }?.let { Sketch(it) }
+            ?: null
+
 
     fun ideas(origin: Idea.Origin): List<Idea> = _ideas.filter { it.origin == origin }
 

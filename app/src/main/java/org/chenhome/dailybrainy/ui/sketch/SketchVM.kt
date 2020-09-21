@@ -5,16 +5,18 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ApplicationComponent
+import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.repo.FullGameRepo
+import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.repo.game.Sketch
 import org.chenhome.dailybrainy.repo.image.LocalImageRepo
-import org.chenhome.dailybrainy.repo.image.RemoteImage
 import org.chenhome.dailybrainy.ui.Event
 import org.chenhome.dailybrainy.ui.GenerateVMHelper
 import org.chenhome.dailybrainy.ui.VoteVMHelper
@@ -40,9 +42,6 @@ class SketchVM(
         SketchVMEP::class.java)
         .localImage()
 
-    private val remoteImageRepo: RemoteImage = RemoteImage()
-
-
     /**
      * Expose FullGame
      */
@@ -60,8 +59,17 @@ class SketchVM(
     val navToNext: LiveData<Event<Boolean>>
         get() = _navToNext
 
-    fun navToNext() {
-        _navToNext.value = Event(true)
+    fun navToNext(isUpdateGame: Boolean) {
+        if (isUpdateGame) {
+            viewModelScope.launch {
+                fullGame.value?.game?.let {
+                    fullGameRepo.updateRemote(it)
+                    _navToNext.value = Event(true)
+                }
+            }
+        } else {
+            _navToNext.value = Event(true)
+        }
     }
 
     val generate = GenerateVMHelper()
@@ -72,12 +80,12 @@ class SketchVM(
      * navToCamera is a external immutable LiveData observable
      * by others
      */
-    private var _navToCamera = MutableLiveData<Event<Boolean>>()
-    val navToCamera: LiveData<Event<Boolean>>
+    private var _navToCamera = MutableLiveData<Event<Idea.Origin>>()
+    val navToCamera: LiveData<Event<Idea.Origin>>
         get() = _navToCamera
 
-    fun navToCamera() {
-        _navToCamera.value = Event(true)
+    fun navToCamera(origin: Idea.Origin) {
+        _navToCamera.value = Event(origin)
     }
 
     /**
@@ -96,9 +104,9 @@ class SketchVM(
     /**
      * @return whether upload succeeded or not
      */
-    fun uploadSketch() {
+    fun uploadSketch(origin: Idea.Origin) {
         sketchImageUri?.let { uri ->
-            fullGameRepo.insertRemoteSketch(uri, userRepo.currentPlayerGuid)
+            fullGameRepo.insertRemoteSketch(origin, uri, userRepo.currentPlayerGuid)
         } ?: Timber.w("Unable to upload sketch with $sketchImageUri")
     }
 

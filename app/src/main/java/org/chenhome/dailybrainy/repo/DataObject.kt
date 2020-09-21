@@ -46,7 +46,7 @@ data class Challenge(
     val desc: String,
     val category: Category,
     val hmw: String?, // only set for Challenge category
-    val youtubeUrl: String?, // only set for Lesson category
+    val youtubeId: String?, // only set for Lesson category. This is the youtube ID
     var imageUri: Uri?, // Permanent URI where this image lives. Set by the local observer and not persisted in reomte db.
 
 ) {
@@ -55,6 +55,17 @@ data class Challenge(
         "", "", "", "",
         Category.CHALLENGE, null, null, null
     )
+
+    fun toYoutubeUri(): Uri? = youtubeId?.let {
+        Uri.parse("https://youtu.be/" + it)
+    } ?: null
+
+    fun toYoutubeThumbUri(): Uri? = youtubeId?.let {
+        Uri.parse("https://img.youtube.com/vi/"
+                + it
+                + "/0.jpg"
+        )
+    } ?: null
 
     enum class Category {
         LESSON,// lesson, where there's generally an associated youtube video
