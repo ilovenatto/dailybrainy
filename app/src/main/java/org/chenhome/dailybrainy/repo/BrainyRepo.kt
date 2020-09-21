@@ -159,5 +159,6 @@ class BrainyRepo @Inject constructor(
      * game session that the user has participated in.
      */
     val gameStubs: LiveData<List<GameStub>> = gameStubObs._gameStubs
+    val allGameStubs: LiveData<List<GameStub>> = gameStubObs._allGameStubs
 
 }

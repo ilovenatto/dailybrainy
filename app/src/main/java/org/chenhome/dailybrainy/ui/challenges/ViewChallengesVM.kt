@@ -20,8 +20,12 @@ class ViewChallengesVM @ViewModelInject constructor(
     brainyRepo: BrainyRepo, // injected
 ) : ViewModel() {
 
+
+    val challenges: LiveData<List<Challenge>> = brainyRepo.challenges
+
     // List of Games owned by the current user
     val games: LiveData<List<GameStub>> = brainyRepo.gameStubs
+
 
     // List of challenges offered by DailyBrainy
     val todayLesson: LiveData<Challenge> = brainyRepo.todayLesson

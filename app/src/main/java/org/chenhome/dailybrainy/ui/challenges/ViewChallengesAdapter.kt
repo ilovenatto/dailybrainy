@@ -49,6 +49,7 @@ class ViewGamesAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
+        Timber.d("Creating Game VH")
         return GameViewHolder(CardGameBinding
             .inflate(inflater, parent, false))
     }
@@ -67,6 +68,7 @@ class ViewGamesAdapter(
     inner class GameViewHolder(val binding: @NotNull CardGameBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(gameStub: GameStub, listener: GameListener) {
+            Timber.d("Binding $gameStub")
             binding.gameStub = gameStub
             binding.listener = listener
             binding.executePendingBindings()

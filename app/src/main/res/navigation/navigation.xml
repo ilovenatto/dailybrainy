@@ -163,9 +163,9 @@
     </fragment>
     <fragment
         android:id="@+id/joinGameFrag"
-        android:name="org.chenhome.dailybrainy.JoinGameFrag"
+        android:name="org.chenhome.dailybrainy.ui.challenges.JoinGameFrag"
         android:label="frag_join_game"
-        tools:layout="@layout/frag_join_game">
+        tools:layout="@layout/join_game_frag">
         <action
             android:id="@+id/action_joinGameFrag_to_viewGameFrag"
             app:destination="@id/viewGameFrag" />

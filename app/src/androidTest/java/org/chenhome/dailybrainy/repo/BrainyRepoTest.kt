@@ -115,7 +115,7 @@ class BrainyRepoTest {
             // add game
             val gameRef = fireDb.getReference(DbFolder.GAMES.path)
                 .push()
-            val game = Game(gameRef.key!!, "", "")
+            val game = Game(gameRef.key!!, "challenge-family-cookout", user.currentPlayerGuid)
             suspendCoroutine<Unit> {
                 gameRef.setValue(game) { e, _ ->
                     assertNull(e)
@@ -152,6 +152,7 @@ class BrainyRepoTest {
                     it.resume(Unit)
                 }
             }
+            delay(1500)
             // observe gamestubs and wait for new session
             repo.gameStubs.observe(owner, Observer<List<GameStub>> {
                 Timber.d("observed list ${it.size}")
@@ -166,6 +167,12 @@ class BrainyRepoTest {
                         stub.playerSession
                     )
                 }
+            })
+            delay(2000)
+            repo.allGameStubs.observe(owner, {
+                assertNotNull(it)
+                Timber.d("Got stubs $it")
+                assertTrue(it.size > 0)
             })
             delay(3000)
         }

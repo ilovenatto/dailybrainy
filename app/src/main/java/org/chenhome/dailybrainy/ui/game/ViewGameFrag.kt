@@ -15,6 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.ViewGameFragBinding
 import org.chenhome.dailybrainy.databinding.ViewGameItemStepBinding
 import org.chenhome.dailybrainy.repo.Challenge
+import org.chenhome.dailybrainy.ui.GameVMFactory
 import org.chenhome.dailybrainy.ui.PlayerAdapter
 import org.jetbrains.annotations.NotNull
 import timber.log.Timber
@@ -25,7 +26,7 @@ class ViewGameFrag : Fragment() {
 
     private val args: ViewGameFragArgs by navArgs()
     private val vm: ViewGameVM by viewModels {
-        ViewGameVMFactory(requireContext(), args.gameGuid)
+        GameVMFactory(requireContext(), args.gameGuid)
     }
     private val stepAdap = StepAdapter(StepAdapter.Listener { step ->
         // Fragment listens to this

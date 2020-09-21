@@ -26,6 +26,9 @@ data class GameStub(
         game.sessionStartMillis?.let { millis ->
             android.text.format.DateFormat.getDateFormat(context).format(Date(millis))
         } ?: null
+
+    // Can get set at a later time
+    var challenge: Challenge? = null
 }
 
 /**

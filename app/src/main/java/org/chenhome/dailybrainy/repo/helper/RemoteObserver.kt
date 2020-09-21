@@ -63,7 +63,9 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
                     var lessons = mutableListOf<Challenge>()
                     var challenges = mutableListOf<Challenge>()
                     it.forEach { entry ->
-                        val chall = decorateWithUri(entry.value)
+                        val chall = entry.value
+
+                        decorateWithUri(remoteImage, chall)
                         when (chall.category) {
                             Challenge.Category.LESSON -> lessons.add(chall)
                             Challenge.Category.CHALLENGE -> challenges.add(chall)
@@ -102,23 +104,6 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
 
     }
 
-    private suspend fun decorateWithUri(challenge: Challenge): Challenge {
-        // get download URI for this challenge
-        if (challenge.imgFn.isNotEmpty()) {
-            remoteImage.getValidStorageRef(challenge.imgFn)?.let { storageRef ->
-                val uri = suspendCoroutine<Uri?> { cont ->
-                    storageRef.downloadUrl.addOnSuccessListener {
-                        cont.resume(it)
-                    }
-                    storageRef.downloadUrl.addOnFailureListener {
-                        cont.resume(null)
-                    }
-                }
-                return challenge.copy(imageUri = uri)
-            } ?: Timber.w("No storage ref found for imgFn ${challenge.imgFn}")
-        }
-        return challenge
-    }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun register() = fireRef.addValueEventListener(this)
@@ -129,6 +114,25 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun deregister() = fireRef.removeEventListener(this)
 }
+
+
+internal suspend fun decorateWithUri(remoteImage: RemoteImage, challenge: Challenge) {
+    // get download URI for this challenge
+    if (challenge.imgFn.isNotEmpty()) {
+        remoteImage.getValidStorageRef(challenge.imgFn)?.let { storageRef ->
+            val uri = suspendCoroutine<Uri?> { cont ->
+                storageRef.downloadUrl.addOnSuccessListener {
+                    cont.resume(it)
+                }
+                storageRef.downloadUrl.addOnFailureListener {
+                    cont.resume(null)
+                }
+            }
+            challenge.imageUri = uri
+        } ?: Timber.w("No storage ref found for imgFn ${challenge.imgFn}")
+    }
+}
+
 
 /**
  * Listens for new games in /playersessions/.. and look for
@@ -143,29 +147,66 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
 internal class GameStubObserver(private val userGuid: String) : ValueEventListener,
     LifecycleObserver {
 
+    private val remoteImage = RemoteImage()
+
     private val fireDb = FirebaseDatabase.getInstance()
     private val fireRef = fireDb
         .getReference(DbFolder.PLAYERSESSION.path)
+    private val challRef = fireDb.getReference(DbFolder.CHALLENGES.path)
     private val scope = CoroutineScope(Dispatchers.IO)
 
     /**
      * List of Games that this user has participated in.
      */
     var _gameStubs: MutableLiveData<List<GameStub>> = MutableLiveData(listOf())
+    var _allGameStubs: MutableLiveData<List<GameStub>> = MutableLiveData(listOf())
+
+    /**
+     * All challenges.
+     */
+    private var _guid2Challenge = mapOf<String, Challenge>()
+
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    fun register() = fireRef.addValueEventListener(this)
+    fun register() {
+        // First get all the challenges, then get the GameStubs
+        scope.launch {
+            suspendCoroutine<Unit> { cont ->
+                challRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        // Map of challegeGuid -> Challenge
+                        snapshot.getValue<Map<String, Challenge>>()?.let {
+                            Timber.d("${it.size} challenges encountered")
+                            _guid2Challenge = it
+                            cont.resume(Unit)
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) = cont.resume(Unit)
+                })
+            }
+            _guid2Challenge.values.forEach {
+                decorateWithUri(remoteImage, it)
+            }
+            fireRef.addValueEventListener(this@GameStubObserver)
+        }
+
+    }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun refresh() = _gameStubs.notifyObserver()
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    fun deregister() = fireRef.removeEventListener(this)
+    fun deregister() {
+        fireRef.removeEventListener(this)
+
+    }
 
     override fun onCancelled(error: DatabaseError) = Timber.d(error.message)
     override fun onDataChange(snapshot: DataSnapshot) {
         // Newly updated values from remote db
         var updatedGameStubs: List<GameStub>
+        var allGameStubs: List<GameStub>
         scope.launch {
             try {
                 var gameMap: Map<String, Game> = mutableMapOf()
@@ -186,30 +227,50 @@ internal class GameStubObserver(private val userGuid: String) : ValueEventListen
                         })
                 }
                 Timber.d("Obtained Game cache with ${gameMap.size} elements")
+                Timber.d("Obtained Challenge cache with ${_guid2Challenge.keys}")
 
                 // Returns a map of <gameGuid> -> Map<SessionGuid, Session>
                 //
                 // /playersession/<gameGuid>/<sessionGuid>/session
                 //
                 snapshot.getValue<Map<String, Map<String, PlayerSession>>>()?.let { orig ->
+                    val f = orig.flatMap { it.value.values }
+                    allGameStubs = orig.flatMap { it.value.values }
+                        // Transform to a list of GameStubs
+                        .mapNotNull { session ->
+                            gameMap[session.gameGuid]?.let { game ->
+                                var stub = GameStub(game, session)
+                                _guid2Challenge[game.challengeGuid]?.let {
+                                    stub.challenge = it
+                                }
+                                stub
+                            }
+                        }
+
                     // for each game, look at each session and add any session where session.playerGuid == userGuid
                     updatedGameStubs = orig.flatMap { it.value.values }
                         // Reduce to sessions this user has participated in
                         .filter {
                             it.userGuid == userGuid
                         }
+                        // TODO: 9/20/20 make this cleaner. merge into one loop with above loop 
                         // Transform to a list of GameStubs
                         .mapNotNull { session ->
                             gameMap[session.gameGuid]?.let { game ->
-                                GameStub(game, session)
+                                var stub = GameStub(game, session)
+                                _guid2Challenge[game.challengeGuid]?.let {
+                                    stub.challenge = it
+                                }
+                                stub
                             }
                         }
 
                     // Call on UI thread b/c _gameStubs.setValue can not be called on background thread
                     withContext(Dispatchers.Main) {
                         // calling [MutableLiveData.value] will notify observers of the LiveData
-                        Timber.d("Found ${updatedGameStubs.size} sessions that user $userGuid participated in")
+                        Timber.d("Found ${updatedGameStubs.size} games that user $userGuid participated in and ${allGameStubs.size} games overall")
                         _gameStubs.value = updatedGameStubs
+                        _allGameStubs.value = allGameStubs
                     }
 
                 } ?: handleNoSessions()
@@ -225,5 +286,6 @@ internal class GameStubObserver(private val userGuid: String) : ValueEventListen
             _gameStubs.value = listOf()
         }
     }
+
 }
 
