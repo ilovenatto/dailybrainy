@@ -57,9 +57,7 @@ class SketchStubVM @ViewModelInject constructor() : ViewModel() {
                         }
                     }
 
-                    override fun onCancelled(error: DatabaseError) {
-                        TODO("Not yet implemented")
-                    }
+                    override fun onCancelled(error: DatabaseError) = Timber.d("Cancelled")
                 })
 
         }
