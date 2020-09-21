@@ -148,17 +148,17 @@ class BrainyRepo @Inject constructor(
      * List of challenges offered by DailyBrainy. They only change
      * when the app has published new challenges.
      */
-    val challenges: LiveData<List<Challenge>> = challengeObs._challenges
-    val lessons: LiveData<List<Challenge>> = challengeObs._lessons
+    val challenges: LiveData<List<Challenge>> = challengeObs.challenges
+    val lessons: LiveData<List<Challenge>> = challengeObs.lessons
 
-    val todayLesson: LiveData<Challenge> = challengeObs._todayLesson
-    val todayChallenge: LiveData<Challenge> = challengeObs._todayChallenge
+    val todayLesson: LiveData<Challenge?> = challengeObs.todayLesson
+    val todayChallenge: LiveData<Challenge?> = challengeObs.todayChallenge
 
     /**
      * List of [GameStub] started by the current user. [GameStub] are
      * game session that the user has participated in.
      */
-    val gameStubs: LiveData<List<GameStub>> = gameStubObs._gameStubs
-    val allGameStubs: LiveData<List<GameStub>> = gameStubObs._allGameStubs
+    val myGameStubs: LiveData<List<GameStub>> = gameStubObs.myGameStubs
+    val allGameStubs: LiveData<List<GameStub>> = gameStubObs.allGameStubs
 
 }

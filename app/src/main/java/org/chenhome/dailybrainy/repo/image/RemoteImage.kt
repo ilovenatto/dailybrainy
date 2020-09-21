@@ -104,6 +104,23 @@ class RemoteImage {
     }
 
 
+    suspend fun getImageUri(imgFn: String): Uri? =
+        if (imgFn.isNotEmpty()) {
+            getValidStorageRef(imgFn)?.let { storageRef ->
+                return suspendCoroutine<Uri?> { cont ->
+                    storageRef.downloadUrl.addOnSuccessListener {
+                        cont.resume(it)
+                    }
+                    storageRef.downloadUrl.addOnFailureListener {
+                        cont.resume(null)
+                    }
+                }
+            } ?: null
+        } else {
+            null
+        }
+
+
     /**
      * @param target Firebase remote asset that will be deleted
      * @return whether delete succeeded

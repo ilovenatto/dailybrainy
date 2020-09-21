@@ -24,12 +24,12 @@ class ViewChallengesVM @ViewModelInject constructor(
     val challenges: LiveData<List<Challenge>> = brainyRepo.challenges
 
     // List of Games owned by the current user
-    val games: LiveData<List<GameStub>> = brainyRepo.gameStubs
+    val games: LiveData<List<GameStub>> = brainyRepo.myGameStubs
 
 
     // List of challenges offered by DailyBrainy
-    val todayLesson: LiveData<Challenge> = brainyRepo.todayLesson
-    val todayChallenge: LiveData<Challenge> = brainyRepo.todayChallenge
+    val todayLesson: LiveData<Challenge?> = brainyRepo.todayLesson
+    val todayChallenge: LiveData<Challenge?> = brainyRepo.todayChallenge
 
     /**
      * NAVIGATE: Navigate to New Game (challengeGuid required)

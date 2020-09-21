@@ -78,14 +78,14 @@ class BrainyRepoTest {
                 })
             }
             suspendCoroutine<Unit> { cont ->
-                repo.todayChallenge.observe(owner, Observer<Challenge> {
+                repo.todayChallenge.observe(owner, Observer<Challenge?> {
                     assertNotNull(it)
                     assertEquals(Challenge.Category.CHALLENGE, it.category)
                     cont.resume(Unit)
                 })
             }
             suspendCoroutine<Unit> { cont ->
-                repo.todayLesson.observe(owner, Observer<Challenge> {
+                repo.todayLesson.observe(owner, Observer<Challenge?> {
                     assertNotNull(it)
                     assertEquals(Challenge.Category.LESSON, it.category)
                     cont.resume(Unit)
@@ -154,7 +154,7 @@ class BrainyRepoTest {
             }
             delay(1500)
             // observe gamestubs and wait for new session
-            repo.gameStubs.observe(owner, Observer<List<GameStub>> {
+            repo.myGameStubs.observe(owner, Observer<List<GameStub>> {
                 Timber.d("observed list ${it.size}")
                 it.forEach { stub ->
                     assertEquals(game, stub.game)
