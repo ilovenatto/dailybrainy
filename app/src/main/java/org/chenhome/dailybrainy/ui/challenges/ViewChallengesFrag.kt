@@ -11,6 +11,7 @@ import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.ViewChallengesFragBinding
+import org.chenhome.dailybrainy.ui.game.NewGameFrag
 import timber.log.Timber
 
 @AndroidEntryPoint // for injecting ViewModel "by viewModels()"
@@ -27,8 +28,8 @@ class ViewChallengesFrag : Fragment() {
             false)
 
         // Previous games
-        val gamesAdapter = ViewGamesAdapter(GameListener { gameGuid ->
-            vm.navToExistingGame(gameGuid)
+        val gamesAdapter = ViewGamesAdapter(GameListener { stub ->
+            vm.navToExistingGame(stub.game.guid)
         })
         binding.listGames.adapter = gamesAdapter
 
@@ -66,7 +67,8 @@ class ViewChallengesFrag : Fragment() {
             // navigate
             it.contentIfNotHandled()?.let { challengeGuid ->
                 val dir =
-                    ViewChallengesFragDirections.actionViewChallengesFragToNewGameFrag(challengeGuid)
+                    ViewChallengesFragDirections.actionViewChallengesFragToNewGameFrag(
+                        challengeGuid, NewGameFrag.GUID_CHALLENGE)
                 this.findNavController().navigate(dir)
             }
         })

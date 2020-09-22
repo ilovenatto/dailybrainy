@@ -211,7 +211,7 @@ data class PlayerSession(
         if (!imgFn.isNullOrEmpty()) {
             return AvatarImage.valueOf(imgFn!!)
         }
-        return AvatarImage.PLACEHOLDER // just return default avatar
+        return AvatarImage.A1 // just return default avatar
     }
 
     @Exclude

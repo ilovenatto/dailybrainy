@@ -32,12 +32,15 @@
         android:label="new_game_fragment"
         tools:layout="@layout/new_game_frag">
         <argument
-            android:name="challengeGuid"
+            android:name="guid"
             app:argType="string" />
         <action
             android:id="@+id/action_newGameFrag_to_viewGameFrag"
             app:destination="@id/viewGameFrag"
             app:popUpTo="@id/viewChallengesFrag" />
+        <argument
+            android:name="guidType"
+            app:argType="integer" />
     </fragment>
     <fragment
         android:id="@+id/lessonFrag"
@@ -166,11 +169,15 @@
         android:name="org.chenhome.dailybrainy.ui.challenges.JoinGameFrag"
         android:label="frag_join_game"
         tools:layout="@layout/join_game_frag">
-        <action
-            android:id="@+id/action_joinGameFrag_to_viewGameFrag"
-            app:destination="@id/viewGameFrag" />
         <argument
             android:name="challengeGuid"
             app:argType="string" />
+        <action
+            android:id="@+id/action_joinGameFrag_to_newGameFrag"
+            app:destination="@id/newGameFrag" />
+        <action
+            android:id="@+id/action_joinGameFrag_to_viewGameFrag"
+            app:destination="@id/viewGameFrag"
+            app:popUpTo="@id/viewChallengesFrag" />
     </fragment>
 </navigation>

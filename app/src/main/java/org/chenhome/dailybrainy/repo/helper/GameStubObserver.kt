@@ -43,7 +43,7 @@ internal class GameStubObserver(private val userGuid: String) : ValueEventListen
     private val scope = CoroutineScope(Dispatchers.IO)
 
 
-    private var _gameStubs: MutableLiveData<List<GameStub>> = MutableLiveData(listOf())
+    private var _gameStubs: MutableLiveData<List<GameStub>> = MutableLiveData()
 
     /**
      * Private cache of challenges. Used to set challenge info on GameStubs
@@ -55,7 +55,9 @@ internal class GameStubObserver(private val userGuid: String) : ValueEventListen
      */
     val myGameStubs = Transformations.map(_gameStubs) {
         it.filter { stub ->
-            stub.playerSession.userGuid == userGuid
+            stub.players.any { player ->
+                player.userGuid == userGuid
+            }
         }
     }
 
@@ -67,6 +69,7 @@ internal class GameStubObserver(private val userGuid: String) : ValueEventListen
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun register() {
+
         // First get all the challenges, then get the GameStubs. These challenges are generally static and
         // wont' change for life of the app process.
         scope.launch {
@@ -87,16 +90,13 @@ internal class GameStubObserver(private val userGuid: String) : ValueEventListen
             guid2Challenge.values.forEach { chall ->
                 chall.imageUri = remoteImage.getImageUri(chall.imgFn)
             }
-
+            Timber.d("Finished getting image URIs for each challenge. Getting GameStubs now.")
             // Then get GameStubs
             // /playersession/<game guid>/all
             fireRef.addValueEventListener(this@GameStubObserver)
         }
 
     }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    fun refresh() = _gameStubs.notifyObserver()
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun deregister() {
@@ -113,8 +113,6 @@ internal class GameStubObserver(private val userGuid: String) : ValueEventListen
      */
     override fun onDataChange(snapshot: DataSnapshot) {
         // Newly updated values from remote db
-        var updatedGameStubs: List<GameStub>
-        var allGameStubs: List<GameStub>
         scope.launch {
             try {
                 // Map of <gameGuid, Game>
@@ -145,24 +143,22 @@ internal class GameStubObserver(private val userGuid: String) : ValueEventListen
                 // /playersession/<gameGuid>/<sessionGuid>/session
                 //
                 snapshot.getValue<Map<String, Map<String, PlayerSession>>>()?.let { orig ->
-                    allGameStubs = orig.flatMap { it.value.values }
-                        // Transform to a list of GameStubs
-                        .mapNotNull { session ->
-                            gameMap[session.gameGuid]?.let { game ->
-                                var stub = GameStub(game, session)
-                                guid2Challenge[game.challengeGuid]?.let {
-                                    stub.challenge = it
-                                }
-                                stub
+                    val stubs = orig.mapValues { entry ->
+                        entry.value.values
+                    }.map { game2Players ->
+                        gameMap[game2Players.key]?.let { game ->
+                            guid2Challenge[game.challengeGuid]?.let { challenge ->
+                                GameStub(game, challenge, game2Players.value.toList())
                             }
                         }
-
+                    }.filterNotNull()
                     // Call on UI thread b/c _gameStubs.setValue can not be called on background thread
                     withContext(Dispatchers.Main) {
                         // calling [MutableLiveData.value] will notify observers of the LiveData
-                        Timber.d("Found ${allGameStubs.size} games overall")
-                        _gameStubs.value = allGameStubs
+                        Timber.d("Found ${stubs.size} games overall")
+                        _gameStubs.value = stubs
                     }
+
                 } ?: handleNoSessions()
             } catch (ex: Exception) {
                 Timber.e("Unable to process game stubs $ex")

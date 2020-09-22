@@ -11,7 +11,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.JoinGameFragBinding
+import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.ui.ChallengeVMFactory
+import org.chenhome.dailybrainy.ui.game.NewGameFrag
 import timber.log.Timber
 
 
@@ -23,17 +25,27 @@ class JoinGameFrag : Fragment() {
         ChallengeVMFactory(requireContext(), args.challengeGuid)
     }
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-
-
+        val myPlayerGuid = UserRepo(requireContext()).currentPlayerGuid
         val binding = JoinGameFragBinding.inflate(inflater, container, false)
         binding.vm = vm
 
-        val gamesAdapter = ViewGamesAdapter(GameListener {
-            vm.navToGame(it)
+        val gamesAdapter = ViewGamesAdapter(GameListener { stub ->
+            if (stub.players.any { it.userGuid == myPlayerGuid }) {
+                // goto existing game directly if currenty user is one of the players in that game
+                findNavController().navigate(
+                    JoinGameFragDirections.actionJoinGameFragToViewGameFrag(stub.game.guid))
+            } else {
+                findNavController().navigate(
+                    JoinGameFragDirections.actionJoinGameFragToNewGameFrag(
+                        stub.game.guid,
+                        NewGameFrag.GUID_GAME
+                    ))
+            }
         })
         binding.listGames.adapter = gamesAdapter
         vm.availGames.observe(viewLifecycleOwner, Observer {
@@ -41,13 +53,6 @@ class JoinGameFrag : Fragment() {
             gamesAdapter.setGames(it)
         })
 
-        vm.navToGame.observe(viewLifecycleOwner, Observer {
-            it.contentIfNotHandled()?.let {
-                findNavController().navigate(
-                    JoinGameFragDirections.actionJoinGameFragToViewGameFrag(it)
-                )
-            }
-        })
         binding.executePendingBindings()
         return binding.root
     }

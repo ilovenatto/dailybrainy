@@ -20,13 +20,23 @@ import org.jetbrains.annotations.NotNull
 @AndroidEntryPoint
 class NewGameFrag : Fragment() {
 
+    /**
+     * Denotes the kind of object that the Guid is referring to
+     * [NewGameFragArgs.guid]. This value is set as the argument
+     * [NewGameFragArgs.guidType]
+     */
+    companion object {
+        const val GUID_CHALLENGE: Int = 0
+        const val GUID_GAME: Int = 1
+    }
+
     // data bind the edit text
     private val viewModel: NewGameVM by viewModels()
     private val args: NewGameFragArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         val binding = NewGameFragBinding.inflate(inflater, container, false)
         with(binding.listAvatars) {
@@ -35,9 +45,18 @@ class NewGameFrag : Fragment() {
             })
         }
         binding.vm = viewModel
-        binding.challengeGuid = args.challengeGuid
         // set lifecycle so that 2-way data binding works w/ LiveData
         binding.lifecycleOwner = viewLifecycleOwner
+
+        binding.button.setOnClickListener {
+            // break MVVM a bit
+            if (args.guid.isNotEmpty() && args.guidType >= 0) {
+                when (args.guidType) {
+                    GUID_CHALLENGE -> viewModel.onNavNewGame(args.guid)
+                    GUID_GAME -> viewModel.onNavExistingGame(args.guid)
+                }
+            }
+        }
         binding.executePendingBindings()
 
         // init view model

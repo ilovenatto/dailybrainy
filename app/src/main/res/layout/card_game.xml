@@ -50,7 +50,7 @@
 
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{gameStub.playerSession.name}"
+                    android:text="@{gameStub.names()}"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                     tools:text="Johnny" />
 

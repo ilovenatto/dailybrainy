@@ -10,7 +10,6 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.getValue
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ApplicationComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,10 +41,6 @@ class GameObserver(
     interface FullGameObserverEP {
         fun brainyRepo(): BrainyRepo
     }
-
-    private val brainyRepo = EntryPointAccessors.fromApplication(context,
-        FullGameObserverEP::class.java)
-        .brainyRepo()
 
     private val remoteImage = RemoteImage()
     private val fireDb = FirebaseDatabase.getInstance()

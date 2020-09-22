@@ -36,8 +36,8 @@ class LessonListener(val viewListener: (challengeGuid: String) -> Unit) {
         else Timber.w("Wrong category")
 }
 
-class GameListener(val clickListener: (gameGuid: String) -> Unit) {
-    fun onClick(gameStub: GameStub) = clickListener(gameStub.game.guid)
+class GameListener(val clickListener: (gameStub: GameStub) -> Unit) {
+    fun onClick(gameStub: GameStub) = clickListener(gameStub)
 }
 
 

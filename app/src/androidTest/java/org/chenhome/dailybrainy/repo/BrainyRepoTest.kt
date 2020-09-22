@@ -54,7 +54,7 @@ class BrainyRepoTest {
         runBlocking {
             assertNotNull(repo.challenges)
             owner.reg.currentState = Lifecycle.State.STARTED
-            delay(2000)
+            delay(3000)
             suspendCoroutine<Unit> { cont ->
                 repo.challenges.observe(owner, Observer<List<Challenge>> {
                     Timber.d("Found ${it.size} challenges")
@@ -152,29 +152,27 @@ class BrainyRepoTest {
                     it.resume(Unit)
                 }
             }
-            delay(1500)
             // observe gamestubs and wait for new session
             repo.myGameStubs.observe(owner, Observer<List<GameStub>> {
                 Timber.d("observed list ${it.size}")
+                assertEquals(1, it.size)
                 it.forEach { stub ->
                     assertEquals(game, stub.game)
-                    if (stub.playerSession.guid == session.guid) assertEquals(
+                    if (stub.players[0].guid == session.guid) assertEquals(
                         session,
-                        stub.playerSession
+                        stub.players[0]
                     )
-                    if (stub.playerSession.guid == session2.guid) assertEquals(
+                    if (stub.players[1].guid == session2.guid) assertEquals(
                         session2,
-                        stub.playerSession
+                        stub.players[1]
                     )
                 }
             })
-            delay(2000)
             repo.allGameStubs.observe(owner, {
                 assertNotNull(it)
                 Timber.d("Got stubs $it")
                 assertTrue(it.size > 0)
             })
-            delay(3000)
         }
     }
 
@@ -233,7 +231,7 @@ class BrainyRepoTest {
         player.imgFn = "asdfads"
 
         runBlocking {
-            val gameGuid = repo.insertNewGame("foobar", player, user.currentPlayerGuid)
+            val gameGuid = repo.insertNewGame("challenge-my-party", player, user.currentPlayerGuid)
             assertNotNull(gameGuid)
 
             // get game
@@ -243,7 +241,7 @@ class BrainyRepoTest {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val remote = snapshot.getValue<Game>()
                         assertEquals(gameGuid, remote?.guid)
-                        assertEquals("foobar", remote?.challengeGuid)
+                        assertEquals("challenge-my-party", remote?.challengeGuid)
                         assertNotNull(remote?.playerGuid)
                         it.resume(Unit)
                     }

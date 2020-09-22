@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.repo.FullGameRepo
 import org.chenhome.dailybrainy.repo.Idea
+import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.ui.Event
 import org.chenhome.dailybrainy.ui.GenerateVMHelper
@@ -48,7 +49,7 @@ class IdeaVM(
     val vote = VoteVMHelper(fullGameRepo)
 
     var newIdea: MutableLiveData<String> = MutableLiveData("")
-
+    val myPlayerGuid = UserRepo(context).currentPlayerGuid
 
     /**
      * addIdea is a external immutable LiveData observable
@@ -66,7 +67,7 @@ class IdeaVM(
             val idea = Idea(
                 guid = "",
                 gameGuid = it.game.guid,
-                playerGuid = it.game.playerGuid,
+                playerGuid = myPlayerGuid,
                 playerName = "",
                 origin = Idea.Origin.BRAINSTORM,
                 votes = 0,

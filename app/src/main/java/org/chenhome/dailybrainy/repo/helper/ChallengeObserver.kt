@@ -29,7 +29,7 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
     private val scope = CoroutineScope(Dispatchers.IO)
 
     // mutable private challenges
-    var _allChall: MutableLiveData<List<Challenge>> = MutableLiveData(listOf())
+    private var _allChall: MutableLiveData<List<Challenge>> = MutableLiveData(listOf())
 
     /**
      * List of challenges offered by DailyBrainy
@@ -81,14 +81,14 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
         Timber.d("Challenges data has changed at location ${snapshot.key}")
         scope.launch {
             try {
-                // Map of challegeGuid -> Challenge
+                // Map of challengeGuid -> Challenge
                 snapshot.getValue<Map<String, Challenge>>()?.let {
                     Timber.d("${it.size} challenges encountered. Replacing all existing challenges.")
                     _allChall.postValue(it.values.toList())
 
-                    // After challenge stubs first published, update challenges with ImageURis, which take sevearl seconds.
+                    // After challenge stubs first published, update challenges with ImageURis, which take several seconds.
                     // then republish this change
-                    var challenges = mutableListOf<Challenge>()
+                    val challenges = mutableListOf<Challenge>()
                     it.values.forEach { chall ->
                         chall.imageUri = remoteImage.getImageUri(chall.imgFn)
                         challenges.add(chall)
@@ -106,9 +106,6 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun register() = fireRef.addValueEventListener(this)
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    fun refresh() = _allChall.notifyObserver()
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun deregister() = fireRef.removeEventListener(this)

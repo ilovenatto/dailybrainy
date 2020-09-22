@@ -87,8 +87,11 @@ internal class StepAdapter(val stepListener: Listener) :
     private var currentStep: Challenge.Step = Challenge.Step.GEN_IDEA
 
     fun setCurrentStep(step: Challenge.Step) {
-        currentStep = step
-        notifyDataSetChanged()
+        // only redraw steps if current step has changed
+        if (currentStep != step) {
+            currentStep = step
+            notifyDataSetChanged()
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {

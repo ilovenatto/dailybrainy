@@ -20,15 +20,15 @@ import java.util.*
  */
 data class GameStub(
     val game: Game,
-    val playerSession: PlayerSession,
+    val challenge: Challenge?,
+    val players: List<PlayerSession>,
 ) {
     fun date(context: Context): String? =
         game.sessionStartMillis?.let { millis ->
             android.text.format.DateFormat.getDateFormat(context).format(Date(millis))
         } ?: null
 
-    // Can get set at a later time
-    var challenge: Challenge? = null
+    fun names(): String = players.map { it.name + " / " }.toString()
 }
 
 /**

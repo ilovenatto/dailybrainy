@@ -31,11 +31,11 @@ class NewGameVM @ViewModelInject constructor(
     }
 
     /**
-     * NAVIGATE: Navigate to Existing Game (gameGuid required)
+     * NAVIGATE: Navigate to New Game
      *
-     * @param gameGuid Guid for existing [Game]
+     * @param challengeGuid Guid for [Challenge]
      */
-    fun navToGame(challengeGuid: String) {
+    fun onNavNewGame(challengeGuid: String) {
         player.value?.let { player ->
             viewModelScope.launch {
                 brainyRepo.insertNewGame(challengeGuid, player, userRepo.currentPlayerGuid)
@@ -44,6 +44,25 @@ class NewGameVM @ViewModelInject constructor(
                     } ?: showError(R.string.error_creategame)
             }
         } ?: Timber.w("Empty player.Unable to insert new game")
+    }
+
+    /**
+     * NAVIGATE: Navigate to Existing Game (gameGuid required)
+     *
+     * @param gameGuid Guid for existing [Game]
+     */
+    fun onNavExistingGame(gameGuid: String) {
+        player.value?.let { player ->
+            viewModelScope.launch {
+                // set player values
+                player.gameGuid = gameGuid
+                player.userGuid = userRepo.currentPlayerGuid
+
+                brainyRepo.insertPlayerSession(gameGuid, player)?.let {
+                    _navToGame.value = Event(gameGuid)
+                } ?: showError(R.string.error_creategame)
+            }
+        } ?: Timber.w("Unable to join existing game")
     }
 
     private val _navToGame = MutableLiveData<Event<String>>()
