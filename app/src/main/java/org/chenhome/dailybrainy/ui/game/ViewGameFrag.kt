@@ -11,6 +11,7 @@ import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.transition.MaterialContainerTransform
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.ViewGameFragBinding
 import org.chenhome.dailybrainy.databinding.ViewGameItemStepBinding
@@ -38,6 +39,9 @@ class ViewGameFrag : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
+        // set up motion
+        sharedElementEnterTransition = MaterialContainerTransform()
+
         val binding = ViewGameFragBinding.inflate(LayoutInflater.from(context), container, false)
         binding.listSteps.adapter = stepAdap
         binding.listPlayers.adapter = playerAdap
