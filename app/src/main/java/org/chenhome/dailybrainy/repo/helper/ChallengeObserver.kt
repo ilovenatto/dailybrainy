@@ -35,7 +35,6 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
      * List of challenges offered by DailyBrainy
      */
     val challenges = Transformations.map(_allChall) {
-        Timber.d("Got chall ${it.size}")
         it.filter { c ->
             c.category == Challenge.Category.CHALLENGE
         }
@@ -106,6 +105,9 @@ internal class ChallengeObserver : ValueEventListener, LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun register() = fireRef.addValueEventListener(this)
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun refresh() = _allChall.notifyObserver()
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun deregister() = fireRef.removeEventListener(this)

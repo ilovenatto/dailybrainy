@@ -29,6 +29,8 @@
 
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Brainy.Headline5"
+
                 android:text="@{challenge.category.toString()}"
                 tools:text="Challenge" />
 
@@ -37,13 +39,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@{challenge.title}"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
                 tools:text="Lorem ipsum" />
 
             <TextView
 
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Brainy.Body2"
                 android:text="@{challenge.desc}"
                 tools:text="Description" />
 

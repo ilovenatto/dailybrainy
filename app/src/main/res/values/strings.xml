@@ -16,4 +16,8 @@
     <string name="gen_sketch">Create sketches for the following ideas.</string>
     <string name="vote_sketch">Well done! Your team sketched these drawings. Vote for solution you like best.</string>
     <string name="create_story">With your team’s most popular sketch, tell a story of someone using your team’s solution.</string>
+    <string name="transition_viewgame">transition_viewgame</string>
+    <string name="transition_gamecard">transition_gamecard_%1$s</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

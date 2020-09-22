@@ -25,6 +25,12 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent">
 
+        <ImageView
+            android:id="@+id/imageView4"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            app:srcCompat="@drawable/logo_large" />
+
         <include
             android:id="@+id/cardLesson"
             layout="@layout/card_lesson"

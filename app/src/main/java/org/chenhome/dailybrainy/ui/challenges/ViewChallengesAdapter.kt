@@ -1,6 +1,7 @@
 package org.chenhome.dailybrainy.ui.challenges
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.chenhome.dailybrainy.databinding.CardGameBinding
@@ -36,8 +37,8 @@ class LessonListener(val viewListener: (challengeGuid: String) -> Unit) {
         else Timber.w("Wrong category")
 }
 
-class GameListener(val clickListener: (gameStub: GameStub) -> Unit) {
-    fun onClick(gameStub: GameStub) = clickListener(gameStub)
+class GameListener(val clickListener: (gameStub: GameStub, view: View) -> Unit) {
+    fun onClick(gameStub: GameStub, view: View) = clickListener(gameStub, view)
 }
 
 

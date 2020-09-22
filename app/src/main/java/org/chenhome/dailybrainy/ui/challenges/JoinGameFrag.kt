@@ -34,7 +34,7 @@ class JoinGameFrag : Fragment() {
         val binding = JoinGameFragBinding.inflate(inflater, container, false)
         binding.vm = vm
 
-        val gamesAdapter = ViewGamesAdapter(GameListener { stub ->
+        val gamesAdapter = ViewGamesAdapter(GameListener { stub, view ->
             if (stub.players.any { it.userGuid == myPlayerGuid }) {
                 // goto existing game directly if currenty user is one of the players in that game
                 findNavController().navigate(

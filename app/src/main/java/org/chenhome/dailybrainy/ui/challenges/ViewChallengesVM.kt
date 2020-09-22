@@ -46,20 +46,6 @@ class ViewChallengesVM @ViewModelInject constructor(
     val navToNewGame: LiveData<Event<String>>
         get() = _navToNewGame
 
-
-    /**
-     * NAVIGATE: Navigate to Existing Game (gameGuid required)
-     *
-     * @param gameGuid Guid for existing [Game]
-     */
-    fun navToExistingGame(gameGuid: String) {
-        _navToExistingGame.value = Event(gameGuid)
-    }
-
-    private val _navToExistingGame = MutableLiveData<Event<String>>()
-    val navToExistingGame: LiveData<Event<String>>
-        get() = _navToExistingGame
-
     /**
      * navToJoinGame is a external immutable LiveData observable
      * by others

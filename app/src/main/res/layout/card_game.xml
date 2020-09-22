@@ -16,8 +16,9 @@
 
     <com.google.android.material.card.MaterialCardView
         app:contentPadding="12dp"
-
+        android:transitionName="@{@string/transition_gamecard(gameStub.game.guid)}"
         android:layout_width="350dp"
+        android:onClick="@{(view)->listener.onClick(gameStub, view)}"
         android:layout_height="wrap_content">
 
         <LinearLayout
@@ -60,13 +61,6 @@
                     android:layout_height="wrap_content"
                     android:text="09/10/2010"
                     tools:text="@{gameStub.date(context)}" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:onClick="@{()->listener.onClick(gameStub)}"
-                    android:text="Join" />
             </LinearLayout>
 
         </LinearLayout>

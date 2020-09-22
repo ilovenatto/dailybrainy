@@ -8,8 +8,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.observe
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
+import org.chenhome.dailybrainy.R
 import org.chenhome.dailybrainy.databinding.ViewChallengesFragBinding
 import org.chenhome.dailybrainy.ui.game.NewGameFrag
 import timber.log.Timber
@@ -28,8 +30,12 @@ class ViewChallengesFrag : Fragment() {
             false)
 
         // Previous games
-        val gamesAdapter = ViewGamesAdapter(GameListener { stub ->
-            vm.navToExistingGame(stub.game.guid)
+        val gamesAdapter = ViewGamesAdapter(GameListener { stub, view ->
+            val txnName = getString(R.string.transition_gamecard)
+            val extras = FragmentNavigatorExtras(view to txnName)
+            val dir =
+                ViewChallengesFragDirections.actionViewChallengesFragToViewGameFrag(stub.game.guid)
+            findNavController().navigate(dir, extras)
         })
         binding.listGames.adapter = gamesAdapter
 
@@ -82,14 +88,6 @@ class ViewChallengesFrag : Fragment() {
             }
         })
 
-        vm.navToExistingGame.observe(viewLifecycleOwner, {
-            // navigate
-            it.contentIfNotHandled()?.let { gameGuid ->
-                val dir =
-                    ViewChallengesFragDirections.actionViewChallengesFragToViewGameFrag(gameGuid)
-                this.findNavController().navigate(dir)
-            }
-        })
         vm.navToJoinGame.observe(viewLifecycleOwner, {
             it.contentIfNotHandled()?.let { challengeGuid ->
                 this.findNavController()
