@@ -3,12 +3,15 @@
     <color name="primaryColor">#ffde03</color>
     <color name="primaryLightColor">#ffff54</color>
     <color name="primaryDarkColor">#c7ad00</color>
+
     <color name="secondaryColor">#0336ff</color>
+    <color name="secondaryColor100">#C5CAE9</color>
+
     <color name="secondaryLightColor">#6f63ff</color>
     <color name="secondaryDarkColor">#0008ca</color>
     <color name="primaryTextColor">#000000</color>
     <color name="secondaryTextColor">#ffffff</color>
 
-    <color name="brainy_secondaryColor">#F57F17</color>
+    <color name="brainy_tertiaryColor">#F57F17</color>
     <color name="black_overlay">#66000000</color>
 </resources>

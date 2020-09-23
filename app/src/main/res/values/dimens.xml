@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="text_margin">16dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_medium">16dp</dimen>
+    <dimen name="margin_large">24dp</dimen>
+    <dimen name="margin_xlarge">32dp</dimen>
+    <dimen name="img_large_height">175dp</dimen>
+    <dimen name="img_medium_height">100dp</dimen>
+    <dimen name="img_xlarge_height">220dp</dimen>
+    <dimen name="appbar_height">80dp</dimen>
 </resources>

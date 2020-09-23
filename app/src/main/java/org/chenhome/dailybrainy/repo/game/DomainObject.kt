@@ -23,12 +23,23 @@ data class GameStub(
     val challenge: Challenge?,
     val players: List<PlayerSession>,
 ) {
+
     fun date(context: Context): String? =
         game.sessionStartMillis?.let { millis ->
             android.text.format.DateFormat.getDateFormat(context).format(Date(millis))
-        } ?: null
+        }
 
-    fun names(): String = players.map { it.name + " / " }.toString()
+    fun prettySummary(context: Context): String {
+        val head = "You joined " + date(context) + " with "
+        var tail = ""
+        players.forEachIndexed { index, p ->
+            tail += p.name
+            if (index < players.size - 1) {
+                tail += ", "
+            }
+        }
+        return head + tail
+    }
 }
 
 /**
@@ -45,11 +56,9 @@ data class FullGame(
 
     fun mostPopularSketchUri(origin: Idea.Origin): Uri? =
         ideas(origin).maxByOrNull { it.votes }?.let { Sketch(it) }?.imgUri
-            ?: null
 
     fun mostPopularSketch(origin: Idea.Origin): Sketch? =
         ideas(origin).maxByOrNull { it.votes }?.let { Sketch(it) }
-            ?: null
 
 
     fun ideas(origin: Idea.Origin): List<Idea> = _ideas.filter { it.origin == origin }
@@ -88,3 +97,24 @@ data class Sketch(
         }
 }
 
+
+/**
+ * Challenge decorated with Lesson properties
+ *
+ * @property challenge
+ */
+data class Lesson(
+    val challenge: Challenge,
+) {
+
+    fun toYoutubeUri(): Uri? = challenge.youtubeId?.let {
+        Uri.parse("https://youtu.be/" + it)
+    }
+
+    fun toYoutubeThumbUri(): Uri? = challenge.youtubeId?.let {
+        Uri.parse("https://img.youtube.com/vi/"
+                + it
+                + "/0.jpg"
+        )
+    }
+}

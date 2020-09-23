@@ -1,0 +1,16 @@
+<resources>
+    <!-- Override Material component styles -->
+
+    <style name="Widget.Brainy.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/secondaryColor</item>
+    </style>
+
+    <style name="TextAppearance.Brainy.CollapsingToolbar.Expanded" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:textColor">@android:color/transparent</item>
+    </style>
+
+    <style name="TextAppearance.Brainy.CollapsingToolbar.Collapsed" parent="TextAppearance.Brainy.Headline4">
+        <item name="android:textColor">@color/secondaryColor</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+</resources>

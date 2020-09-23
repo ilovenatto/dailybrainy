@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
         <variable
             name="lesson"
-            type="org.chenhome.dailybrainy.repo.Challenge" />
+            type="org.chenhome.dailybrainy.repo.game.Lesson" />
 
         <variable
             name="listener"
@@ -14,53 +15,48 @@
     </data>
 
     <com.google.android.material.card.MaterialCardView
-        android:layout_width="350dp"
-        android:foregroundGravity="center"
-        android:layout_height="200dp">
+        android:layout_width="match_parent"
+        app:contentPadding="@dimen/margin_medium"
+        app:cardUseCompatPadding="true"
+        android:onClick="@{()->listener.onViewLesson(lesson)}"
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="12dp"
             android:orientation="vertical">
 
+            <ImageView
+                android:layout_width="match_parent"
+                app:imageUrl="@{lesson.challenge.imageUri}"
+                android:layout_height="@dimen/img_large_height"
+                tools:srcCompat="@tools:sample/backgrounds/scenic"
+                android:contentDescription="@string/app_name" />
+
+            <TextView
+                android:layout_marginTop="@dimen/margin_medium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Brainy.Overline"
+                android:text="@string/design_lesson"
+                tools:text="Design Lesson" />
+
             <TextView
 
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Today's Lesson"
-                tools:text="Lesson" />
-
-            <TextView
-
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@{lesson.title}"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:text="@{lesson.challenge.title}"
+                android:textAppearance="@style/TextAppearance.Brainy.Subtitle1"
                 tools:text="Lorem ipsum" />
 
             <TextView
-
+                android:layout_marginTop="@dimen/margin_small"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{lesson.desc}"
+                android:text="@{lesson.challenge.desc}"
+                android:textAppearance="@style/TextAppearance.Brainy.Body2"
                 tools:text="Description" />
 
-            <!-- Buttons -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:orientation="horizontal">
-
-                <com.google.android.material.button.MaterialButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:onClick="@{()->listener.onViewLesson(lesson)}"
-                    android:text="View Lesson" />
-
-            </LinearLayout>
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

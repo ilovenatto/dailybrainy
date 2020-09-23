@@ -24,7 +24,7 @@
             android:id="@+id/step_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/text_margin"
+            android:layout_margin="@dimen/margin_large"
             android:textAppearance="?attr/textAppearanceListItem"
             tools:text="3"
             android:text="@{Long.toString(step.allowedSecs)}" />
@@ -33,7 +33,7 @@
             android:id="@+id/step_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/text_margin"
+            android:layout_margin="@dimen/img_medium_height"
             android:textAppearance="?attr/textAppearanceListItem"
             tools:text="Generate ideas"
             android:text="@{context.getString(step.titleRsc)}" />

@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,9 +33,9 @@ class JoinGameFrag : Fragment() {
         val binding = JoinGameFragBinding.inflate(inflater, container, false)
         binding.vm = vm
 
-        val gamesAdapter = ViewGamesAdapter(GameListener { stub, view ->
+        val gamesAdapter = GameStubAdapter(GameStubListener { stub, _ ->
             if (stub.players.any { it.userGuid == myPlayerGuid }) {
-                // goto existing game directly if currenty user is one of the players in that game
+                // goto existing game directly if currently user is one of the players in that game
                 findNavController().navigate(
                     JoinGameFragDirections.actionJoinGameFragToViewGameFrag(stub.game.guid))
             } else {
@@ -48,7 +47,7 @@ class JoinGameFrag : Fragment() {
             }
         })
         binding.listGames.adapter = gamesAdapter
-        vm.availGames.observe(viewLifecycleOwner, Observer {
+        vm.availGames.observe(viewLifecycleOwner, {
             Timber.d("Available games to join ${it.size} for ${args.challengeGuid}")
             gamesAdapter.setGames(it)
         })

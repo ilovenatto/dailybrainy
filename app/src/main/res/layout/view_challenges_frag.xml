@@ -3,58 +3,63 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
+    <data />
 
-        <variable
-            name="vm"
-            type="org.chenhome.dailybrainy.ui.challenges.ViewChallengesVM" />
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_marginTop="@dimen/margin_medium"
+        android:layout_marginBottom="@dimen/margin_medium"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-        <variable
-            name="listenerLesson"
-            type="org.chenhome.dailybrainy.ui.challenges.LessonListener" />
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            app:liftOnScroll="true"
+            android:layout_height="@dimen/img_xlarge_height">
 
-        <variable
-            name="listenerChallenge"
-            type="org.chenhome.dailybrainy.ui.challenges.ChallengeListener" />
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:expandedTitleMarginBottom="@dimen/margin_large"
+                app:collapsedTitleTextAppearance="@style/TextAppearance.Brainy.CollapsingToolbar.Collapsed"
+                app:contentScrim="?attr/colorPrimary"
+                app:expandedTitleTextAppearance="@style/TextAppearance.Brainy.CollapsingToolbar.Expanded"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+                app:statusBarScrim="?attr/colorPrimaryVariant"
+                app:title="@string/app_name">
 
-    </data>
+                <ImageView
+                    android:layout_width="fill_parent"
+                    android:layout_height="@dimen/img_xlarge_height"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/logo_large"
+                    android:contentDescription="@string/app_name" />
 
-    <LinearLayout
-        android:layout_margin="16dp"
-        android:orientation="vertical"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent">
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/appbar_height"
+                    android:elevation="0dp"
+                    android:background="@android:color/transparent"
+                    app:layout_collapseMode="pin"
+                    app:layout_scrollFlags="scroll|enterAlways|snap" />
 
-        <ImageView
-            android:id="@+id/imageView4"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            app:srcCompat="@drawable/logo_large" />
 
-        <include
-            android:id="@+id/cardLesson"
-            layout="@layout/card_lesson"
-            app:lesson="@{vm.todayLesson}"
-            app:listener="@{listenerLesson}" />
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-        <include
-            android:id="@+id/cardChallenge"
-            layout="@layout/card_challenge"
-            app:listener="@{listenerChallenge}"
-            app:challenge="@{vm.todayChallenge}" />
+        </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/listGames"
+            android:id="@+id/list"
             android:name="org.chenhome.dailybrainy.ui.ViewChallengesFrag"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginLeft="@dimen/margin_medium"
+            android:layout_marginRight="@dimen/margin_medium"
             app:layoutManager="LinearLayoutManager"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
             tools:context=".ui.challenges.ViewChallengesFrag">
 
         </androidx.recyclerview.widget.RecyclerView>
 
 
-    </LinearLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

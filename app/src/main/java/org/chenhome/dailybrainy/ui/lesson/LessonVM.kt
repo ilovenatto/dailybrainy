@@ -13,6 +13,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.getValue
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.DbFolder
+import org.chenhome.dailybrainy.repo.game.Lesson
 import org.chenhome.dailybrainy.ui.Event
 import timber.log.Timber
 
@@ -24,8 +25,8 @@ class LessonVM @ViewModelInject constructor() : ViewModel() {
      * lesson is a external immutable LiveData observable
      * by others
      */
-    private var _lesson = MutableLiveData<Challenge>()
-    val lesson: LiveData<Challenge>
+    private var _lesson = MutableLiveData<Lesson>()
+    val lesson: LiveData<Lesson>
         get() = _lesson
 
     /**
@@ -43,7 +44,7 @@ class LessonVM @ViewModelInject constructor() : ViewModel() {
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         snapshot.getValue<Challenge>()?.let {
-                            _lesson.value = it
+                            _lesson.value = Lesson(it)
                         }
                     }
 

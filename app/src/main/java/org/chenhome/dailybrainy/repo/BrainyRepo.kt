@@ -25,7 +25,7 @@ import kotlin.coroutines.suspendCoroutine
  */
 @Singleton
 class BrainyRepo @Inject constructor(
-    val userRepo: UserRepo, // Injected
+    userRepo: UserRepo, // Injected
 ) : LifecycleObserver {
     private val fireDb: FirebaseDatabase = FirebaseDatabase.getInstance()
 
@@ -108,6 +108,9 @@ class BrainyRepo @Inject constructor(
             val gameGuid = suspendCoroutine<String?> { cont ->
                 gameRef.key?.let { gameGuid ->
                     val game = Game(gameGuid, challengeGuid, userGuid)
+
+                    // Set start time as right now
+                    game.sessionStartMillis = System.currentTimeMillis()
                     gameRef.setValue(game) { error, _ ->
                         error?.let {
                             Timber.w("Unable to insert new game $error")

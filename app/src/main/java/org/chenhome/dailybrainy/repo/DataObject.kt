@@ -55,18 +55,6 @@ data class Challenge(
         "", "", "", "",
         Category.CHALLENGE, null, null, null
     )
-
-    fun toYoutubeUri(): Uri? = youtubeId?.let {
-        Uri.parse("https://youtu.be/" + it)
-    } ?: null
-
-    fun toYoutubeThumbUri(): Uri? = youtubeId?.let {
-        Uri.parse("https://img.youtube.com/vi/"
-                + it
-                + "/0.jpg"
-        )
-    } ?: null
-
     enum class Category {
         LESSON,// lesson, where there's generally an associated youtube video
         CHALLENGE

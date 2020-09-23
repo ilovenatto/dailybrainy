@@ -20,4 +20,12 @@
     <string name="transition_gamecard">transition_gamecard_%1$s</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="today_challenge">Today\'s Challenge</string>
+    <string name="past_challenge">Past Challenges</string>
+    <string name="challenge">Challenge</string>
+    <string name="join_game">Join Game</string>
+    <string name="new_game">New Game</string>
+    <string name="design_lesson">Design Lesson</string>
+    <string name="not_available">Not yet available.</string>
+    <string name="today_lesson">Today\'s Lesson</string>
 </resources>

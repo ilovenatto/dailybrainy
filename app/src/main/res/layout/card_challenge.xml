@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -15,61 +16,71 @@
 
 
     <com.google.android.material.card.MaterialCardView
-        android:layout_marginTop="20dp"
-        android:layout_width="350dp"
-        android:layout_height="200dp">
+        app:contentPadding="@dimen/margin_medium"
+        app:cardUseCompatPadding="true"
+
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="12dp"
             android:orientation="vertical">
 
             <TextView
 
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.Brainy.Headline5"
-
                 android:text="@{challenge.category.toString()}"
+                android:textAppearance="@style/TextAppearance.Brainy.Overline"
                 tools:text="Challenge" />
 
             <TextView
-
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@{challenge.title}"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+                android:textAppearance="@style/TextAppearance.Brainy.Headline6"
                 tools:text="Lorem ipsum" />
 
             <TextView
-
+                android:layout_marginTop="@dimen/margin_small"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.Brainy.Body2"
                 android:text="@{challenge.desc}"
+                android:textAppearance="@style/TextAppearance.Brainy.Body2"
                 tools:text="Description" />
 
             <!-- Buttons -->
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_marginTop="@dimen/margin_small"
+                android:layout_marginBottom="@dimen/margin_small"
+                android:layout_height="@dimen/img_large_height"
+                app:imageUrl="@{challenge.imageUri}"
+                tools:srcCompat="@tools:sample/backgrounds/scenic"
+                android:contentDescription="@string/app_name" />
+
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:onClick="@{()->listener.onJoinGame(challenge)}"
-                    android:text="Join Game" />
-
+                    android:layout_marginEnd="@dimen/margin_large"
+                    style="@style/Widget.Brainy.Button.TextButton"
+                    android:onClick="@{()->listener.onNewGame(challenge)}"
+                    android:text="@string/new_game" />
 
                 <com.google.android.material.button.MaterialButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="New Game"
-                    android:onClick="@{()->listener.onNewGame(challenge)}" />
+                    style="@style/Widget.Brainy.Button.TextButton"
+                    android:onClick="@{()->listener.onJoinGame(challenge)}"
+                    android:text="@string/join_game" />
+
+
             </LinearLayout>
 
         </LinearLayout>
