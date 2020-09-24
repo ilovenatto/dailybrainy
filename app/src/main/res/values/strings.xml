@@ -28,4 +28,6 @@
     <string name="design_lesson">Design Lesson</string>
     <string name="not_available">Not yet available.</string>
     <string name="today_lesson">Today\'s Lesson</string>
+    <string name="watch">Watch</string>
+    <string name="description">Description</string>
 </resources>

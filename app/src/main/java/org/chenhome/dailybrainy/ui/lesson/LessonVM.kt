@@ -11,15 +11,21 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.getValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.DbFolder
 import org.chenhome.dailybrainy.repo.game.Lesson
+import org.chenhome.dailybrainy.repo.image.RemoteImage
 import org.chenhome.dailybrainy.ui.Event
 import timber.log.Timber
 
 class LessonVM @ViewModelInject constructor() : ViewModel() {
 
     private val fireDb = FirebaseDatabase.getInstance()
+    private val scope = CoroutineScope(Dispatchers.IO)
+    private val remoteImage = RemoteImage()
 
     /**
      * lesson is a external immutable LiveData observable
@@ -43,8 +49,11 @@ class LessonVM @ViewModelInject constructor() : ViewModel() {
                 .child(challengeGuid)
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        snapshot.getValue<Challenge>()?.let {
-                            _lesson.value = Lesson(it)
+                        snapshot.getValue<Challenge>()?.let { chall ->
+                            scope.launch {
+                                chall.imageUri = remoteImage.getImageUri(chall.imgFn)
+                                _lesson.postValue(Lesson(chall))
+                            }
                         }
                     }
 

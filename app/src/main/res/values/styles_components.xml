@@ -5,6 +5,11 @@
         <item name="android:textColor">@color/secondaryColor</item>
     </style>
 
+    <style name="Widget.Brainy.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:textColor">@color/secondaryTextColor</item>
+        <item name="android:backgroundTint">@color/secondaryColor</item>
+    </style>
+
     <style name="TextAppearance.Brainy.CollapsingToolbar.Expanded" parent="TextAppearance.MaterialComponents.Headline5">
         <item name="android:textColor">@android:color/transparent</item>
     </style>

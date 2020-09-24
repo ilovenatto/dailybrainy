@@ -10,47 +10,104 @@
             type="org.chenhome.dailybrainy.ui.lesson.LessonVM" />
     </data>
 
-    <LinearLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context=".ui.lesson.ViewLessonFrag">
+        android:background="@android:color/white">
 
-        <ImageView
-            android:id="@+id/imageView"
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="120dp"
-            app:imageUrl="@{vm.lesson.challenge.imageUri}"
-            tools:src="@tools:sample/backgrounds/scenic"
-            android:contentDescription="@string/app_name" />
+            android:background="@color/primaryColor"
+            android:layout_height="@dimen/img_xlarge_height"
+            app:liftOnScroll="true">
 
-        <TextView
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:collapsedTitleTextAppearance="@style/TextAppearance.Brainy.Headline5"
+                app:contentScrim="?attr/colorPrimary"
+                app:expandedTitleMarginBottom="@dimen/margin_large"
+                app:expandedTitleTextAppearance="@style/TextAppearance.Brainy.Headline5"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+                app:statusBarScrim="?attr/colorPrimaryVariant"
+                app:title="@{vm.lesson.challenge.title}">
+
+                <ImageView
+                    android:id="@+id/imageLesson"
+                    android:layout_gravity="end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/img_xlarge_height"
+                    android:contentDescription="@string/app_name" />
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/appbar_height"
+                    android:elevation="0dp"
+                    app:layout_collapseMode="pin"
+                    app:layout_scrollFlags="scroll|enterAlways|snap"
+                    app:navigationIcon="@drawable/round_close_24" />
+
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{vm.lesson.challenge.title}"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            tools:text="Brainstorming" />
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <ImageView
-            android:id="@+id/imageView3"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            app:imageUrl="@{vm.thumbUri}"
-            tools:src="@tools:sample/backgrounds/scenic"
-            android:contentDescription="@string/app_name" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-        <Button
-            android:id="@+id/button2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="@{()->vm.navToYoutube()}"
-            android:text="Watch" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{vm.lesson.challenge.desc}" />
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/img_xlarge_height"
+                        android:contentDescription="@string/app_name"
+                        android:scaleType="fitXY"
+                        app:imageUrl="@{vm.thumbUri}"
+                        tools:src="@tools:sample/backgrounds/scenic" />
 
-    </LinearLayout>
+                    <Button
+                        style="@style/Widget.Brainy.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:onClick="@{()->vm.navToYoutube()}"
+                        android:text="@string/watch" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_margin="@dimen/margin_medium"
+                    tools:context=".ui.lesson.ViewLessonFrag">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_large"
+                        android:text="@string/description"
+                        android:textAppearance="@style/TextAppearance.Brainy.Overline"
+                        tools:text="Description" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_small"
+                        android:text="@{vm.lesson.challenge.desc}"
+                        android:textAppearance="@style/TextAppearance.Brainy.Body2"
+                        tools:text="Foobar lorem ipsum" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>
