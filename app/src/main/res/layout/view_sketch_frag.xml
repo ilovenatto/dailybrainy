@@ -25,7 +25,6 @@
                 android:layout_height="?attr/actionBarSize"
                 app:navigationIcon="@drawable/round_close_24"
                 app:title="@string/sketch"
-                style="@style/Widget.MaterialComponents.Toolbar.Primary"
                 tools:text="My sketch ide a" />
 
         </com.google.android.material.appbar.AppBarLayout>

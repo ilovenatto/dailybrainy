@@ -6,9 +6,9 @@
 
     <color name="secondaryColor">#0336ff</color>
     <color name="secondaryColor100">#C5CAE9</color>
-
     <color name="secondaryLightColor">#6f63ff</color>
     <color name="secondaryDarkColor">#0008ca</color>
+
     <color name="primaryTextColor">#000000</color>
     <color name="secondaryTextColor">#ffffff</color>
 
