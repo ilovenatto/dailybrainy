@@ -26,10 +26,11 @@
 
         <ImageView
             android:id="@+id/avatarImage"
+            android:layout_gravity="center"
             android:layout_margin="@dimen/margin_medium"
             android:layout_width="@dimen/img_medium_height"
             android:layout_height="@dimen/img_medium_height"
-            android:layout_weight="1"
+            android:scaleType="fitCenter"
             android:contentDescription="@string/avatar"
             tools:srcCompat="@tools:sample/avatars" />
     </com.google.android.material.card.MaterialCardView>

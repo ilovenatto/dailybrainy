@@ -10,6 +10,7 @@
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:background="@color/primaryColor50"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -21,7 +22,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:menu="@menu/menu_newgame"
+                app:menu="@menu/menu_done"
                 app:navigationIcon="@drawable/round_arrow_back_24"
                 app:title="@string/new_game" />
 
@@ -29,6 +30,7 @@
 
 
         <androidx.core.widget.NestedScrollView
+
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">

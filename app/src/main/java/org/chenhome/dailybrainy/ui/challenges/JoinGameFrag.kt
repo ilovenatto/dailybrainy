@@ -30,8 +30,13 @@ class JoinGameFrag : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         val myPlayerGuid = UserRepo(requireContext()).currentPlayerGuid
+
         val binding = JoinGameFragBinding.inflate(inflater, container, false)
         binding.vm = vm
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+
 
         val gamesAdapter = GameStubAdapter(GameStubListener { stub, _ ->
             if (stub.players.any { it.userGuid == myPlayerGuid }) {
@@ -55,5 +60,5 @@ class JoinGameFrag : Fragment() {
         binding.executePendingBindings()
         return binding.root
     }
-
 }
+

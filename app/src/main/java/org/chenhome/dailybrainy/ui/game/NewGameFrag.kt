@@ -49,7 +49,7 @@ class NewGameFrag : Fragment() {
                 findNavController().popBackStack()
             }
             setOnMenuItemClickListener { item ->
-                if (item.itemId == R.id.menuitem_start) {
+                if (item.itemId == R.id.menuitem_done) {
                     if (args.guid.isNotEmpty() && args.guidType >= 0) {
                         when (args.guidType) {
                             GUID_CHALLENGE -> viewModel.onNavNewGame(args.guid)
@@ -69,7 +69,7 @@ class NewGameFrag : Fragment() {
         with(viewModel) {
             // Only enable Done action when form input is valid
             valid.observe(viewLifecycleOwner, { valid ->
-                binding.toolbar.menu.findItem(R.id.menuitem_start)?.isEnabled = valid
+                binding.toolbar.menu.findItem(R.id.menuitem_done)?.isEnabled = valid
             })
 
             navToGame.observe(viewLifecycleOwner, {
