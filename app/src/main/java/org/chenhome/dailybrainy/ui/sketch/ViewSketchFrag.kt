@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.ViewSketchFragBinding
@@ -26,6 +27,9 @@ class ViewSketchFrag : Fragment() {
     ): View? {
         val binding = ViewSketchFragBinding
             .inflate(LayoutInflater.from(requireContext()), container, false)
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
 
         if (args.gameGuid.isNotEmpty() && args.ideaGuid.isNotEmpty()) {
             vm.loadSketchStub(args.gameGuid, args.ideaGuid)

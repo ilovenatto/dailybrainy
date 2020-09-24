@@ -18,8 +18,6 @@
     <string name="create_story">With your team’s most popular sketch, tell a story of someone using your team’s solution.</string>
     <string name="transition_viewgame">transition_viewgame</string>
     <string name="transition_gamecard">transition_gamecard_%1$s</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="today_challenge">Today\'s Challenge</string>
     <string name="past_challenge">Past Challenges</string>
     <string name="challenge">Challenge</string>
@@ -30,4 +28,7 @@
     <string name="today_lesson">Today\'s Lesson</string>
     <string name="watch">Watch</string>
     <string name="description">Description</string>
+    <string name="sketch">Sketch</string>
+    <string name="player">Player</string>
+    <string name="votes">Votes</string>
 </resources>

@@ -45,6 +45,7 @@
                     android:layout_height="@dimen/appbar_height"
                     android:elevation="0dp"
                     app:layout_collapseMode="pin"
+                    style="@style/Widget.MaterialComponents.Toolbar"
                     app:layout_scrollFlags="scroll|enterAlways|snap"
                     app:navigationIcon="@drawable/round_close_24" />
 

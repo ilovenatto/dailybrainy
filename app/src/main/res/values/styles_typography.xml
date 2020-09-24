@@ -32,7 +32,7 @@
         <item name="fontFamily">@font/rubik_medium</item>
     </style>
 
-    <style name="TextAppearance.Brainy.Body1" parent="TextAppearance.MaterialComponents.Body1">
+    <style name="TextAppearance.Brainy.Body1" parent="TextAppearance.MaterialComponents.Body2">
         <item name="fontFamily">@font/rubik</item>
     </style>
 

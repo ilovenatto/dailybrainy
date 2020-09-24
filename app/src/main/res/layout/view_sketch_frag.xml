@@ -10,39 +10,85 @@
             type="org.chenhome.dailybrainy.ui.sketch.SketchStubVM" />
     </data>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textSketchTitle"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:navigationIcon="@drawable/round_close_24"
+                app:title="@string/sketch"
+                style="@style/Widget.MaterialComponents.Toolbar.Primary"
+                tools:text="My sketch idea" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@{vm.sketchStub.idea.title}"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            tools:text="Sketch title" />
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <TextView
-            android:id="@+id/textPlayer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{vm.sketchStub.idea.playerName}"
-            tools:text="Johnny" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textVotes"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text='@{"Votes: " + vm.sketchStub.idea.votes}'
-            tools:text="Votes: 10" />
+                <ImageView
+                    android:id="@+id/imageSketch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scaleType="fitStart"
+                    app:imageUrl="@{vm.sketchStub.imgUri}"
+                    tools:src="@tools:sample/backgrounds/scenic"
+                    android:contentDescription="@string/app_name" />
 
-        <ImageView
-            android:id="@+id/imageSketch"
-            android:layout_width="400dp"
-            android:layout_height="wrap_content"
-            app:imageUrl="@{vm.sketchStub.imgUri}"
-            tools:src="@tools:sample/backgrounds/scenic" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="@dimen/margin_medium"
+                    android:orientation="vertical">
 
-    </LinearLayout>
+                    <TextView
+                        android:layout_marginTop="@dimen/margin_medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Brainy.Overline"
+                        android:text="@string/votes" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_small"
+                        android:text="@{String.valueOf(vm.sketchStub.idea.votes)}"
+                        android:textAppearance="@style/TextAppearance.Brainy.Subtitle1"
+                        tools:text="10" />
+
+                    <TextView
+                        android:layout_marginTop="@dimen/margin_medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Brainy.Overline"
+                        android:text="@string/player" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="@dimen/margin_small"
+                        android:text="@{vm.sketchStub.idea.playerName}"
+                        android:textAppearance="@style/TextAppearance.Brainy.Subtitle1"
+                        tools:text="Sketch title" />
+                </LinearLayout>
+
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>
