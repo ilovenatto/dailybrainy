@@ -55,13 +55,13 @@ class ViewChallengesAdapter(
     private var lesson: Lesson? = null
     private var games: List<GameStub>? = null
 
+    // Create heterogeneous list of Challenge, Lesson, Headers and Games
+    private var allItems: MutableList<Any> = mutableListOf()
+
     init {
         // called at instantiation so we can build list with placeholder cards
         setAllItems()
     }
-
-    // Create heterogeneous list of Challenge, Lesson, Headers and Games
-    private var allItems: MutableList<Any> = mutableListOf()
 
     // Called whenever the underlying data has changed
     private fun setAllItems() {

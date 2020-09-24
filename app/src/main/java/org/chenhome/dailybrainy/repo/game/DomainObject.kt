@@ -114,7 +114,7 @@ data class Lesson(
     fun toYoutubeThumbUri(): Uri? = challenge.youtubeId?.let {
         Uri.parse("https://img.youtube.com/vi/"
                 + it
-                + "/hq1.jpg"
+                + "/maxres1.jpg"
         )
     }
 }
