@@ -21,6 +21,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                app:menu="@menu/menu_newgame"
                 app:navigationIcon="@drawable/round_arrow_back_24"
                 app:title="@string/new_game" />
 
@@ -48,25 +49,22 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@={vm.player.name}" />
+
+                    <TextView
+                        android:layout_marginTop="@dimen/margin_xlarge"
+                        android:textAppearance="@style/TextAppearance.Brainy.Headline6"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/your_avatar" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/listAvatars"
-                    android:layout_width="354dp"
-                    android:layout_height="459dp"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="28dp"
-                    android:layout_marginEnd="24dp"
-                    android:layout_marginBottom="24dp"
+                    android:layout_marginTop="@dimen/margin_small"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                     app:spanCount="3" />
-
-                <Button
-                    android:id="@+id/button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:enabled="@{vm.valid}"
-                    android:text="Start game" />
 
             </LinearLayout>
 

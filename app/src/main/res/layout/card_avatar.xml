@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="avatar"
+            type="org.chenhome.dailybrainy.ui.game.NewGameFrag.SelectableAvatar" />
+
+        <variable
+            name="listener"
+            type="org.chenhome.dailybrainy.ui.game.NewGameFrag.AvatarAdapter.AvatarListener" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:checkable="true"
+        android:id="@+id/avatarCard"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardUseCompatPadding="true"
+        android:onClick="@{()->listener.onClick(avatar)}"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/avatarImage"
+            android:layout_margin="@dimen/margin_medium"
+            android:layout_width="@dimen/img_medium_height"
+            android:layout_height="@dimen/img_medium_height"
+            android:layout_weight="1"
+            android:contentDescription="@string/avatar"
+            tools:srcCompat="@tools:sample/avatars" />
+    </com.google.android.material.card.MaterialCardView>
+
+</layout>

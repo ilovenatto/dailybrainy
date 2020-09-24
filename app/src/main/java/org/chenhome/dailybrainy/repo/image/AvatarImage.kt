@@ -17,3 +17,5 @@ enum class AvatarImage(
     A5(R.drawable.avatar5),
     A6(R.drawable.avatar6)
 }
+
+

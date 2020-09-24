@@ -4,9 +4,7 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.R
-import org.chenhome.dailybrainy.repo.BrainyRepo
-import org.chenhome.dailybrainy.repo.PlayerSession
-import org.chenhome.dailybrainy.repo.UserRepo
+import org.chenhome.dailybrainy.repo.*
 import org.chenhome.dailybrainy.repo.helper.notifyObserver
 import org.chenhome.dailybrainy.repo.image.AvatarImage
 import org.chenhome.dailybrainy.ui.Event
@@ -14,7 +12,7 @@ import org.chenhome.dailybrainy.ui.UiError
 import timber.log.Timber
 
 class NewGameVM @ViewModelInject constructor(
-    val userRepo: UserRepo, // injected by Hilt
+    private val userRepo: UserRepo, // injected by Hilt
     val brainyRepo: BrainyRepo, // injected by Hilt
 ) : ViewModel() {
 
@@ -23,11 +21,10 @@ class NewGameVM @ViewModelInject constructor(
 
     // Whether all form values are set
     val valid = MediatorLiveData<Boolean>().apply {
-        addSource(player, Observer {
+        addSource(player) {
             value = it.name.isNotEmpty() &&
                     (it.imgFn?.isNotEmpty() ?: false)
-            Timber.d("Got valid $value")
-        })
+        }
     }
 
     /**
