@@ -6,39 +6,39 @@
     <data />
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_marginTop="@dimen/margin_medium"
-        android:layout_marginBottom="@dimen/margin_medium"
+        android:background="@color/primaryColor"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            app:liftOnScroll="true"
-            android:layout_height="@dimen/img_xlarge_height">
+            android:layout_height="wrap_content"
+            app:liftOnScroll="true">
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:expandedTitleMarginBottom="@dimen/margin_large"
                 app:collapsedTitleTextAppearance="@style/TextAppearance.Brainy.CollapsingToolbar.Collapsed"
                 app:contentScrim="?attr/colorPrimary"
-                app:expandedTitleTextAppearance="@style/TextAppearance.Brainy.CollapsingToolbar.Expanded"
+                app:expandedTitleTextAppearance="@style/TextAppearance.Brainy.CollapsingToolbar.Transparent"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
                 app:statusBarScrim="?attr/colorPrimaryVariant"
                 app:title="@string/app_name">
 
                 <ImageView
-                    android:layout_width="fill_parent"
-                    android:layout_height="@dimen/img_xlarge_height"
-                    android:scaleType="centerInside"
-                    app:srcCompat="@drawable/logo_large"
-                    android:contentDescription="@string/app_name" />
+                    android:layout_width="@dimen/img_xlarge_height"
+                    android:layout_height="@dimen/img_large_height"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/margin_large"
+                    android:contentDescription="@string/app_name"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/logo2_large" />
 
                 <com.google.android.material.appbar.MaterialToolbar
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/appbar_height"
-                    android:elevation="0dp"
+                    android:layout_height="@dimen/appbar_height_large"
                     android:background="@android:color/transparent"
+                    android:elevation="0dp"
                     app:layout_collapseMode="pin"
                     app:layout_scrollFlags="scroll|enterAlways|snap" />
 
@@ -52,8 +52,7 @@
             android:name="org.chenhome.dailybrainy.ui.ViewChallengesFrag"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/margin_medium"
-            android:layout_marginRight="@dimen/margin_medium"
+            android:layout_margin="@dimen/margin_medium"
             app:layoutManager="LinearLayoutManager"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             tools:context=".ui.challenges.ViewChallengesFrag">

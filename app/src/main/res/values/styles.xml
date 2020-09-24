@@ -11,7 +11,6 @@
         <item name="colorSecondary">@color/secondaryColor</item>
         <item name="colorSecondaryVariant">@color/secondaryLightColor</item>
         <item name="colorOnSecondary">@color/secondaryTextColor</item>
-        <item name="android:colorBackground">@color/primaryColor</item>
 
         <!-- Typography -->
         <!-- Customizes Materials components -->

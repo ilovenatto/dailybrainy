@@ -13,8 +13,7 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/white">
+        android:layout_height="match_parent">
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
@@ -27,7 +26,7 @@
                 app:navigationIcon="@drawable/round_close_24"
                 app:title="@string/sketch"
                 style="@style/Widget.MaterialComponents.Toolbar.Primary"
-                tools:text="My sketch idea" />
+                tools:text="My sketch ide a" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -57,11 +56,11 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:layout_marginTop="@dimen/margin_medium"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Brainy.Overline"
-                        android:text="@string/votes" />
+                        android:layout_marginTop="@dimen/margin_medium"
+                        android:text="@string/votes"
+                        android:textAppearance="@style/TextAppearance.Brainy.Overline" />
 
                     <TextView
                         android:layout_width="match_parent"

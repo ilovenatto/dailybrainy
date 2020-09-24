@@ -10,12 +10,13 @@
         <item name="android:backgroundTint">@color/secondaryColor</item>
     </style>
 
-    <style name="TextAppearance.Brainy.CollapsingToolbar.Expanded" parent="TextAppearance.MaterialComponents.Headline5">
+    <style name="TextAppearance.Brainy.CollapsingToolbar.Transparent" parent="TextAppearance.MaterialComponents.Headline5">
         <item name="android:textColor">@android:color/transparent</item>
     </style>
 
     <style name="TextAppearance.Brainy.CollapsingToolbar.Collapsed" parent="TextAppearance.Brainy.Headline4">
+        <item name="fontFamily">@font/fredericka_the_great</item>
+        <item name="android:letterSpacing">9.0</item>
         <item name="android:textColor">@color/secondaryColor</item>
-        <item name="android:textAllCaps">true</item>
     </style>
 </resources>
