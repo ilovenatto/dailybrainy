@@ -63,6 +63,9 @@ data class FullGame(
 
     fun ideas(origin: Idea.Origin): List<Idea> = _ideas.filter { it.origin == origin }
     fun ideasCount(origin: Idea.Origin): Int = _ideas.filter { it.origin == origin }.size
+    fun ideasCount(origin: Idea.Origin, playerGuid: String): Int = _ideas
+        .filter { it.origin == origin && it.playerGuid == playerGuid }.size
+
     fun voteCount(origin: Idea.Origin): Int = _ideas
         .filter {
             it.origin == origin

@@ -42,4 +42,6 @@
     <string name="num_sketches">%1$d sketches</string>
     <string name="num_storypanels">%1$d story panels</string>
     <string name="storyboard">Storyboard</string>
+    <string name="points">%1$d points</string>
+    <string name="player_desc">%1$d ideas, %2$d sketches and %3$d story panels</string>
 </resources>

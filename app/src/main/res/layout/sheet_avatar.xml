@@ -1,70 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:clickable="true"
-    app:behavior_hideable="false"
-    app:behavior_peekHeight="@dimen/sheet_height_collapsed"
-    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/sheet_height"
-    android:background="@color/brainy_tertiaryColor"
-    android:orientation="vertical"
-    tools:showIn="@layout/view_game_frag">
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
 
     <LinearLayout
+        android:clickable="true"
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="@dimen/sheet_height_collapsed"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="@dimen/sheet_height"
+        android:background="@color/brainy_tertiaryColor"
+        android:orientation="vertical">
 
-        <ImageView
-            android:layout_width="@dimen/img_medium_height"
-            android:layout_height="wrap_content"
-            android:src="@drawable/avatar1"
-            tools:srcCompat="@tools:sample/avatars" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:gravity="center|start"
+            android:layout_height="@dimen/sheet_height_collapsed"
+            android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="@dimen/img_medium_height"
-            android:layout_height="wrap_content"
-            android:src="@drawable/avatar1"
-            tools:srcCompat="@tools:sample/avatars" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/avatar1"
-            tools:srcCompat="@tools:sample/avatars" />
+            <LinearLayout
+                android:layout_width="@dimen/img_small_height"
+                android:gravity="center"
+                android:layout_height="@dimen/img_small_height"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|start"
+                    app:srcCompat="@drawable/baseline_expand_less_24" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/listThumbs"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_avatarthumb"
+                app:spanCount="4"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                android:layout_height="match_parent" />
+
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listPlayers"
+            tools:itemCount="3"
+            tools:listitem="@layout/item_player"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
 
     </LinearLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_medium"
-        android:text="TextView adfadsf ;alsdf"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_medium"
-        android:text="TextView adfadsf ;alsdf"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_medium"
-        android:text="TextView adfadsf ;alsdf"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_medium"
-
-        android:text="TextView adfadsf ;alsdf"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
-
-
-</LinearLayout>
+</layout>

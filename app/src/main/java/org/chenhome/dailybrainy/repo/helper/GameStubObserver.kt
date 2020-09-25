@@ -58,7 +58,7 @@ internal class GameStubObserver(private val userGuid: String) : ValueEventListen
             stub.players.any { player ->
                 player.userGuid == userGuid
             }
-        }
+        }.sortedByDescending { stub -> stub.game.sessionStartMillis }
     }
 
     /**

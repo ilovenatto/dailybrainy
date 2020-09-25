@@ -15,7 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.ViewGameFragBinding
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.ui.GameVMFactory
-import org.chenhome.dailybrainy.ui.PlayerAdapter
+import org.chenhome.dailybrainy.ui.PlayerSheetAdapter
 import timber.log.Timber
 
 
@@ -30,7 +30,7 @@ class ViewGameFrag : Fragment() {
         // Fragment listens to this
         vm.navToStep(step)
     })
-    private val playerAdap = PlayerAdapter()
+    private val playerSheetAdapter = PlayerSheetAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,6 +46,9 @@ class ViewGameFrag : Fragment() {
                 DividerItemDecoration.VERTICAL))
             adapter = stepAdap
         }
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
 
         // observe steps
         vm.gameSteps.observe(viewLifecycleOwner, { steps ->
@@ -55,12 +58,13 @@ class ViewGameFrag : Fragment() {
         })
 
         // observe current step & players
-
-        // TODO: 9/24/20 setup players
-        //binding.listPlayers.adapter = playerAdap
+        with(binding.avatars) {
+            listPlayers.adapter = playerSheetAdapter.playerAdapter
+            listThumbs.adapter = playerSheetAdapter.thumbAdapter
+        }
         vm.fullGame.observe(viewLifecycleOwner, {
             it?.let {
-                playerAdap.players = it.players
+                playerSheetAdapter.setGame(it)
                 binding.vm = vm
                 binding.executePendingBindings()
             }
@@ -89,7 +93,8 @@ class ViewGameFrag : Fragment() {
         binding.executePendingBindings()
         return binding.root
     }
-
 }
+
+
 
 

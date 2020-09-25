@@ -10,7 +10,8 @@
     <dimen name="img_xlarge_height">220dp</dimen>
     <dimen name="appbar_height">48dp</dimen>
     <dimen name="appbar_height_large">72dp</dimen>
-    <dimen name="sheet_height_collapsed">64dp</dimen>
-    <dimen name="sheet_height">300dp</dimen>
+    <dimen name="sheet_height_collapsed">72dp</dimen>
+    <dimen name="sheet_height">350dp</dimen>
     <dimen name="step_height">72dp</dimen>
+    <dimen name="img_avatar_height">64dp</dimen>
 </resources>
