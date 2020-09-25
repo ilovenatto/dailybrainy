@@ -7,7 +7,7 @@
 
         <variable
             name="dummy"
-            type="org.chenhome.dailybrainy.ui.challenges.PlaceholderDummy" />
+            type="org.chenhome.dailybrainy.ui.PlaceholderDummy" />
     </data>
 
     <com.google.android.material.card.MaterialCardView

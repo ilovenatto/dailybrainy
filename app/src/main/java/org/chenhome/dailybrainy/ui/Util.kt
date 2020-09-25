@@ -1,5 +1,7 @@
 package org.chenhome.dailybrainy.ui
 
+import android.content.Context
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
@@ -7,6 +9,7 @@ import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import org.chenhome.dailybrainy.R
+import org.chenhome.dailybrainy.repo.Challenge
 import timber.log.Timber
 
 /**
@@ -65,7 +68,7 @@ data class UiError(
  * @param imgUri
  */
 @BindingAdapter("imageUrl") // creates new attribute
-fun bindImage(imgView: ImageView, imgUri: Uri?): Unit {
+fun bindImage(imgView: ImageView, imgUri: Uri?) {
     Timber.d("Binding $imgUri to ${imgView}")
     imgUri?.let {
         val imgUrl = imgUri
@@ -79,5 +82,37 @@ fun bindImage(imgView: ImageView, imgUri: Uri?): Unit {
                 .placeholder(R.drawable.ic_broken_image)
                 .error(R.drawable.ic_broken_image))
             .into(imgView)
+    }
+}
+
+// Dummy class to mark a Placeholder data item
+data class PlaceholderDummy(
+    val title: String,
+    val desc: String, // desc optional
+)
+
+// UI value holder for Game step information
+data class GameStep
+    (
+    val step: Challenge.Step,
+    val isComplete: Boolean,
+    val isCurrentStep: Boolean,
+    val numStuff: Int,
+) {
+    fun iconDrawable(context: Context): Drawable? {
+        if (isCurrentStep) return context.getDrawable(R.drawable.current_step)
+        return if (isComplete) context.getDrawable(R.drawable.baseline_check_circle_24)
+        else context.getDrawable(R.drawable.baseline_check_circle_outline_24)
+    }
+
+    fun description(context: Context): String {
+        return when (step) {
+            Challenge.Step.GEN_IDEA -> context.getString(R.string.num_ideas, numStuff)
+            Challenge.Step.VOTE_IDEA -> context.getString(R.string.num_votes, numStuff)
+            Challenge.Step.GEN_SKETCH -> context.getString(R.string.num_sketches, numStuff)
+            Challenge.Step.VOTE_SKETCH -> context.getString(R.string.num_votes, numStuff)
+            Challenge.Step.CREATE_STORYBOARD -> context.getString(R.string.num_votes, numStuff)
+            Challenge.Step.VIEW_STORYBOARD -> context.getString(R.string.num_storypanels, numStuff)
+        }
     }
 }

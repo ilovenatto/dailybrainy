@@ -10,6 +10,7 @@ import org.chenhome.dailybrainy.databinding.*
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.repo.game.GameStub
 import org.chenhome.dailybrainy.repo.game.Lesson
+import org.chenhome.dailybrainy.ui.PlaceholderDummy
 import timber.log.Timber
 
 
@@ -232,8 +233,3 @@ class CardPlaceholderVH(val binding: CardPlaceholderBinding) :
     }
 }
 
-// Dummy class to mark a Placeholder data item
-data class PlaceholderDummy(
-    val title: String,
-    val desc: String, // desc optional
-)

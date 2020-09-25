@@ -128,7 +128,7 @@ class GameObserver(
                         update.setValue(game) { error, ref ->
                             error?.let {
                                 Timber.w("Unable to update game at $ref")
-                            } ?: Timber.d("Updated game ${game.guid} at $ref")
+                            } ?: Timber.d("Updated game ${game} at $ref")
                         }
                     } catch (e: Exception) {
                         Timber.e("Unable to update game $game, $e")

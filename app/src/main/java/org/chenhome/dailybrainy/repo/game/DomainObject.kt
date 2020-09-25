@@ -62,6 +62,14 @@ data class FullGame(
 
 
     fun ideas(origin: Idea.Origin): List<Idea> = _ideas.filter { it.origin == origin }
+    fun ideasCount(origin: Idea.Origin): Int = _ideas.filter { it.origin == origin }.size
+    fun voteCount(origin: Idea.Origin): Int = _ideas
+        .filter {
+            it.origin == origin
+        }.fold(0, { sum, idea ->
+            sum + idea.votes
+        })
+
 
     fun add(idea: Idea) {
         // doesn't exist

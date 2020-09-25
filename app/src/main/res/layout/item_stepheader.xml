@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tool="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="dummy"
+            type="org.chenhome.dailybrainy.ui.PlaceholderDummy" />
+    </data>
+
+    <LinearLayout
+        android:layout_margin="@dimen/margin_small"
+        android:gravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/appbar_height_large"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{dummy.title}"
+            android:textAppearance="@style/TextAppearance.Brainy.Overline"
+            tool:text="step 1" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{dummy.desc}"
+            android:textAppearance="@style/TextAppearance.Brainy.Headline6"
+            tool:text="Brainstorming" />
+    </LinearLayout>
+</layout>

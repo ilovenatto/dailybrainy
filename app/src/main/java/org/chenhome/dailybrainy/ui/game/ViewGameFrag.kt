@@ -6,30 +6,27 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.transition.MaterialContainerTransform
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.ViewGameFragBinding
-import org.chenhome.dailybrainy.databinding.ViewGameItemStepBinding
 import org.chenhome.dailybrainy.repo.Challenge
 import org.chenhome.dailybrainy.ui.GameVMFactory
 import org.chenhome.dailybrainy.ui.PlayerAdapter
-import org.jetbrains.annotations.NotNull
 import timber.log.Timber
 
 
-@AndroidEntryPoint // injecting viewmodels with hilt
+@AndroidEntryPoint // injecting view models with hilt
 class ViewGameFrag : Fragment() {
 
     private val args: ViewGameFragArgs by navArgs()
     private val vm: ViewGameVM by viewModels {
         GameVMFactory(requireContext(), args.gameGuid)
     }
-    private val stepAdap = StepAdapter(StepAdapter.Listener { step ->
+    private val stepAdap = GameStepAdapter(GameStepAdapter.GameStepListener { step ->
         // Fragment listens to this
         vm.navToStep(step)
     })
@@ -42,22 +39,34 @@ class ViewGameFrag : Fragment() {
         // set up motion
         sharedElementEnterTransition = MaterialContainerTransform()
 
-        val binding = ViewGameFragBinding.inflate(LayoutInflater.from(context), container, false)
-        binding.listSteps.adapter = stepAdap
-        binding.listPlayers.adapter = playerAdap
+        val binding = ViewGameFragBinding
+            .inflate(LayoutInflater.from(context), container, false)
+        with(binding.listSteps) {
+            addItemDecoration(DividerItemDecoration(requireContext(),
+                DividerItemDecoration.VERTICAL))
+            adapter = stepAdap
+        }
+
+        // observe steps
+        vm.gameSteps.observe(viewLifecycleOwner, { steps ->
+            val current = steps.find { it.isCurrentStep }
+            Timber.d("Steps updated. Current step is $current")
+            stepAdap.setSteps(requireContext(), steps)
+        })
 
         // observe current step & players
-        vm.fullGame.observe(viewLifecycleOwner, Observer {
+
+        // TODO: 9/24/20 setup players
+        //binding.listPlayers.adapter = playerAdap
+        vm.fullGame.observe(viewLifecycleOwner, {
             it?.let {
-                stepAdap.setCurrentStep(it.game.currentStep)
                 playerAdap.players = it.players
                 binding.vm = vm
                 binding.executePendingBindings()
-
             }
         })
 
-        vm.navToStep.observe(viewLifecycleOwner, Observer {
+        vm.navToStep.observe(viewLifecycleOwner, {
             it.contentIfNotHandled()?.run {
                 val dir: NavDirections = when (this) {
                     Challenge.Step.GEN_IDEA -> ViewGameFragDirections
@@ -72,7 +81,6 @@ class ViewGameFrag : Fragment() {
                         .actionViewGameFragToCreateStoryFrag(vm.gameGuid)
                     Challenge.Step.VIEW_STORYBOARD -> ViewGameFragDirections
                         .actionViewGameFragToReviewStoryFrag(vm.gameGuid)
-                    else -> throw Exception("Encountered unsupported Challenge step $this")
                 }
                 Timber.d("Navigating to $dir")
                 findNavController().navigate(dir)
@@ -82,50 +90,6 @@ class ViewGameFrag : Fragment() {
         return binding.root
     }
 
-}
-
-internal class StepAdapter(val stepListener: Listener) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    private val steps = Challenge.Step.values()
-    private var currentStep: Challenge.Step = Challenge.Step.GEN_IDEA
-
-    fun setCurrentStep(step: Challenge.Step) {
-        // only redraw steps if current step has changed
-        if (currentStep != step) {
-            currentStep = step
-            notifyDataSetChanged()
-        }
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return StepVH(
-            ViewGameItemStepBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false))
-    }
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        // assume position lines up with Enum's ordinal number
-        (holder as StepVH).bind(steps[position])
-    }
-
-    override fun getItemCount(): Int = steps.size
-
-
-    inner class StepVH(val binding: @NotNull ViewGameItemStepBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(step: Challenge.Step) {
-            binding.step = step
-            binding.listener = stepListener
-        }
-    }
-
-    class Listener(val listener: (Challenge.Step) -> Unit) {
-        // Called by item's layout XML onClick attribute
-        fun onClick(step: Challenge.Step) {
-            listener(step)
-        }
-    }
 }
 
 

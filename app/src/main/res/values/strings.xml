@@ -25,6 +25,7 @@
     <string name="not_available">Not yet available.</string>
     <string name="today_lesson">Today\'s Lesson</string>
     <string name="watch">Watch</string>
+    <string name="step">Step %1$d</string>
     <string name="description">Description</string>
     <string name="sketch">Sketch</string>
     <string name="player">Player</string>
@@ -34,4 +35,11 @@
     <string name="start">Start</string>
     <string name="join_game">Join Game</string>
     <string name="done">Done</string>
+    <string name="brainstorm">Brainstorm</string>
+    <string name="no_items_yet">No items</string>
+    <string name="num_ideas">%1$d ideas</string>
+    <string name="num_votes">%1$d votes</string>
+    <string name="num_sketches">%1$d sketches</string>
+    <string name="num_storypanels">%1$d story panels</string>
+    <string name="storyboard">Storyboard</string>
 </resources>

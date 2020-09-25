@@ -61,74 +61,49 @@ data class Challenge(
     }
 
     /**
-     * The phases in each challenge, in ordinal order
-     */
-    enum class Phase {
-        BRAINSTORM,
-        SKETCH,
-        SHARE
-    }
-
-    enum class CountType {
-        NUM_VOTES,
-        NUM_IDEAS,
-        NUM_POPULAR,
-        NONE
-    }
-
-    /**
      * Steps in each challenge, broken down by Phase
      */
     enum class Step(
         val titleRsc: Int,
-        val phase: Phase,
         val allowedSecs: Long,
-        val countType: CountType,
     ) {
 
         // Brainstorm
         GEN_IDEA(
             org.chenhome.dailybrainy.R.string.genidea,
-            Phase.BRAINSTORM,
-            TimeUnit.MINUTES.toSeconds(3),
-            CountType.NUM_IDEAS
+            TimeUnit.MINUTES.toSeconds(3)
         ),
         VOTE_IDEA(
             org.chenhome.dailybrainy.R.string.voteidea,
-            Phase.BRAINSTORM,
-            TimeUnit.MINUTES.toSeconds(3),
-            CountType.NUM_VOTES
+            TimeUnit.MINUTES.toSeconds(3)
         ),
 
         // Sketch
         GEN_SKETCH(
             org.chenhome.dailybrainy.R.string.gensketch,
-            Phase.SKETCH,
             TimeUnit.MINUTES.toSeconds(5),
-            CountType.NUM_IDEAS
         ),
 
         VOTE_SKETCH(
             org.chenhome.dailybrainy.R.string.votesketch,
-            Phase.SKETCH,
-            TimeUnit.MINUTES.toSeconds(2),
-            CountType.NUM_VOTES
+            TimeUnit.MINUTES.toSeconds(2)
         ),
 
         // Share
         CREATE_STORYBOARD(
             org.chenhome.dailybrainy.R.string.createstoryboard,
-            Phase.SHARE,
-            TimeUnit.MINUTES.toSeconds(10),
-            CountType.NONE
+            TimeUnit.MINUTES.toSeconds(10)
         ),
         VIEW_STORYBOARD(
             org.chenhome.dailybrainy.R.string.viewstoryboard,
-            Phase.SHARE,
-            TimeUnit.MINUTES.toSeconds(10),
-            CountType.NONE
-        )
+            TimeUnit.MINUTES.toSeconds(10)
+        );
+
+        // Whether current step less than other step (in ordinal value)
+        fun less(other: Step): Boolean = this.ordinal < other.ordinal
+
     }
+
 }
 
 
@@ -251,17 +226,11 @@ data class Idea(
         imgUri = null
     )
 
-    /**
-     * @return whether this IDea is considered a sketch (with a drawing) or not
-     */
-    @Exclude
-    fun isSketch(): Boolean = imgFn?.isNotEmpty() ?: false
-
     fun vote() {
         votes += 1
     }
 
-    // Which part of the game that the idea orginated
+    // Which part of the game that the idea originated
     enum class Origin {
         BRAINSTORM,
         SKETCH,

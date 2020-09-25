@@ -35,6 +35,7 @@
                     android:layout_gravity="end"
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/img_xlarge_height"
+                    app:imageUrl="@{vm.lesson.challenge.imageUri}"
                     android:contentDescription="@string/app_name" />
 
                 <com.google.android.material.appbar.MaterialToolbar

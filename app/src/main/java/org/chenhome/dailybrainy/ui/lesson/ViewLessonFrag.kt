@@ -11,7 +11,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.ViewLessonFragBinding
-import org.chenhome.dailybrainy.ui.bindImage
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -25,13 +24,7 @@ class ViewLessonFrag : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         val binding = ViewLessonFragBinding.inflate(inflater, container, false)
-
         vm.loadLesson(args.challengeGuid)
-        vm.lesson.observe(viewLifecycleOwner, { lesson ->
-            binding.imageLesson.let {
-                bindImage(it, lesson.challenge.imageUri)
-            }
-        })
 
         binding.vm = vm
         binding.toolbar.setNavigationOnClickListener {
