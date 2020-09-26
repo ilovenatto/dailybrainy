@@ -15,4 +15,5 @@
     <dimen name="step_height">72dp</dimen>
     <dimen name="img_avatar_height">64dp</dimen>
     <dimen name="card_height_medium">160dp</dimen>
+    <dimen name="touchable_height">48dp</dimen>
 </resources>

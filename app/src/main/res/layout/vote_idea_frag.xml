@@ -41,7 +41,7 @@
                     android:layout_marginTop="@dimen/appbar_height_large"
                     android:layout_marginStart="@dimen/margin_medium"
                     android:layout_marginEnd="@dimen/margin_medium"
-                    android:text="@string/genidea_instruction"
+                    android:text="@string/vote_idea"
                     android:textAppearance="@style/TextAppearance.Brainy.Headline4" />
 
                 <com.google.android.material.appbar.MaterialToolbar
@@ -81,18 +81,11 @@
                         tools:text="How might we lorem ipsum foo ba ipsum lroem lorem bheadline."
                         android:text="@{vm.fullGame.challenge.hmw}" />
 
-                    <EditText
-                        android:id="@+id/editHmw"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/margin_small"
-                        android:inputType="textShortMessage|textAutoCorrect|textAutoComplete" />
-
                     <TextView
                         android:id="@+id/textVotes"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="@dimen/margin_medium"
                         android:text='@{"You have " +Integer.toString(vm.vote.votesLeft) + " votes left"}'
                         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                         tools:text="You have 5 votes left" />
@@ -105,7 +98,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                    app:spanCount="3"
+                    app:spanCount="2"
                     tools:context=".ui.game.ViewGameFrag"
                     android:layout_marginBottom="@dimen/sheet_height_collapsed"
                     tools:listitem="@layout/item_idea">

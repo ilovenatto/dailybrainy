@@ -33,6 +33,7 @@ class JoinGameFrag : Fragment() {
 
         val binding = JoinGameFragBinding.inflate(inflater, container, false)
         binding.vm = vm
+        binding.progress.show()
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
@@ -54,7 +55,13 @@ class JoinGameFrag : Fragment() {
         binding.listGames.adapter = gamesAdapter
         vm.availGames.observe(viewLifecycleOwner, {
             Timber.d("Available games to join ${it.size} for ${args.challengeGuid}")
-            gamesAdapter.setGames(it)
+            if (it.isNotEmpty()) {
+                gamesAdapter.setGames(it)
+                binding.textNoItems.visibility = View.GONE
+            } else {
+                binding.textNoItems.visibility = View.VISIBLE
+            }
+            binding.progress.hide()
         })
 
         binding.executePendingBindings()

@@ -91,7 +91,7 @@
                         android:layout_marginTop="16dp"
                         android:gravity="start|top"
                         android:hint="What's your idea?"
-                        android:inputType="textMultiLine|textAutoComplete|textAutoCorrect"
+                        android:inputType="textAutoCorrect|textAutoComplete"
                         android:text="@={vm.newIdea}" />
 
                     <Button

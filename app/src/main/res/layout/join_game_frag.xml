@@ -28,6 +28,25 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
+        <androidx.core.widget.ContentLoadingProgressBar
+            android:id="@+id/progress"
+            android:layout_width="@dimen/touchable_height"
+            android:layout_height="@dimen/touchable_height"
+            android:layout_gravity="center"
+            style="?android:attr/progressBarStyleLarge"
+            android:indeterminate="true" />
+
+        <TextView
+            android:id="@+id/textNoItems"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.Brainy.Subtitle1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_large"
+            android:visibility="gone"
+            android:text="@string/i_don_t_see_any_previous_games_for_this_challenge" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listGames"
             android:layout_width="match_parent"

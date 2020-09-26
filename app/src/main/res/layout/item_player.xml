@@ -20,8 +20,8 @@
             android:layout_height="@dimen/appbar_height_large">
 
             <ImageView
-                android:layout_width="@dimen/img_avatar_height"
-                android:layout_height="@dimen/img_avatar_height"
+                android:layout_width="@dimen/img_small_height"
+                android:layout_height="@dimen/img_small_height"
                 android:src="@{player.avatarImage(context)}"
                 tools:srcCompat="@drawable/avatar1" />
         </FrameLayout>

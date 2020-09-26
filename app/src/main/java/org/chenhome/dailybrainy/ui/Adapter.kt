@@ -51,6 +51,8 @@ internal class IdeaAdapter(val showVotes: Boolean) :
             notifyDataSetChanged()
         }
 
+    var listener: IdeaListener? = null
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
         IdeaVH(ItemIdeaBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
@@ -65,7 +67,12 @@ internal class IdeaAdapter(val showVotes: Boolean) :
         fun bind(idea: Idea) {
             binding.idea = idea
             binding.votes.visibility = if (showVotes) View.VISIBLE else View.GONE
+            this@IdeaAdapter.listener?.let { binding.listener = it }
         }
+    }
+
+    class IdeaListener(val listener: (Idea) -> Unit) {
+        fun onClick(idea: Idea) = listener(idea)
     }
 }
 

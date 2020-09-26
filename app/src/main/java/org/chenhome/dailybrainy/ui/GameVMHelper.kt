@@ -75,11 +75,18 @@ class VoteVMHelper(val fullGameRepo: FullGameRepo) {
      * @param idea
      */
     fun incrementVoteRemotely(idea: Idea) {
-        val updated = idea.copy()
-        updated.vote()
+        if (_votesLeft.value == 0) {
+            // ignore
+            Timber.w("Ignoring request to vote. Out of votes.")
+            return
+        }
+
         val votes = _votesLeft.value?.dec() ?: 0
         _votesLeft.value = if (votes < 0) 0 else votes
+
         Timber.d("Incremeting vote on idean $idea")
+        val updated = idea.copy()
+        updated.vote()
         scope.launch {
             fullGameRepo.updateRemote(updated)
         }
