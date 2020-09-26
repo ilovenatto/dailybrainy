@@ -13,10 +13,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.GenIdeaFragBinding
 import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.game.FullGame
-import org.chenhome.dailybrainy.ui.Event
 import org.chenhome.dailybrainy.ui.GameVMFactory
 import org.chenhome.dailybrainy.ui.IdeaAdapter
-import org.chenhome.dailybrainy.ui.PlayerAdapter
+import org.chenhome.dailybrainy.ui.PlayerSheetAdapter
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -27,8 +26,8 @@ class GenIdeaFrag : Fragment() {
         GameVMFactory(requireContext(), args.gameGuid)
     }
 
-    private val playerAdap = PlayerAdapter()
-    private val ideaAdap = IdeaAdapter()
+    private val playerAdap = PlayerSheetAdapter()
+    private val ideaAdap = IdeaAdapter(false)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,13 +36,16 @@ class GenIdeaFrag : Fragment() {
         val binding = GenIdeaFragBinding.inflate(LayoutInflater.from(context), container, false)
         binding.vm = vm
         binding.listIdeas.adapter = ideaAdap
-        binding.listPlayers.adapter = playerAdap
+        with(binding.avatars) {
+            listPlayers.adapter = playerAdap.playerAdapter
+            listThumbs.adapter = playerAdap.thumbAdapter
+        }
         binding.lifecycleOwner = viewLifecycleOwner
+        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         binding.executePendingBindings()
 
         initAdapterObservers(vm.fullGame, ideaAdap, playerAdap)
-        initNavObserver(vm.navToNext)
         return binding.root
     }
 
@@ -58,27 +60,17 @@ class GenIdeaFrag : Fragment() {
         vm.generate.countdownTimer.cancel()
     }
 
-    private fun initNavObserver(
-        navToNext: LiveData<Event<Boolean>>,
-    ) {
-        navToNext.observe(viewLifecycleOwner, {
-            it.contentIfNotHandled()?.run {
-                findNavController().popBackStack()
-            }
-        })
-    }
-
 
     private fun initAdapterObservers(
         fullGame: LiveData<FullGame>,
         ideaAdap: IdeaAdapter,
-        playerAdap: PlayerAdapter,
+        playerAdap: PlayerSheetAdapter,
     ) {
         fullGame.observe(viewLifecycleOwner, {
             it?.let {
                 Timber.d("Got challenge ${it.challenge.title}")
                 ideaAdap.ideas = it.ideas(Idea.Origin.BRAINSTORM)
-                playerAdap.players = it.players
+                playerAdap.setGame(it)
             }
         })
     }

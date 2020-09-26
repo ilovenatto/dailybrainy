@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="idea"
+            type="org.chenhome.dailybrainy.repo.Idea" />
+
+        <variable
+            name="listener"
+            type="org.chenhome.dailybrainy.ui.idea.VoteIdeaAdapter.Listener" />
+    </data>
+
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        app:contentPadding="@dimen/margin_medium"
+        app:cardUseCompatPadding="true"
+        android:onClick="@{(view)->listener.onClick(idea)}">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{idea.title}"
+                android:textAppearance="@style/TextAppearance.Brainy.Subtitle1"
+                tools:text="Lorem ipsum game foo" />
+
+            <TextView
+                android:layout_marginTop="@dimen/margin_small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{idea.playerName}"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                tools:text="Johnny" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/votes"
+                android:layout_marginTop="@dimen/margin_medium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text='@{idea.votes + " votes"'
+                tools:text="3 votes" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</layout>

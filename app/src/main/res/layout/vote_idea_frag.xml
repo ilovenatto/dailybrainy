@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:name="org.chenhome.dailybrainy.ui.ViewGameFrag">
 
     <data>
 
@@ -10,63 +13,116 @@
             type="org.chenhome.dailybrainy.ui.idea.IdeaVM" />
     </data>
 
-    <LinearLayout
-        android:id="@+id/linear"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="12dp"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id="@+id/header"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/textInstruction"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:text="@string/vote_idea"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-            <TextView
-                android:id="@+id/textVotes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text='@{"You have " +Integer.toString(vm.vote.votesLeft) + " votes left"}'
-                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                tools:text="You have 5 votes left" />
-
-        </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/listIdeas"
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="151dp"
-            android:layout_marginBottom="32dp"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-            app:spanCount="3"
-            tools:itemCount="5"
-            tools:listitem="@layout/gen_idea_item_idea" />
+            android:layout_height="@dimen/img_xlarge_height"
+            app:liftOnScroll="true">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/listPlayers"
-            android:layout_width="357dp"
-            android:layout_height="85dp"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-            app:spanCount="5"
-            tools:listitem="@layout/view_game_item_player" />
 
-        <Button
-            android:id="@+id/buttonDone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="@{()->vm.navToNext()}"
-            android:enabled="@{vm.vote.votesLeft == 0}"
-            android:text="Done" />
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:collapsedTitleTextAppearance="@style/TextAppearance.Brainy.Headline5"
+                app:contentScrim="?attr/colorPrimary"
+                app:expandedTitleMarginBottom="@dimen/margin_large"
+                app:expandedTitleTextAppearance="@style/TextAppearance.Brainy.CollapsingToolbar.Transparent"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+                app:title="@string/genidea"
+                app:statusBarScrim="?attr/colorPrimaryVariant">
 
-    </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/appbar_height_large"
+                    android:layout_marginStart="@dimen/margin_medium"
+                    android:layout_marginEnd="@dimen/margin_medium"
+                    android:text="@string/genidea_instruction"
+                    android:textAppearance="@style/TextAppearance.Brainy.Headline4" />
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/toolbar"
+                    style="@style/Widget.MaterialComponents.Toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/appbar_height"
+                    android:elevation="0dp"
+                    app:layout_collapseMode="pin"
+                    app:layout_scrollFlags="scroll|enterAlways|snap"
+                    app:navigationIcon="@drawable/round_arrow_back_24" />
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/margin_medium"
+                    android:background="@color/primaryColor"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Brainy.Headline6"
+                        tools:text="How might we lorem ipsum foo ba ipsum lroem lorem bheadline."
+                        android:text="@{vm.fullGame.challenge.hmw}" />
+
+                    <EditText
+                        android:id="@+id/editHmw"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_small"
+                        android:inputType="textShortMessage|textAutoCorrect|textAutoComplete" />
+
+                    <TextView
+                        android:id="@+id/textVotes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text='@{"You have " +Integer.toString(vm.vote.votesLeft) + " votes left"}'
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                        tools:text="You have 5 votes left" />
+                </LinearLayout>
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                    android:id="@+id/listIdeas"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="3"
+                    tools:context=".ui.game.ViewGameFrag"
+                    android:layout_marginBottom="@dimen/sheet_height_collapsed"
+                    tools:listitem="@layout/item_idea">
+
+                </androidx.recyclerview.widget.RecyclerView>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <include
+            layout="@layout/sheet_avatar"
+            android:id="@+id/avatars" />
+
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 </layout>
+
+
+
+

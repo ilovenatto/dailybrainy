@@ -71,7 +71,7 @@
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:spanCount="3"
                 tools:itemCount="3"
-                tools:listitem="@layout/gen_sketch_item" />
+                tools:listitem="@layout/item_sketch" />
 
             <Button
                 android:id="@+id/buttonSetting"
@@ -93,7 +93,7 @@
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:spanCount="3"
                 tools:itemCount="3"
-                tools:listitem="@layout/gen_sketch_item" />
+                tools:listitem="@layout/item_sketch" />
 
             <Button
                 android:id="@+id/button3"
@@ -114,7 +114,7 @@
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:spanCount="3"
                 tools:itemCount="3"
-                tools:listitem="@layout/gen_sketch_item" />
+                tools:listitem="@layout/item_sketch" />
 
             <Button
                 android:id="@+id/button4"

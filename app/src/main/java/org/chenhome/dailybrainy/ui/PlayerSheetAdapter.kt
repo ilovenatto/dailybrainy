@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import org.chenhome.dailybrainy.R
 import org.chenhome.dailybrainy.databinding.ItemAvatarthumbBinding
 import org.chenhome.dailybrainy.databinding.ItemPlayerBinding
 import org.chenhome.dailybrainy.repo.Idea
@@ -93,8 +92,4 @@ data class Player(
 
     fun avatarImage(context: Context): Drawable? = context
         .getDrawable(session.avatarImage().imgResId)
-
-    fun prettyPoints(context: Context): String = context.getString(R.string.points, points)
-    fun desc(context: Context): String =
-        context.getString(R.string.player_desc, ideas, sketches, storyPanels)
 }

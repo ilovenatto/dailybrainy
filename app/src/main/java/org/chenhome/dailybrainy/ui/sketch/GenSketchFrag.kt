@@ -30,7 +30,7 @@ class GenSketchFrag : Fragment() {
     }
 
     private val playerAdap = PlayerAdapter()
-    private val ideaAdap = IdeaAdapter()
+    private val ideaAdap = IdeaAdapter(true)
     private val sketchAdap = SketchAdapter(SketchVHListener(
         { _ ->
             // do nothing on vote

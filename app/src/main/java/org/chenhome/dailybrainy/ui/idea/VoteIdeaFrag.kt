@@ -15,9 +15,8 @@ import org.chenhome.dailybrainy.databinding.VoteIdeaFragBinding
 import org.chenhome.dailybrainy.databinding.VoteIdeaItemIdeaBinding
 import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.game.FullGame
-import org.chenhome.dailybrainy.ui.Event
 import org.chenhome.dailybrainy.ui.GameVMFactory
-import org.chenhome.dailybrainy.ui.PlayerAdapter
+import org.chenhome.dailybrainy.ui.PlayerSheetAdapter
 import org.jetbrains.annotations.NotNull
 import timber.log.Timber
 
@@ -29,7 +28,7 @@ class VoteIdeaFrag : Fragment() {
         GameVMFactory(requireContext(), args.gameGuid)
     }
 
-    private val playerAdap = PlayerAdapter()
+    private val playerAdap = PlayerSheetAdapter()
     private val ideaAdap = VoteIdeaAdapter(VoteIdeaAdapter.Listener { idea ->
         vm.vote.incrementVoteRemotely(idea)
         Timber.d("voted for idea $idea")
@@ -42,13 +41,19 @@ class VoteIdeaFrag : Fragment() {
         val binding = VoteIdeaFragBinding.inflate(LayoutInflater.from(context), container, false)
         binding.vm = vm
         binding.listIdeas.adapter = ideaAdap
-        binding.listPlayers.adapter = playerAdap
+        with(binding.avatars) {
+            listThumbs.adapter = playerAdap.thumbAdapter
+            listPlayers.adapter = playerAdap.playerAdapter
+        }
         binding.lifecycleOwner = viewLifecycleOwner
 
+        with(binding.toolbar) {
+            setNavigationOnClickListener { findNavController().popBackStack() }
+
+        }
         binding.executePendingBindings()
 
         initAdapterObservers(vm.fullGame, ideaAdap, playerAdap)
-        initNavObserver(vm.navToNext)
         return binding.root
     }
 
@@ -63,23 +68,16 @@ class VoteIdeaFrag : Fragment() {
         vm.generate.countdownTimer.cancel()
     }
 
-    private fun initNavObserver(navToNext: LiveData<Event<Boolean>>) {
-        navToNext.observe(viewLifecycleOwner, {
-            it.contentIfNotHandled()?.run {
-                findNavController().popBackStack()
-            }
-        })
-    }
 
     private fun initAdapterObservers(
         fullGame: LiveData<FullGame>,
         voteIdeaAdap: VoteIdeaAdapter,
-        playerAdap: PlayerAdapter,
+        playerAdap: PlayerSheetAdapter,
     ) {
         fullGame.observe(viewLifecycleOwner, {
             it?.let {
                 voteIdeaAdap.ideas = it.ideas(Idea.Origin.BRAINSTORM)
-                playerAdap.players = it.players
+                playerAdap.setGame(it)
             }
         })
     }

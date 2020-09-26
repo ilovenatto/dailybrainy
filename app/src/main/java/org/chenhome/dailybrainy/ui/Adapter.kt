@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import org.chenhome.dailybrainy.databinding.GenIdeaItemIdeaBinding
-import org.chenhome.dailybrainy.databinding.GenSketchItemBinding
+import org.chenhome.dailybrainy.databinding.ItemIdeaBinding
+import org.chenhome.dailybrainy.databinding.ItemSketchBinding
 import org.chenhome.dailybrainy.databinding.ViewGameItemPlayerBinding
 import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.PlayerSession
@@ -42,7 +42,7 @@ internal class PlayerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 }
 
-internal class IdeaAdapter :
+internal class IdeaAdapter(val showVotes: Boolean) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var ideas: List<Idea> = listOf()
@@ -52,7 +52,7 @@ internal class IdeaAdapter :
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
-        IdeaVH(GenIdeaItemIdeaBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        IdeaVH(ItemIdeaBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         (holder as IdeaVH).bind(ideas[position])
@@ -60,10 +60,11 @@ internal class IdeaAdapter :
 
     override fun getItemCount(): Int = ideas.size
 
-    class IdeaVH(val binding: @NotNull GenIdeaItemIdeaBinding) :
+    inner class IdeaVH(val binding: @NotNull ItemIdeaBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(idea: Idea) {
             binding.idea = idea
+            binding.votes.visibility = if (showVotes) View.VISIBLE else View.GONE
         }
     }
 }
@@ -77,7 +78,7 @@ internal class SketchAdapter(val sketchListener: SketchVHListener, val voteEnabl
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
-        SketchVH(GenSketchItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        SketchVH(ItemSketchBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         (holder as SketchVH).bind(sketches[position])
@@ -85,7 +86,7 @@ internal class SketchAdapter(val sketchListener: SketchVHListener, val voteEnabl
 
     override fun getItemCount(): Int = sketches.size
 
-    inner class SketchVH(val binding: @NotNull GenSketchItemBinding) :
+    inner class SketchVH(val binding: @NotNull ItemSketchBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(sketch: Sketch) {
             binding.sketch = sketch

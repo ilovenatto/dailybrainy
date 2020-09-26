@@ -56,7 +56,7 @@
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:spanCount="3"
                 tools:itemCount="3"
-                tools:listitem="@layout/gen_idea_item_idea" />
+                tools:listitem="@layout/item_idea" />
 
             <Button
                 android:id="@+id/buttonCapture"
@@ -77,7 +77,7 @@
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:spanCount="3"
             tools:itemCount="4"
-            tools:listitem="@layout/gen_sketch_item" />
+            tools:listitem="@layout/item_sketch" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listPlayers"

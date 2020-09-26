@@ -10,7 +10,6 @@ import org.chenhome.dailybrainy.repo.FullGameRepo
 import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.repo.game.FullGame
-import org.chenhome.dailybrainy.ui.Event
 import org.chenhome.dailybrainy.ui.GenerateVMHelper
 import org.chenhome.dailybrainy.ui.VoteVMHelper
 import timber.log.Timber
@@ -29,17 +28,6 @@ class IdeaVM(
 
     override fun onCleared() {
         fullGameRepo.onClear()
-    }
-
-    /**
-     * Navigate to next
-     */
-    private var _navToNext = MutableLiveData<Event<Boolean>>()
-    val navToNext: LiveData<Event<Boolean>>
-        get() = _navToNext
-
-    fun navToNext() {
-        _navToNext.value = Event(true)
     }
 
     /**

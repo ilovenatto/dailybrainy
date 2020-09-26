@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.Brainy.Body2"
                 tools:text="3 sketches, 3 ideas, and 3 story panels"
-                android:text="@{player.desc(context)}" />
+                android:text='@{player.ideas+" ideas,"+player.sketches+" sketches and " + player.storyPanels + " story panels."}' />
         </LinearLayout>
 
         <com.google.android.material.chip.Chip
@@ -53,6 +53,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_medium"
             tools:text="8 points"
-            android:text="@{player.prettyPoints(context)}" />
+            android:text='@{player.points + " points"}' />
     </LinearLayout>
 </layout>
