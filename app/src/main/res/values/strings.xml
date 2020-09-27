@@ -10,7 +10,7 @@
     <string name="viewstoryboard">Review storyboard</string>
     <string name="avatar">Avatar</string>
     <string name="error_creategame">We weren\'t able to start the game. Try again a bit later.</string>
-    <string name="genidea_instruction">With your team, write down as many ideas as you can</string>
+    <string name="genidea_instruction">Generate as many ideas as you can</string>
     <string name="enter_your_name">Your name</string>
     <string name="vote_idea">Vote for the best idea that you guys came up with.</string>
     <string name="gen_sketch">Create sketches for the following ideas.</string>
@@ -45,4 +45,8 @@
     <string name="points">%1$d points</string>
     <string name="player_desc">%1$d ideas, %2$d sketches and %3$d story panels</string>
     <string name="i_don_t_see_any_previous_games_for_this_challenge">I don\'t see any previous games for this challenge.</string>
+    <string name="capture">Capture sketch</string>
+    <string name="most_popular_ideas">Most popular ideas</string>
+    <string name="your_team_s_ideas">Your team\'s ideas</string>
+    <string name="your_team_s_sketch">Your team\'s sketches</string>
 </resources>

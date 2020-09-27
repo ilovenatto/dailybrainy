@@ -61,6 +61,13 @@ data class FullGame(
         ideas(origin).maxByOrNull { it.votes }?.let { Sketch(it) }
 
 
+    fun mostPopularIdeas(origin: Idea.Origin, take: Int): List<Idea> = ideas(origin)
+        .sortedByDescending { it.votes }
+        .let {
+            it.take(if (take > it.size) it.size else take)
+        }
+
+
     fun ideas(origin: Idea.Origin): List<Idea> = _ideas.filter { it.origin == origin }
     fun ideasCount(origin: Idea.Origin): Int = _ideas.filter { it.origin == origin }.size
     fun ideasCount(origin: Idea.Origin, playerGuid: String): Int = _ideas

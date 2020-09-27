@@ -14,14 +14,13 @@
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:backgroundTint="@color/primaryColor50"
-        android:background="@color/primaryColor50"
+        style="@style/Widget.Brainy.CardContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/img_xlarge_height"
+            android:layout_height="@dimen/img_large_height"
             app:liftOnScroll="true">
 
 
@@ -111,20 +110,34 @@
 
                 </LinearLayout>
 
-                <androidx.recyclerview.widget.RecyclerView
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-                    android:id="@+id/listIdeas"
-                    android:padding="@dimen/margin_small"
+                <TextView
+                    android:layout_marginTop="@dimen/margin_large"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                    app:spanCount="2"
-                    tools:context=".ui.game.ViewGameFrag"
-                    android:layout_marginBottom="@dimen/sheet_height_collapsed"
-                    android:layout_marginTop="@dimen/margin_medium"
-                    tools:listitem="@layout/item_idea">
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.Brainy.Overline"
+                    android:text="@string/your_team_s_ideas" />
 
-                </androidx.recyclerview.widget.RecyclerView>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:padding="@dimen/margin_small"
+                    android:layout_height="match_parent">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                        android:id="@+id/listIdeas"
+                        android:padding="@dimen/margin_small"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                        app:spanCount="2"
+                        tools:context=".ui.game.ViewGameFrag"
+                        android:layout_marginBottom="@dimen/sheet_height_collapsed"
+                        tools:listitem="@layout/item_idea">
+
+                    </androidx.recyclerview.widget.RecyclerView>
+                </FrameLayout>
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 

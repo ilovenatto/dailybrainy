@@ -1,9 +1,15 @@
 <resources>
     <!-- Override Material component styles -->
 
+    <style name="Widget.Brainy.CardContainer" parent="">
+        <item name="android:background">@color/primaryColor50</item>
+    </style>
+
+
     <style name="Widget.Brainy.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textColor">@color/secondaryColor</item>
     </style>
+
 
     <style name="Widget.Brainy.Button" parent="Widget.MaterialComponents.Button">
         <item name="android:textColor">@color/secondaryTextColor</item>

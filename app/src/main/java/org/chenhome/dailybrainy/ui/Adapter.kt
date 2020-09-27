@@ -98,7 +98,7 @@ internal class SketchAdapter(val sketchListener: SketchVHListener, val voteEnabl
         fun bind(sketch: Sketch) {
             binding.sketch = sketch
             binding.listener = sketchListener
-            binding.buttonVote.visibility = if (voteEnabled) View.VISIBLE else View.GONE
+            binding.votes.visibility = if (voteEnabled) View.VISIBLE else View.GONE
 
             // specially handle the image
             sketch.imgUri?.let {

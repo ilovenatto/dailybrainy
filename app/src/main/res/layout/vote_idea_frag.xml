@@ -14,6 +14,7 @@
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        style="@style/Widget.Brainy.CardContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -31,15 +32,15 @@
                 app:expandedTitleMarginBottom="@dimen/margin_large"
                 app:expandedTitleTextAppearance="@style/TextAppearance.Brainy.CollapsingToolbar.Transparent"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-                app:title="@string/genidea"
-                app:statusBarScrim="?attr/colorPrimaryVariant">
+                app:statusBarScrim="?attr/colorPrimaryVariant"
+                app:title="@string/genidea">
 
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/appbar_height_large"
                     android:layout_marginStart="@dimen/margin_medium"
+                    android:layout_marginTop="@dimen/appbar_height_large"
                     android:layout_marginEnd="@dimen/margin_medium"
                     android:text="@string/vote_idea"
                     android:textAppearance="@style/TextAppearance.Brainy.Headline4" />
@@ -70,46 +71,53 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="@dimen/margin_medium"
                     android:background="@color/primaryColor"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="@dimen/margin_medium">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:text="@{vm.fullGame.challenge.hmw}"
                         android:textAppearance="@style/TextAppearance.Brainy.Headline6"
-                        tools:text="How might we lorem ipsum foo ba ipsum lroem lorem bheadline."
-                        android:text="@{vm.fullGame.challenge.hmw}" />
-
-                    <TextView
-                        android:id="@+id/textVotes"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/margin_medium"
-                        android:text='@{"You have " +Integer.toString(vm.vote.votesLeft) + " votes left"}'
-                        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                        tools:text="You have 5 votes left" />
+                        tools:text="How might we lorem ipsum foo ba ipsum lroem lorem bheadline." />
                 </LinearLayout>
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_large"
+                    android:gravity="center"
+                    android:text='@{"You have " +Integer.toString(vm.vote.votesLeft) + " votes left"}'
+                    android:textAppearance="@style/TextAppearance.Brainy.Overline"
+                    tools:text="You have 5 votes left" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-                    android:id="@+id/listIdeas"
+
+                <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                    app:spanCount="2"
-                    tools:context=".ui.game.ViewGameFrag"
-                    android:layout_marginBottom="@dimen/sheet_height_collapsed"
-                    tools:listitem="@layout/item_idea">
+                    android:padding="@dimen/margin_small">
 
-                </androidx.recyclerview.widget.RecyclerView>
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/listIdeas"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="@dimen/margin_small"
+                        android:layout_marginBottom="@dimen/sheet_height_collapsed"
+                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                        app:spanCount="2"
+                        tools:context=".ui.game.ViewGameFrag"
+                        tools:listitem="@layout/item_idea">
+
+                    </androidx.recyclerview.widget.RecyclerView>
+                </FrameLayout>
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
         <include
-            layout="@layout/sheet_avatar"
-            android:id="@+id/avatars" />
+            android:id="@+id/avatars"
+            layout="@layout/sheet_avatar" />
 
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
