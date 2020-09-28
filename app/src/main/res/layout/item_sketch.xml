@@ -11,11 +11,11 @@
 
         <variable
             name="listener"
-            type="org.chenhome.dailybrainy.ui.SketchAdapter.SketchVHListener" />
+            type="org.chenhome.dailybrainy.ui.SketchVHListener" />
     </data>
 
     <com.google.android.material.card.MaterialCardView
-        android:layout_width="180dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardUseCompatPadding="true">
 

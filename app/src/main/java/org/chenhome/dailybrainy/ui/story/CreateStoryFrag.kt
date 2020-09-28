@@ -29,7 +29,7 @@ class CreateStoryFrag : Fragment() {
         GameVMFactory(requireContext(), args.gameGuid)
     }
 
-    private val sketchListener = SketchAdapter.SketchVHListener(
+    private val sketchListener = SketchVHListener(
         { sketch -> // onvote
             vm.vote.incrementVoteRemotely(sketch.idea)
         }, { sketch -> // onview
@@ -73,7 +73,7 @@ class CreateStoryFrag : Fragment() {
                 sketch?.imgUri?.let {
                     bindImage(imageSketch, it)
                 }
-                listener = SketchAdapter.SketchVHListener(
+                listener = SketchVHListener(
                     { // onvote
                         //ignore
                     },

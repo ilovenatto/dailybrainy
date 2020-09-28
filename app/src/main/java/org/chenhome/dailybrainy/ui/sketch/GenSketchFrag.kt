@@ -17,7 +17,6 @@ import org.chenhome.dailybrainy.databinding.GenSketchFragBinding
 import org.chenhome.dailybrainy.repo.Idea
 import org.chenhome.dailybrainy.repo.game.Sketch
 import org.chenhome.dailybrainy.ui.*
-import org.chenhome.dailybrainy.ui.SketchAdapter.SketchVHListener
 import timber.log.Timber
 
 @AndroidEntryPoint

@@ -11,7 +11,8 @@ import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.RevStoryFragBinding
 import org.chenhome.dailybrainy.ui.GameVMFactory
-import org.chenhome.dailybrainy.ui.SketchAdapter
+import org.chenhome.dailybrainy.ui.PlayerSheetAdapter
+import org.chenhome.dailybrainy.ui.SketchVHListener
 
 @AndroidEntryPoint
 class ReviewStoryFrag : Fragment() {
@@ -20,7 +21,14 @@ class ReviewStoryFrag : Fragment() {
     private val vm: StoryVM by viewModels {
         GameVMFactory(requireContext(), args.gameGuid)
     }
-    //private val playerAdap = PlayerAdapter()
+    private val playerAdap = PlayerSheetAdapter()
+
+    private val sketchListener = SketchVHListener(
+        { // do nothing
+        }, { sketch -> // onview
+            vm.navToViewSketch(sketch)
+        })
+    private val sketchAdap = StorySketchAdapter(sketchListener)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,27 +36,25 @@ class ReviewStoryFrag : Fragment() {
     ): View? {
         val binding = RevStoryFragBinding.inflate(inflater, container, false)
 
+        // bind vars
         binding.vm = vm
-//        binding.listPlayers.adapter = playerAdap
-        binding.listener = SketchAdapter.SketchVHListener(
-            {
-                // do nothing on vote
-            },
-            { sketch ->
-                vm.navToViewSketch(sketch)
-            })
-
         binding.lifecycleOwner = viewLifecycleOwner
-        binding.executePendingBindings()
+
+        // toolbar
+        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+        with(binding.avatars) {
+            listPlayers.adapter = playerAdap.playerAdapter
+            listThumbs.adapter = playerAdap.thumbAdapter
+        }
+
+        // bind list
+        binding.list.adapter = sketchAdap
+
+        // Refresh data
         vm.fullGame.observe(viewLifecycleOwner, {
             it?.let { game ->
-//                playerAdap.players = game.players
-            }
-        })
-
-        vm.navToNext.observe(viewLifecycleOwner, {
-            it.contentIfNotHandled()?.run {
-                findNavController().popBackStack()
+                playerAdap.setGame(game)
+                sketchAdap.setGame(requireContext(), game)
             }
         })
 
@@ -61,7 +67,7 @@ class ReviewStoryFrag : Fragment() {
             }
         })
 
-
+        binding.executePendingBindings()
         return binding.root
 
     }

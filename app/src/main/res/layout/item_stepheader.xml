@@ -20,6 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@{dummy.title}"
+            android:visibility="@{dummy.title.isEmpty() ? android.view.View.GONE : android.view.View.VISIBLE}"
             android:textAppearance="@style/TextAppearance.Brainy.Overline"
             tool:text="step 1" />
 

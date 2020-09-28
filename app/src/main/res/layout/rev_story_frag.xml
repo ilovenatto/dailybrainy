@@ -8,113 +8,146 @@
         <variable
             name="vm"
             type="org.chenhome.dailybrainy.ui.story.StoryVM" />
-
-        <variable
-            name="listener"
-            type="org.chenhome.dailybrainy.ui.SketchAdapter.SketchVHListener" />
     </data>
 
-    <ScrollView
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        style="@style/Widget.Brainy.CardContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:liftOnScroll="true">
+
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:collapsedTitleTextAppearance="@style/TextAppearance.Brainy.Headline5"
+                app:contentScrim="?attr/colorPrimary"
+                app:expandedTitleMarginBottom="@dimen/margin_large"
+                app:expandedTitleTextAppearance="@style/TextAppearance.Brainy.CollapsingToolbar.Transparent"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+                app:statusBarScrim="?attr/colorPrimaryVariant"
+                app:title="@string/review_story">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/primaryColor"
+                    android:orientation="vertical"
+                    android:padding="@dimen/margin_medium">
+
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/img_large_height"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="@dimen/margin_large"
+                        android:contentDescription="@string/app_name"
+                        android:scaleType="fitCenter"
+                        app:imageUrl="@{vm.fullGame.challenge.imageUri}"
+                        android:src="@drawable/ic_broken_image" />
+
+                </LinearLayout>
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/toolbar"
+                    style="@style/Widget.MaterialComponents.Toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/appbar_height"
+                    android:elevation="0dp"
+                    app:layout_collapseMode="pin"
+                    app:layout_scrollFlags="scroll|enterAlways|snap"
+                    app:navigationIcon="@drawable/round_arrow_back_24" />
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="12dp"
-            android:orientation="vertical"
-            tools:context=".ui.story.ReviewStoryFrag">
+            android:layout_marginBottom="@dimen/sheet_height_collapsed"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-
-            <ImageView
-                android:id="@+id/imageChallenge"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                app:imageUrl="@{vm.fullGame.challenge.imageUri}"
-                tools:src="@tools:sample/backgrounds/scenic" />
-
-            <TextView
-                android:id="@+id/textView2"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@{vm.fullGame.game.storyTitle}"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-                tools:text="Donkey mates" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@{vm.fullGame.game.storyDesc}"
-                tools:text="Lorem ipsum ipsum lorem" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="@dimen/margin_medium"
+                    android:padding="@dimen/margin_medium"
+                    android:background="@color/primaryColor"
+                    android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/textView4"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:text="@{vm.fullGame.challenge.desc}"
-                tools:text="How might we transport our school stuff in new ways?" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="The Story"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Setting" />
-
-            <include
-                android:id="@+id/setting"
-                layout="@layout/item_sketch"
-                app:sketch="@{vm.fullGame.mostPopularSketch(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_SETTING)}"
-                app:listener="@{listener}"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_large"
+                        android:text="@{vm.fullGame.game.storyTitle}"
+                        tools:text="Donkey Mates"
+                        android:textAppearance="@style/TextAppearance.Brainy.Headline4" />
 
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Story" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/opportunity"
+                        android:layout_marginTop="@dimen/margin_large"
+                        android:textAppearance="@style/TextAppearance.Brainy.Overline" />
 
-            <include
-                android:id="@+id/solution"
-                layout="@layout/item_sketch"
-                app:sketch="@{vm.fullGame.mostPopularSketch(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_SOLUTION)}"
-                app:listener="@{listener}"
+                    <TextView
+                        android:layout_marginTop="@dimen/margin_small"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Brainy.Body1"
+                        android:text="@{vm.fullGame.challenge.hmw}"
+                        tools:text="How might we transport our school stuff in new ways?" />
 
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/solution"
+                        android:layout_marginTop="@dimen/margin_large"
+                        android:textAppearance="@style/TextAppearance.Brainy.Overline" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_large"
+                        android:text="@{vm.fullGame.game.storyDesc}"
+                        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lectus quis turpis et a in pellentesque vitae."
+                        android:layout_marginTop="@dimen/margin_small"
+                        android:textAppearance="@style/TextAppearance.Brainy.Body1" />
 
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Resolution" />
+                </LinearLayout>
 
-            <include
-                android:id="@+id/resolution"
-                layout="@layout/item_sketch"
-                app:sketch="@{vm.fullGame.mostPopularSketch(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_RESOLUTION)}"
-                app:listener="@{listener}"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/list"
+                    android:layout_width="match_parent"
+                    android:layout_marginStart="@dimen/margin_small"
+                    android:layout_marginEnd="@dimen/margin_small"
+                    android:layout_height="match_parent"
+                    app:layoutManager="LinearLayoutManager"
+                    tools:listitem="@layout/item_sketch" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Players" />
 
-            <Button
-                android:id="@+id/buttonDone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="@{()->vm.navToNext()}"
-                android:text="Done" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
 
-        </LinearLayout>
-    </ScrollView>
+        <include
+            android:id="@+id/avatars"
+            layout="@layout/sheet_avatar" />
+
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
 </layout>

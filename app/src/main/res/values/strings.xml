@@ -59,4 +59,10 @@
     <string name="setting_instr">Sketch a panel describing the setting. Describe the situation your protagonist finds himself/herself in.</string>
     <string name="the_solution">The solution in action</string>
     <string name="resolution">The resolution</string>
+    <string name="review_story">Review storyboard</string>
+    <string name="opportunity">The opportunity</string>
+    <string name="solution">The solution</string>
+    <string name="the_setting_desc">Imagine the following setting</string>
+    <string name="the_solution_desc">They solved their problem...</string>
+    <string name="reso_desc">And lived happily ever after...</string>
 </resources>

@@ -54,9 +54,6 @@ data class FullGame(
 ) {
     private var _ideas: MutableList<Idea> = mutableListOf()
 
-    fun mostPopularSketchUri(origin: Idea.Origin): Uri? =
-        ideas(origin).maxByOrNull { it.votes }?.let { Sketch(it) }?.imgUri
-
     fun mostPopularSketch(origin: Idea.Origin): Sketch? =
         ideas(origin).maxByOrNull { it.votes }?.let { Sketch(it) }
 

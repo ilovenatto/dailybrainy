@@ -95,7 +95,7 @@ data class Challenge(
             TimeUnit.MINUTES.toSeconds(10)
         ),
         VIEW_STORYBOARD(
-            org.chenhome.dailybrainy.R.string.viewstoryboard,
+            org.chenhome.dailybrainy.R.string.review_story,
             TimeUnit.MINUTES.toSeconds(10)
         );
 

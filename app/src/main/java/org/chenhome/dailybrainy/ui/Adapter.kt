@@ -75,16 +75,17 @@ internal class SketchAdapter(val sketchListener: SketchVHListener, val voteEnabl
         }
     }
 
-    class SketchVHListener(
-        val onVoteListener: (Sketch) -> Unit,
-        val onViewListener: (Sketch) -> Unit,
-    ) {
-        fun onVote(sketch: Sketch) {
-            onVoteListener(sketch)
-        }
+}
 
-        fun onView(sketch: Sketch) {
-            onViewListener(sketch)
-        }
+class SketchVHListener(
+    val onVoteListener: (Sketch) -> Unit,
+    val onViewListener: (Sketch) -> Unit,
+) {
+    fun onVote(sketch: Sketch) {
+        onVoteListener(sketch)
+    }
+
+    fun onView(sketch: Sketch) {
+        onViewListener(sketch)
     }
 }

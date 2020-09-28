@@ -4,12 +4,10 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ApplicationComponent
-import kotlinx.coroutines.launch
 import org.chenhome.dailybrainy.repo.FullGameRepo
 import org.chenhome.dailybrainy.repo.UserRepo
 import org.chenhome.dailybrainy.repo.game.FullGame
@@ -42,21 +40,6 @@ class StoryVM(
         fullGameRepo.onClear()
     }
 
-    /**
-     * navToNext
-     */
-    private var _navToNext = MutableLiveData<Event<Boolean>>()
-    val navToNext: LiveData<Event<Boolean>>
-        get() = _navToNext
-
-    fun navToNext() {
-        viewModelScope.launch {
-            fullGame.value?.game?.let {
-                fullGameRepo.updateRemote(it)
-                _navToNext.value = Event(true)
-            }
-        }
-    }
 
     /**
      * navToViewSketch is a external immutable LiveData observable

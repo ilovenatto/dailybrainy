@@ -11,7 +11,7 @@
 
         <variable
             name="listener"
-            type="org.chenhome.dailybrainy.ui.SketchAdapter.SketchVHListener" />
+            type="org.chenhome.dailybrainy.ui.SketchVHListener" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

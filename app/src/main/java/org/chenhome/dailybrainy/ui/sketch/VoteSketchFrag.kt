@@ -25,7 +25,7 @@ class VoteSketchFrag : Fragment() {
 
     private val playerAdap = PlayerSheetAdapter()
     private val ideaAdap = IdeaAdapter(false)
-    private val sketchAdap = SketchAdapter(SketchAdapter.SketchVHListener(
+    private val sketchAdap = SketchAdapter(SketchVHListener(
         { sketch -> // onvote
             vm.vote.incrementVoteRemotely(sketch.idea)
         }, { sketch -> // onview
