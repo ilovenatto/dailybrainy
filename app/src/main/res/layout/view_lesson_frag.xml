@@ -34,7 +34,7 @@
                     android:id="@+id/imageLesson"
                     android:layout_gravity="end"
                     android:layout_width="wrap_content"
-                    android:layout_height="@dimen/img_xlarge_height"
+                    android:layout_height="@dimen/img_large_height"
                     app:imageUrl="@{vm.lesson.challenge.imageUri}"
                     android:contentDescription="@string/app_name" />
 

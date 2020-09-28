@@ -3,7 +3,7 @@
     "challenge-my-party": {
       "title": "It's My Party!",
       "hmw": "How might we hold our friend’s birthday party safely such that they feel celebrated?",
-      "desc": "Sed egestas bibendum nisi. Morbi eleifend enim in tristique aliquet. Ut tincidunt dui in orci vehicula, ac imperdiet nunc lacinia",
+      "desc": "It's your birthday yet you have to stay socially distant. Is this the end of birthdays as we know it? Or is there another way for you to celebrate, socialize, get gifts and mark the most important day of the year?",
       "imgFn": "challenges/challenge_birthday.png",
       "guid": "challenge-my-party",
       "category": "CHALLENGE"
@@ -11,7 +11,7 @@
     "challenge-too-swole": {
       "title": "Too Swole",
       "hmw": "How might kids exercise and stay active safely during shelter-in-place?",
-      "desc": "Sed egestas bibendum nisi. Morbi eleifend enim in tristique aliquet. Ut tincidunt dui in orci vehicula, ac imperdiet nunc lacinia",
+      "desc": "You can't hoop it up with your friends anymore. You definitely can't play tackle football. Is there some other way you could get your exercise in? There must be some way we can work out our cabin fever right?",
       "imgFn": "challenges/challenge_swole.png",
       "guid": "challenge-too-swole",
       "category": "CHALLENGE"
@@ -19,7 +19,7 @@
     "challenge-family-cookout": {
       "title": "Family Cookout",
       "hmw": "How might the whole family participate in planning and cooking Sunday dinner?",
-      "desc": "Sed egestas bibendum nisi. Morbi eleifend enim in tristique aliquet. Ut tincidunt dui in orci vehicula, ac imperdiet nunc lacinia",
+      "desc": "Now that you're stuck home with your parents and siblings, you have to have dinner with them. In fact, you've got to cook all the time now. Is there a better way where the work can get shared?",
       "imgFn": "challenges/challenge_cookout.png",
       "guid": "challenge-family-cookout",
       "category": "CHALLENGE"
