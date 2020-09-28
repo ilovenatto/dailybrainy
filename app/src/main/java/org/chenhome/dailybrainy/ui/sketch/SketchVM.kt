@@ -2,10 +2,7 @@ package org.chenhome.dailybrainy.ui.sketch
 
 import android.content.Context
 import android.net.Uri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -48,27 +45,19 @@ class SketchVM(
     private val fullGameRepo = FullGameRepo(context, gameGuid)
     val fullGame: LiveData<FullGame> = fullGameRepo.fullGame
 
+    val mostPopularSketch: LiveData<Sketch> = Transformations.map(fullGame) {
+        it.mostPopularSketch(Idea.Origin.SKETCH)
+    }
+
     override fun onCleared() {
         fullGameRepo.onClear()
     }
 
-    /**
-     * navToNext
-     */
-    private var _navToNext = MutableLiveData<Event<Boolean>>()
-    val navToNext: LiveData<Event<Boolean>>
-        get() = _navToNext
-
-    fun navToNext(isUpdateGame: Boolean) {
-        if (isUpdateGame) {
-            viewModelScope.launch {
-                fullGame.value?.game?.let {
-                    fullGameRepo.updateRemote(it)
-                    _navToNext.value = Event(true)
-                }
+    fun updateGame() {
+        viewModelScope.launch {
+            fullGame.value?.game?.let {
+                fullGameRepo.updateRemote(it)
             }
-        } else {
-            _navToNext.value = Event(true)
         }
     }
 

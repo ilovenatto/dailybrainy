@@ -8,142 +8,238 @@
         <variable
             name="vm"
             type="org.chenhome.dailybrainy.ui.sketch.SketchVM" />
+
+        <variable
+            name="listener"
+            type="org.chenhome.dailybrainy.ui.SketchAdapter.SketchVHListener" />
     </data>
 
-    <ScrollView
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        style="@style/Widget.Brainy.CardContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/sheet_height"
+            app:liftOnScroll="true">
+
+
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:collapsedTitleTextAppearance="@style/TextAppearance.Brainy.Headline5"
+                app:contentScrim="?attr/colorPrimary"
+                app:expandedTitleMarginBottom="@dimen/margin_large"
+                app:expandedTitleTextAppearance="@style/TextAppearance.Brainy.CollapsingToolbar.Transparent"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+                app:statusBarScrim="?attr/colorPrimaryVariant"
+                app:title="@string/createstoryboard">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/primaryColor"
+                    android:orientation="vertical"
+                    android:padding="@dimen/margin_medium">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/appbar_height"
+                        android:text="@string/create_story"
+                        android:textAppearance="@style/TextAppearance.Brainy.Headline5" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_medium"
+                        android:gravity="center"
+                        android:text="@string/most_popular_idea"
+                        android:textAppearance="@style/TextAppearance.Brainy.Overline" />
+
+                    <include
+                        android:id="@+id/cardSketch"
+                        layout="@layout/item_sketch"
+                        android:layout_gravity="center"
+                        android:layout_width="@dimen/img_xlarge_height"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_small" />
+
+                </LinearLayout>
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/toolbar"
+                    app:menu="@menu/menu_done"
+                    style="@style/Widget.MaterialComponents.Toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/appbar_height"
+                    android:elevation="0dp"
+                    app:layout_collapseMode="pin"
+                    app:layout_scrollFlags="scroll|enterAlways|snap"
+                    app:navigationIcon="@drawable/round_arrow_back_24" />
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="12dp"
-            android:orientation="vertical"
-            tools:context=".ui.story.CreateStoryFrag">
+            android:layout_marginBottom="@dimen/sheet_height_collapsed"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/create_story"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-            <ImageView
-                android:id="@+id/imagePopular"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                app:imageUrl="@{vm.fullGame.mostPopularSketchUri(org.chenhome.dailybrainy.repo.Idea.Origin.SKETCH)}"
-                tools:src="@tools:sample/backgrounds/scenic" />
-
-            <TextView
-                android:id="@+id/textView2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Your storyboard"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
-
-            <EditText
-                android:id="@+id/editName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="Name"
-                android:inputType="textPersonName"
-                android:text="@={vm.fullGame.game.storyTitle}" />
-
-            <EditText
-                android:id="@+id/editDescription"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="Description"
-                android:inputType="textPersonName"
-                android:text="@={vm.fullGame.game.storyDesc}" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Setting" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/listSetting"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="3"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_sketch" />
-
-            <Button
-                android:id="@+id/buttonSetting"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="@{()->vm.navToCamera(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_SETTING)}"
-                android:text="Capture" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Solution" />
+                android:layout_margin="12dp"
+                android:orientation="vertical">
 
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/listSolution"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="3"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_sketch" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_large"
+                    android:gravity="center"
+                    android:text="@string/your_team_s_storyboard"
+                    android:textAppearance="@style/TextAppearance.Brainy.Overline" />
 
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="@{()->vm.navToCamera(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_SOLUTION)}"
-                android:text="Capture" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/your_story"
+                    android:layout_marginTop="@dimen/margin_large"
+                    android:textAppearance="@style/TextAppearance.Brainy.Subtitle1" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="REsolution" />
+                <EditText
+                    android:id="@+id/editName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/what_s_the_title_for_your_solution"
+                    android:inputType="textPersonName"
+                    android:text="@={vm.fullGame.game.storyTitle}" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/listResolution"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="3"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_sketch" />
+                <EditText
+                    android:id="@+id/editDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/and_the_description"
+                    android:inputType="textPersonName"
+                    android:text="@={vm.fullGame.game.storyDesc}" />
 
-            <Button
-                android:id="@+id/button4"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="@{()->vm.navToCamera(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_RESOLUTION)}"
-                android:text="Capture" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Players" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/the_setting"
+                    android:layout_marginTop="@dimen/margin_large"
+                    android:textAppearance="@style/TextAppearance.Brainy.Subtitle1" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/listPlayers"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="3"
-                tools:itemCount="3"
-                tools:listitem="@layout/view_game_item_player" />
+                <TextView
+                    android:layout_marginTop="@dimen/margin_small"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Brainy.Body2"
+                    android:text="@string/setting_instr" />
 
-            <Button
-                android:id="@+id/buttonDone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="@{()->vm.navToNext(true)}"
-                android:text="Done" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/listSetting"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="@dimen/margin_small"
+                    android:layout_gravity="center"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="2"
+                    tools:itemCount="2"
+                    tools:listitem="@layout/item_sketch" />
 
-        </LinearLayout>
-    </ScrollView>
+                <Button
+                    android:id="@+id/buttonSetting"
+                    style="@style/Widget.Brainy.Button.OutlinedButton"
+                    android:layout_marginBottom="@dimen/margin_large"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{()->vm.navToCamera(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_SETTING)}"
+                    android:text="Capture" />
+
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/the_solution"
+                    android:layout_marginTop="@dimen/margin_large"
+                    android:textAppearance="@style/TextAppearance.Brainy.Subtitle1" />
+
+                <TextView
+                    android:layout_marginTop="@dimen/margin_small"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Brainy.Body2"
+                    android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Neque, turpis turpis suscipit aliquam. Eget." />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/listSolution"
+                    android:layout_marginTop="@dimen/margin_small"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="2"
+                    tools:itemCount="2"
+                    tools:listitem="@layout/item_sketch" />
+
+                <Button
+                    android:layout_width="match_parent"
+                    style="@style/Widget.Brainy.Button.OutlinedButton"
+                    android:layout_marginBottom="@dimen/margin_large"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{()->vm.navToCamera(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_SOLUTION)}"
+                    android:text="Capture" />
+
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/resolution"
+                    android:layout_marginTop="@dimen/margin_large"
+                    android:textAppearance="@style/TextAppearance.Brainy.Subtitle1" />
+
+                <TextView
+                    android:layout_marginTop="@dimen/margin_small"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Brainy.Body2"
+                    android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Neque, turpis turpis suscipit aliquam. Eget." />
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_marginTop="@dimen/margin_small"
+                    android:id="@+id/listResolution"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="2"
+                    tools:itemCount="2"
+                    android:layout_gravity="center"
+                    tools:listitem="@layout/item_sketch" />
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.Brainy.Button.OutlinedButton"
+                    android:onClick="@{()->vm.navToCamera(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_RESOLUTION)}"
+                    android:text="Capture" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <include
+            android:id="@+id/avatars"
+            layout="@layout/sheet_avatar" />
+
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 </layout>

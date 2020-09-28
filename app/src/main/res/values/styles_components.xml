@@ -5,6 +5,9 @@
         <item name="android:background">@color/primaryColor50</item>
     </style>
 
+    <style name="Widget.Brainy.Button.OutlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/secondaryColor</item>
+    </style>
 
     <style name="Widget.Brainy.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textColor">@color/secondaryColor</item>

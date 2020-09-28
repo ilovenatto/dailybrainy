@@ -11,7 +11,7 @@
 
         <variable
             name="listener"
-            type="org.chenhome.dailybrainy.ui.story.SketchCardListener" />
+            type="org.chenhome.dailybrainy.ui.SketchAdapter.SketchVHListener" />
     </data>
 
     <ScrollView
@@ -68,7 +68,7 @@
 
             <include
                 android:id="@+id/setting"
-                layout="@layout/card_sketch"
+                layout="@layout/item_sketch"
                 app:sketch="@{vm.fullGame.mostPopularSketch(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_SETTING)}"
                 app:listener="@{listener}"
                 android:layout_width="match_parent"
@@ -82,7 +82,7 @@
 
             <include
                 android:id="@+id/solution"
-                layout="@layout/card_sketch"
+                layout="@layout/item_sketch"
                 app:sketch="@{vm.fullGame.mostPopularSketch(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_SOLUTION)}"
                 app:listener="@{listener}"
 
@@ -97,7 +97,7 @@
 
             <include
                 android:id="@+id/resolution"
-                layout="@layout/card_sketch"
+                layout="@layout/item_sketch"
                 app:sketch="@{vm.fullGame.mostPopularSketch(org.chenhome.dailybrainy.repo.Idea.Origin.STORY_RESOLUTION)}"
                 app:listener="@{listener}"
                 android:layout_width="wrap_content"
@@ -107,15 +107,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Players" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/listPlayers"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="3"
-                tools:itemCount="3"
-                tools:listitem="@layout/view_game_item_player" />
 
             <Button
                 android:id="@+id/buttonDone"

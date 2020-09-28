@@ -102,12 +102,20 @@
                         style="@style/Widget.Brainy.Button"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:enabled="@{vm.generate.countdownOver==false}"
                         android:onClick="@{()->vm.navToCamera(org.chenhome.dailybrainy.repo.Idea.Origin.SKETCH)}"
                         android:text="@string/capture" />
 
+
                     <TextView
-                        android:id="@+id/textTimer"
-                        android:layout_width="106dp"
+                        android:layout_width="wrap_content"
+                        android:visibility="@{vm.generate.countdownOver==true ? android.view.View.VISIBLE : android.view.View.GONE}"
+                        android:layout_height="wrap_content"
+                        android:text="@string/no_more_sketches" />
+
+                    <TextView
+                        android:visibility="@{vm.generate.countdownOver==true ? android.view.View.GONE : android.view.View.VISIBLE}"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text='@{"Time left " + vm.generate.countdown}' />
                 </LinearLayout>

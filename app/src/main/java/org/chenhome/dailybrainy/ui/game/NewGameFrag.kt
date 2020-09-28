@@ -48,6 +48,9 @@ class NewGameFrag : Fragment() {
             setNavigationOnClickListener {
                 findNavController().popBackStack()
             }
+
+            // Start disabled; enabled when form is filled out
+            menu.findItem(R.id.menuitem_done)?.isEnabled = false
             setOnMenuItemClickListener { item ->
                 if (item.itemId == R.id.menuitem_done) {
                     if (args.guid.isNotEmpty() && args.guidType >= 0) {

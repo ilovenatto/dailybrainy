@@ -5,17 +5,15 @@
     <string name="reviewidea">Review best ideas</string>
     <string name="gensketch">Generate sketches</string>
     <string name="votesketch">Vote on sketches</string>
-    <string name="reviewsketch">Review best sketches</string>
     <string name="createstoryboard">Create storyboard</string>
-    <string name="viewstoryboard">Review storyboard</string>
     <string name="avatar">Avatar</string>
     <string name="error_creategame">We weren\'t able to start the game. Try again a bit later.</string>
     <string name="genidea_instruction">Generate as many ideas as you can</string>
     <string name="enter_your_name">Your name</string>
     <string name="vote_idea">Vote for the best idea that you guys came up with.</string>
     <string name="gen_sketch">Create sketches for the following ideas.</string>
-    <string name="vote_sketch">Well done! Your team sketched these drawings. Vote for solution you like best.</string>
-    <string name="create_story">With your team’s most popular sketch, tell a story of someone using your team’s solution.</string>
+    <string name="vote_sketch">Vote for the best solution.</string>
+    <string name="create_story">Tell the story of your team’s solution.</string>
     <string name="transition_viewgame">transition_viewgame</string>
     <string name="transition_gamecard">transition_gamecard_%1$s</string>
     <string name="today_challenge">Today\'s Challenge</string>
@@ -32,7 +30,6 @@
     <string name="votes">Votes</string>
     <string name="new_game">New Game</string>
     <string name="your_avatar">Your avatar</string>
-    <string name="start">Start</string>
     <string name="join_game">Join Game</string>
     <string name="done">Done</string>
     <string name="brainstorm">Brainstorm</string>
@@ -47,6 +44,19 @@
     <string name="i_don_t_see_any_previous_games_for_this_challenge">I don\'t see any previous games for this challenge.</string>
     <string name="capture">Capture sketch</string>
     <string name="most_popular_ideas">Most popular ideas</string>
+    <string name="most_popular_idea">Most popular idea</string>
     <string name="your_team_s_ideas">Your team\'s ideas</string>
     <string name="your_team_s_sketch">Your team\'s sketches</string>
+    <string name="no_more_ideas">Time\'s up. You can\'t add more ideas</string>
+    <string name="no_more_sketches">Time\'s up. You can\'t add more sketches</string>
+    <string name="add">Add</string>
+    <string name="what_s_your_idea">What\'s your idea?</string>
+    <string name="your_team_s_storyboard">Your team\'s storyboard</string>
+    <string name="your_story">Your story</string>
+    <string name="what_s_the_title_for_your_solution">What\'s the title for your solution?</string>
+    <string name="and_the_description">And the description?</string>
+    <string name="the_setting">The setting</string>
+    <string name="setting_instr">Sketch a panel describing the setting. Describe the situation your protagonist finds himself/herself in.</string>
+    <string name="the_solution">The solution in action</string>
+    <string name="resolution">The resolution</string>
 </resources>

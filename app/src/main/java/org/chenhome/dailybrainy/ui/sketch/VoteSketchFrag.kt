@@ -12,7 +12,6 @@ import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.VoteSketchFragBinding
 import org.chenhome.dailybrainy.repo.Idea
-import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.repo.game.Sketch
 import org.chenhome.dailybrainy.ui.*
 
@@ -24,8 +23,8 @@ class VoteSketchFrag : Fragment() {
         GameVMFactory(requireContext(), args.gameGuid)
     }
 
-    private val playerAdap = PlayerAdapter()
-    private val ideaAdap = IdeaAdapter(true)
+    private val playerAdap = PlayerSheetAdapter()
+    private val ideaAdap = IdeaAdapter(false)
     private val sketchAdap = SketchAdapter(SketchAdapter.SketchVHListener(
         { sketch -> // onvote
             vm.vote.incrementVoteRemotely(sketch.idea)
@@ -42,14 +41,28 @@ class VoteSketchFrag : Fragment() {
         binding.vm = vm
         binding.listIdeas.adapter = ideaAdap
         binding.listSketches.adapter = sketchAdap
-        binding.listPlayers.adapter = playerAdap
-        binding.lifecycleOwner = viewLifecycleOwner
+        with(binding.avatars) {
+            listThumbs.adapter = playerAdap.thumbAdapter
+            listPlayers.adapter = playerAdap.playerAdapter
+        }
 
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+        binding.lifecycleOwner = viewLifecycleOwner
         binding.executePendingBindings()
 
-        initAdapterObservers(vm.fullGame, sketchAdap, ideaAdap, playerAdap)
-        initNavObserver(vm.navToNext, vm.navToViewSketch)
+        vm.fullGame.observe(viewLifecycleOwner, {
+            it?.let {
+                sketchAdap.sketches = it.ideas(Idea.Origin.SKETCH).map { idea -> Sketch(idea) }
+                ideaAdap.ideas =
+                    it.mostPopularIdeas(Idea.Origin.BRAINSTORM, GenSketchFrag.NUM_POPULARIDEAS)
+                playerAdap.setGame(it)
+            }
+        })
+        initNavObserver(vm.navToViewSketch)
         return binding.root
+
     }
 
     override fun onResume() {
@@ -63,14 +76,8 @@ class VoteSketchFrag : Fragment() {
     }
 
     private fun initNavObserver(
-        navToNext: LiveData<Event<Boolean>>,
         navToViewSketch: LiveData<Event<Sketch>>,
     ) {
-        navToNext.observe(viewLifecycleOwner, {
-            it.contentIfNotHandled()?.run {
-                findNavController().popBackStack()
-            }
-        })
         navToViewSketch.observe(viewLifecycleOwner, {
             it.contentIfNotHandled()?.let { sketch ->
                 findNavController()
@@ -78,22 +85,6 @@ class VoteSketchFrag : Fragment() {
                         .actionVoteSketchFragToViewSketchFrag(
                             sketch.idea.gameGuid,
                             sketch.idea.guid))
-            }
-        })
-    }
-
-
-    private fun initAdapterObservers(
-        fullGame: LiveData<FullGame>,
-        sketchAdap: SketchAdapter,
-        ideaAdap: IdeaAdapter,
-        playerAdap: PlayerAdapter,
-    ) {
-        fullGame.observe(viewLifecycleOwner, {
-            it?.let {
-                sketchAdap.sketches = it.ideas(Idea.Origin.SKETCH).map { idea -> Sketch(idea) }
-                ideaAdap.ideas = it.ideas(Idea.Origin.BRAINSTORM)
-                playerAdap.players = it.players
             }
         })
     }

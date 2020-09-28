@@ -88,23 +88,31 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
+                        android:autofillHints="New idea title"
                         android:gravity="start|top"
-                        android:hint="What's your idea?"
+                        android:hint="@string/what_s_your_idea"
                         android:inputType="textAutoCorrect|textAutoComplete"
                         android:text="@={vm.newIdea}" />
+
 
                     <Button
                         android:id="@+id/buttonAdd"
                         style="@style/Widget.Brainy.Button"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:enabled="@{vm.newIdea.length() >=0}"
+                        android:enabled="@{vm.newIdea.length() >=0 &amp;&amp; vm.generate.countdownOver==false}"
                         android:onClick="@{()->vm.addIdea()}"
-                        android:text="Add" />
+                        android:text="@string/add" />
 
                     <TextView
-                        android:id="@+id/textTimer"
-                        android:layout_width="106dp"
+                        android:layout_width="wrap_content"
+                        android:visibility="@{vm.generate.countdownOver==true ? android.view.View.VISIBLE : android.view.View.GONE}"
+                        android:layout_height="wrap_content"
+                        android:text="@string/no_more_ideas" />
+
+                    <TextView
+                        android:visibility="@{vm.generate.countdownOver==true ? android.view.View.GONE : android.view.View.VISIBLE}"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text='@{"Time left " + vm.generate.countdown}' />
 

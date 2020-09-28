@@ -10,93 +10,132 @@
             type="org.chenhome.dailybrainy.ui.sketch.SketchVM" />
     </data>
 
-    <LinearLayout
-        android:id="@+id/linear"
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        style="@style/Widget.Brainy.CardContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="12dp"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id="@+id/header"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/textInstruction"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:text="@string/vote_sketch"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-            <TextView
-                android:id="@+id/textHmw"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@{vm.fullGame.challenge.title}"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                tools:text="How might we foo bar" />
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/img_large_height"
+            app:liftOnScroll="true">
 
 
-            <TextView
-                android:id="@+id/textView"
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:collapsedTitleTextAppearance="@style/TextAppearance.Brainy.Headline5"
+                app:contentScrim="?attr/colorPrimary"
+                app:expandedTitleMarginBottom="@dimen/margin_large"
+                app:expandedTitleTextAppearance="@style/TextAppearance.Brainy.CollapsingToolbar.Transparent"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+                app:title="@string/votesketch"
+                app:statusBarScrim="?attr/colorPrimaryVariant">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/appbar_height_large"
+                    android:layout_marginStart="@dimen/margin_medium"
+                    android:layout_marginEnd="@dimen/margin_medium"
+                    android:text="@string/vote_sketch"
+                    android:textAppearance="@style/TextAppearance.Brainy.Headline4" />
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/toolbar"
+                    style="@style/Widget.MaterialComponents.Toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/appbar_height"
+                    android:elevation="0dp"
+                    app:layout_collapseMode="pin"
+                    app:layout_scrollFlags="scroll|enterAlways|snap"
+                    app:navigationIcon="@drawable/round_arrow_back_24" />
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="Most popular ideas"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                android:orientation="vertical">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/listIdeas"
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:layout_marginTop="8dp"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="3"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_idea" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/margin_medium"
+                    android:background="@color/primaryColor"
+                    android:orientation="vertical">
 
-        </LinearLayout>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Brainy.Headline6"
+                        tools:text="How might we lorem ipsum foo ba ipsum lroem lorem bheadline."
+                        android:text="@{vm.fullGame.challenge.hmw}" />
 
+                    <TextView
+                        android:layout_marginTop="@dimen/margin_medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textAppearance="@style/TextAppearance.Brainy.Overline"
+                        android:text="@string/most_popular_ideas" />
 
-        <TextView
-            android:id="@+id/textVotesLeft"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text='@{"You have " + vm.vote.votesLeft + " left"}'
-            tools:text="You have 4 votes left" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:layout_marginTop="@dimen/margin_small"
+                        android:id="@+id/listIdeas"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                        app:spanCount="2"
+                        tools:itemCount="2"
+                        tools:listitem="@layout/item_idea" />
+                </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/listSketches"
-            android:layout_width="match_parent"
-            android:layout_height="190dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="16dp"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-            app:spanCount="3"
-            tools:itemCount="3"
-            tools:listitem="@layout/item_sketch" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_large"
+                    android:gravity="center"
+                    android:text='@{"You have " +Integer.toString(vm.vote.votesLeft) + " votes left"}'
+                    android:textAppearance="@style/TextAppearance.Brainy.Overline"
+                    tools:text="You have 5 votes left" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/listPlayers"
-            android:layout_width="357dp"
-            android:layout_height="92dp"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-            app:spanCount="5"
-            tools:itemCount="4"
-            tools:listitem="@layout/view_game_item_player" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:padding="@dimen/margin_small"
+                    android:layout_height="match_parent">
 
-        <Button
-            android:id="@+id/buttonDone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="@{()->vm.navToNext(false)}"
-            android:text="Done" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/listSketches"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginBottom="@dimen/sheet_height_collapsed"
+                        android:padding="@dimen/margin_small"
+                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                        app:spanCount="2"
+                        tools:context=".ui.game.ViewGameFrag"
+                        tools:listitem="@layout/item_sketch">
 
-    </LinearLayout>
+                    </androidx.recyclerview.widget.RecyclerView>
+                </FrameLayout>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <include
+            layout="@layout/sheet_avatar"
+            android:id="@+id/avatars" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 </layout>
-

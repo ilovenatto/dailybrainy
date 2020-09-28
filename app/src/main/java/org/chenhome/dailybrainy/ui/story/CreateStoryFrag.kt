@@ -13,14 +13,11 @@ import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
+import org.chenhome.dailybrainy.R
 import org.chenhome.dailybrainy.databinding.CreateStoryFragBinding
 import org.chenhome.dailybrainy.repo.Idea
-import org.chenhome.dailybrainy.repo.game.FullGame
 import org.chenhome.dailybrainy.repo.game.Sketch
-import org.chenhome.dailybrainy.ui.Event
-import org.chenhome.dailybrainy.ui.GameVMFactory
-import org.chenhome.dailybrainy.ui.PlayerAdapter
-import org.chenhome.dailybrainy.ui.SketchAdapter
+import org.chenhome.dailybrainy.ui.*
 import org.chenhome.dailybrainy.ui.sketch.SketchVM
 import timber.log.Timber
 
@@ -39,10 +36,10 @@ class CreateStoryFrag : Fragment() {
             vm.navToViewSketch(sketch)
         })
 
-    private val playerAdap = PlayerAdapter()
-    private val settingAdap = SketchAdapter(sketchListener, true)
-    private val solutionAdap = SketchAdapter(sketchListener, true)
-    private val resolutionAdap = SketchAdapter(sketchListener, true)
+    private val playerAdap = PlayerSheetAdapter()
+    private val settingAdap = SketchAdapter(sketchListener, false)
+    private val solutionAdap = SketchAdapter(sketchListener, false)
+    private val resolutionAdap = SketchAdapter(sketchListener, false)
     private lateinit var binding: CreateStoryFragBinding
 
 
@@ -51,18 +48,63 @@ class CreateStoryFrag : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         binding = CreateStoryFragBinding.inflate(inflater, container, false)
-
         binding.vm = vm
-        binding.listPlayers.adapter = playerAdap
+        binding.lifecycleOwner = viewLifecycleOwner
+
+        // toolbar
+        with(binding.toolbar) {
+            setNavigationOnClickListener { findNavController().popBackStack() }
+            setOnMenuItemClickListener { menu ->
+                if (menu.itemId == R.id.menuitem_done) {
+                    vm.updateGame()
+                    findNavController().popBackStack()
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+
+        // most popular sketch
+        vm.fullGame.observe(viewLifecycleOwner, { game ->
+            with(binding.cardSketch) {
+                sketch = game.mostPopularSketch(Idea.Origin.SKETCH)
+                // specially handle the image
+                sketch?.imgUri?.let {
+                    bindImage(imageSketch, it)
+                }
+                listener = SketchAdapter.SketchVHListener(
+                    { // onvote
+                        //ignore
+                    },
+                    { sketch -> // onview
+                        vm.navToViewSketch(sketch)
+                    })
+            }
+            binding.executePendingBindings()
+        })
+
+        // adapters
+        with(binding.avatars) {
+            listThumbs.adapter = playerAdap.thumbAdapter
+            listPlayers.adapter = playerAdap.playerAdapter
+        }
         binding.listSetting.adapter = settingAdap
         binding.listSolution.adapter = solutionAdap
         binding.listResolution.adapter = resolutionAdap
+        vm.fullGame.observe(viewLifecycleOwner, {
+            it?.let { game ->
+                settingAdap.sketches = game.ideas(Idea.Origin.STORY_SETTING).map { Sketch(it) }
+                solutionAdap.sketches = game.ideas(Idea.Origin.STORY_SOLUTION).map { Sketch(it) }
+                resolutionAdap.sketches =
+                    game.ideas(Idea.Origin.STORY_RESOLUTION).map { Sketch(it) }
+                playerAdap.setGame(it)
+            }
+        })
 
-        binding.lifecycleOwner = viewLifecycleOwner
+        // Nav
+        initNavObserver(vm.navToViewSketch, vm.navToCamera)
         binding.executePendingBindings()
-
-        initAdapterObservers(vm.fullGame, playerAdap, settingAdap, solutionAdap, resolutionAdap)
-        initNavObserver(vm.navToNext, vm.navToViewSketch, vm.navToCamera)
         return binding.root
 
     }
@@ -79,37 +121,10 @@ class CreateStoryFrag : Fragment() {
         vm.uploadSketch(Idea.Origin.values()[requestCode])
     }
 
-
-    private fun initAdapterObservers(
-        fullGame: LiveData<FullGame>,
-        playerAdap: PlayerAdapter,
-        settingAdap: SketchAdapter,
-        solutionAdap: SketchAdapter,
-        resolutionAdap: SketchAdapter,
-    ) {
-        fullGame.observe(viewLifecycleOwner, {
-            it?.let { game ->
-                playerAdap.players = game.players
-                settingAdap.sketches = game.ideas(Idea.Origin.STORY_SETTING).map { Sketch(it) }
-                solutionAdap.sketches = game.ideas(Idea.Origin.STORY_SOLUTION).map { Sketch(it) }
-                resolutionAdap.sketches =
-                    game.ideas(Idea.Origin.STORY_RESOLUTION).map { Sketch(it) }
-            }
-        })
-
-
-    }
-
     private fun initNavObserver(
-        navToNext: LiveData<Event<Boolean>>,
         navToViewSketch: LiveData<Event<Sketch>>,
         navToCamera: LiveData<Event<Idea.Origin>>,
     ) {
-        navToNext.observe(viewLifecycleOwner, {
-            it.contentIfNotHandled()?.run {
-                findNavController().popBackStack()
-            }
-        })
         navToViewSketch.observe(viewLifecycleOwner, {
             it.contentIfNotHandled()?.let { sketch ->
                 findNavController()

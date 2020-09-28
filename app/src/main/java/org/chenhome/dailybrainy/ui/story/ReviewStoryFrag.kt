@@ -11,8 +11,7 @@ import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
 import org.chenhome.dailybrainy.databinding.RevStoryFragBinding
 import org.chenhome.dailybrainy.ui.GameVMFactory
-import org.chenhome.dailybrainy.ui.PlayerAdapter
-
+import org.chenhome.dailybrainy.ui.SketchAdapter
 
 @AndroidEntryPoint
 class ReviewStoryFrag : Fragment() {
@@ -21,8 +20,7 @@ class ReviewStoryFrag : Fragment() {
     private val vm: StoryVM by viewModels {
         GameVMFactory(requireContext(), args.gameGuid)
     }
-
-    private val playerAdap = PlayerAdapter()
+    //private val playerAdap = PlayerAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,16 +29,20 @@ class ReviewStoryFrag : Fragment() {
         val binding = RevStoryFragBinding.inflate(inflater, container, false)
 
         binding.vm = vm
-        binding.listPlayers.adapter = playerAdap
-        binding.listener = SketchCardListener { sketch ->
-            vm.navToViewSketch(sketch)
-        }
+//        binding.listPlayers.adapter = playerAdap
+        binding.listener = SketchAdapter.SketchVHListener(
+            {
+                // do nothing on vote
+            },
+            { sketch ->
+                vm.navToViewSketch(sketch)
+            })
 
         binding.lifecycleOwner = viewLifecycleOwner
         binding.executePendingBindings()
         vm.fullGame.observe(viewLifecycleOwner, {
             it?.let { game ->
-                playerAdap.players = game.players
+//                playerAdap.players = game.players
             }
         })
 
